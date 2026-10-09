@@ -1,5 +1,5 @@
 // Rugama POS Service Worker
-const CACHE_NAME = 'rugama-pos-v1';
+const CACHE_NAME = 'ALNASSR-v1';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
