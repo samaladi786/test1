@@ -829,8 +829,34 @@
     }
 
     // 7. ഡിലീറ്റ് സുരക്ഷ (PIN Verification)
+   // 7. ഡിലീറ്റ് സുരക്ഷ (2-ദിവസത്തെ റൂളോടെയുള്ള PIN Verification)
     function requestDelete(id) {
       pendingDeleteId = id;
+      
+      const txn = (transactionsList || []).find(t => String(t.id) === String(id));
+      const todayStr = getSaudiToday();
+      let isOlderThanLimit = false;
+
+      if (txn && txn.date) {
+        const txnDateStr = String(txn.date).split('T')[0].split(' ')[0].trim();
+        const limitDays = window.STAFF_DELETE_LIMIT_DAYS || 2;
+        
+        const dToday = new Date(todayStr);
+        const dTxn = new Date(txnDateStr);
+        const diffDays = Math.floor((dToday - dTxn) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > limitDays) {
+          isOlderThanLimit = true;
+        }
+      }
+
+      const subTitle = document.querySelector("#pinModal p");
+      if (subTitle) {
+        subTitle.innerText = isOlderThanLimit 
+          ? "⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണ്! മാസ്റ്റർ പിൻ നൽകുക." 
+          : "ഡിലീറ്റ് ചെയ്യാൻ ലോഗിൻ പിൻ നൽകുക";
+      }
+
       document.getElementById("pinInput").value = "";
       document.getElementById("pinModal").classList.remove("hidden");
       document.getElementById("pinInput").focus();
@@ -847,10 +873,41 @@
       const masterPin = String(window.MASTER_PIN);
       const currentShopPin = currentShop ? String(currentShop.pin) : null;
 
-      const isValidPin = (pinVal === sessionPin) || (pinVal === masterPin) || (pinVal === currentShopPin);
-
-      if (isValidPin && pendingDeleteId) {
+      if (pendingDeleteId) {
         const id = pendingDeleteId;
+        const txn = (transactionsList || []).find(t => String(t.id) === String(id));
+        const todayStr = getSaudiToday();
+        let isOlderThanLimit = false;
+
+        if (txn && txn.date) {
+          const txnDateStr = String(txn.date).split('T')[0].split(' ')[0].trim();
+          const limitDays = window.STAFF_DELETE_LIMIT_DAYS || 2;
+          const dToday = new Date(todayStr);
+          const dTxn = new Date(txnDateStr);
+          const diffDays = Math.floor((dToday - dTxn) / (1000 * 60 * 60 * 24));
+
+          if (diffDays > limitDays) {
+            isOlderThanLimit = true;
+          }
+        }
+
+        // 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണെങ്കിൽ മാസ്റ്റർ പിൻ നിർബന്ധം!
+        if (isOlderThanLimit) {
+          if (pinVal !== masterPin) {
+            alert("⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ള എൻട്രികൾ ഡിലീറ്റ് ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ തന്നെ നൽകണം!");
+            document.getElementById("pinInput").value = "";
+            return;
+          }
+        } else {
+          // 2 ദിവസത്തിനുള്ളിലുള്ളതാണെങ്കിൽ സാധാരണ ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ മതിയാകും
+          const isValidPin = (pinVal === sessionPin) || (pinVal === masterPin) || (pinVal === currentShopPin);
+          if (!isValidPin) {
+            alert("പിൻ തെറ്റാണ്! ശരിയായ പാസ്‌വേഡ് നൽകുക.");
+            document.getElementById("pinInput").value = "";
+            return;
+          }
+        }
+
         closePinModal();
         const { error } = await supabaseClient.from('transactions').delete().eq('id', id);
         if (error) alert("ഡിലീറ്റ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
@@ -858,9 +915,6 @@
           alert("വിജയകരമായി ഡിലീറ്റ് ചെയ്തു!");
           fetchAllData();
         }
-      } else {
-        alert("പിൻ തെറ്റാണ്!");
-        document.getElementById("pinInput").value = "";
       }
     }
   </script>
