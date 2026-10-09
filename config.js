@@ -50,7 +50,7 @@ window.SHOPS_CONFIG = [
     tagline: 'Taj Sports',
     url: 'https://mwxbakqoipcwblhukrfs.supabase.co',
     key: 'sb_publishable_OfuR1PeffNa4NWUhpwV3gg_pwqovQZT',
-    pin: '4444', // TAJ ഷോപ്പിന്റെ സ്റ്റാഫ് പിൻ
+    pin: '2222', // TAJ ഷോപ്പിന്റെ സ്റ്റാഫ് പിൻ
     themeGradient: 'from-rose-950 via-slate-900 to-pink-950',
     accentColor: 'text-rose-400',
     badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
