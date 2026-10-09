@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- COMMON CONFIG FILE -->
-  <script src="config.js?v=5"></script>
+  <script src="config.js?v=6"></script>
 
   <!-- SERVICE WORKER REGISTRATION -->
   <script>
@@ -43,7 +43,7 @@
     <div class="bg-white rounded-3xl max-w-xs w-full p-6 shadow-2xl border text-center space-y-4">
       <div class="w-16 h-16 rounded-2xl bg-slate-900 text-white flex items-center justify-center mx-auto shadow-lg overflow-hidden border border-slate-700">
         <img id="loginLogoPreview" src="icon-192.png" alt="Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('loginDefaultIcon').classList.remove('hidden');" />
-        <i id="loginDefaultIcon" data-lucide="smartphone" class="w-7 h-7 hidden"></i>
+        <i id="loginDefaultIcon" data-lucide="store" class="w-7 h-7 text-emerald-400 hidden"></i>
       </div>
       <div>
         <h2 class="text-base font-extrabold text-slate-800">ALNASSR മൊബൈൽ POS</h2>
@@ -76,7 +76,7 @@
     <div class="flex items-center justify-between gap-2">
       
       <div class="flex items-center gap-2 overflow-hidden">
-        <!-- കടയുടെ ലോഗോ ബോക്സ് (ബാസ്കറ്റ് ഐക്കണിന് പകരം) -->
+        <!-- കടയുടെ ലോഗോ ബോക്സ് -->
         <div id="shopLogoBox" class="w-9 h-9 rounded-xl bg-white/10 p-0.5 flex items-center justify-center border border-white/20 shrink-0 overflow-hidden shadow-sm">
           <img id="shopLogoImg" src="icon-192.png" alt="Shop Logo" class="w-full h-full object-contain rounded-lg" onerror="this.style.display='none'; document.getElementById('shopDefaultIcon').classList.remove('hidden');" />
           <i id="shopDefaultIcon" data-lucide="store" class="w-5 h-5 text-emerald-400 hidden"></i>
@@ -165,7 +165,12 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-700 mb-1">കസ്റ്റമർ:</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-[11px] font-bold text-slate-700">കസ്റ്റമർ:</label>
+            <button type="button" onclick="quickAddMasterPrompt('customer')" class="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-2 py-0.5 rounded-full touch-btn cursor-pointer">
+              + ന്യൂ കസ്റ്റമർ
+            </button>
+          </div>
           <input 
             list="customerListOptions" 
             id="saleCustomerInput" 
@@ -215,7 +220,12 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-700 mb-1">വെണ്ടർ:</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-[11px] font-bold text-slate-700">വെണ്ടർ:</label>
+            <button type="button" onclick="quickAddMasterPrompt('vendor')" class="text-[10px] bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold px-2 py-0.5 rounded-full touch-btn cursor-pointer">
+              + ന്യൂ വെണ്ടർ
+            </button>
+          </div>
           <input 
             list="vendorListOptions" 
             id="purchaseVendorInput" 
@@ -264,7 +274,12 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-700 mb-1">ഇനം / ജീവനക്കാരൻ:</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-[11px] font-bold text-slate-700">ഇനം / ജീവനക്കാരൻ:</label>
+            <button type="button" onclick="quickAddMasterPrompt('expense')" class="text-[10px] bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold px-2 py-0.5 rounded-full touch-btn cursor-pointer">
+              + ന്യൂ ചിലവ് ഇനം
+            </button>
+          </div>
           <input 
             list="unifiedPartyOptions" 
             id="unifiedPartyInput" 
@@ -532,7 +547,6 @@
       connectActiveShop();
     }
 
-    // ഷോപ്പ് മാറുമ്പോൾ ലോഗോയും പേരും അപ്‌ഡേറ്റ് ചെയ്യുന്നു
     function connectActiveShop() {
       currentShop = SHOPS.find(s => s.id === currentShopId) || SHOPS[0];
       if (!currentShop) return;
@@ -542,7 +556,6 @@
 
       document.getElementById("shopStaticTitle").innerText = currentShop.name;
       
-      // ലോഗോ അപ്‌ഡേറ്റ് ചെയ്യൽ
       const logoImg = document.getElementById("shopLogoImg");
       const defaultIcon = document.getElementById("shopDefaultIcon");
       if (currentShop.logo) {
@@ -663,6 +676,54 @@
         uDL.innerHTML = "";
         expensesMasterList.forEach(e => uDL.innerHTML += `<option value="${e.name}">`);
         employeesList.forEach(em => uDL.innerHTML += `<option value="${em.name}">`);
+      }
+    }
+
+    // നേരിട്ട് മാസ്റ്റർ ഡാറ്റയിലേക്ക് ആഡ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ (+ ന്യൂ ബട്ടൺ)
+    async function quickAddMasterPrompt(type) {
+      let promptTitle = type === 'customer' ? 'പുതിയ കസ്റ്റമർ പേര് നൽകുക:' : (type === 'vendor' ? 'പുതിയ വെണ്ടർ പേര് നൽകുക:' : 'പുതിയ ചിലവ് ഇനം (Expense Name) നൽകുക:');
+      let name = prompt(promptTitle);
+      if (!name || !name.trim()) return;
+      name = name.trim();
+
+      if (type === 'expense') {
+        const newExp = { name: name };
+        if (navigator.onLine && supabaseClient) {
+          const { error } = await supabaseClient.from('expenses_master').insert([newExp]);
+          if (error) return alert("ചിലവ് ഇനം സേവ് ചെയ്യാൻ പറ്റിയില്ല: " + error.message);
+        }
+        expensesMasterList.push(newExp);
+        localStorage.setItem("ALNASSR_CACHE_EXPENSES", JSON.stringify(expensesMasterList));
+        populateDropdowns();
+        document.getElementById("unifiedPartyInput").value = name;
+        onUnifiedPartySelected();
+        alert(`"${name}" ചിലവ് മാസ്റ്റർ ലിസ്റ്റിൽ ചേർത്തു!`);
+
+      } else if (type === 'customer') {
+        const newCust = { name: name, type: 'cash', opening_balance: 0 };
+        if (navigator.onLine && supabaseClient) {
+          const { error } = await supabaseClient.from('customers').insert([newCust]);
+          if (error) return alert("കസ്റ്റമറെ സേവ് ചെയ്യാൻ പറ്റിയില്ല: " + error.message);
+        }
+        customersList.push(newCust);
+        localStorage.setItem("ALNASSR_CACHE_CUSTOMERS", JSON.stringify(customersList));
+        populateDropdowns();
+        document.getElementById("saleCustomerInput").value = name;
+        onCustomerSelected();
+        alert(`"${name}" കസ്റ്റമർ ലിസ്റ്റിൽ ചേർത്തു!`);
+
+      } else if (type === 'vendor') {
+        const newVend = { name: name, type: 'cash', opening_balance: 0 };
+        if (navigator.onLine && supabaseClient) {
+          const { error } = await supabaseClient.from('vendors').insert([newVend]);
+          if (error) return alert("വെണ്ടറെ സേവ് ചെയ്യാൻ പറ്റിയില്ല: " + error.message);
+        }
+        vendorsList.push(newVend);
+        localStorage.setItem("ALNASSR_CACHE_VENDORS", JSON.stringify(vendorsList));
+        populateDropdowns();
+        document.getElementById("purchaseVendorInput").value = name;
+        onVendorSelected();
+        alert(`"${name}" വെണ്ടർ ലിസ്റ്റിൽ ചേർത്തു!`);
       }
     }
 
@@ -895,8 +956,9 @@
         let expName = rawVal.split(' (')[0].trim();
         let exp = (expensesMasterList || []).find(e => e && e.name && e.name.toLowerCase() === expName.toLowerCase());
 
+        // opening_balance പൂർണ്ണമായി ഒഴിവാക്കി, name മാത്രം കൃത്യമായി സേവ് ചെയ്യുന്നു
         if (!exp) {
-          const newExp = { name: expName, opening_balance: 0 };
+          const newExp = { name: expName };
           if (navigator.onLine && supabaseClient) {
             try { await supabaseClient.from('expenses_master').insert([newExp]); } catch (e) {}
           }
