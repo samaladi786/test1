@@ -1,5 +1,5 @@
 // Rugama POS Service Worker - പൂർണ്ണ ഓഫ്‍ലൈൻ കാഷെ സിസ്റ്റം
-const CACHE_NAME = 'rugama-pos-v3';
+const CACHE_NAME = 'ALNASSR-pos-v3';
 
 // നെറ്റ് ഇല്ലാതെ ഫോണിൽ പ്രവർത്തിക്കാൻ ആവശ്യമായ പ്രധാന ഫയലുകൾ (സ്വന്തം ലോഗോ ഉൾപ്പെടെ)
 const ASSETS_TO_CACHE = [
