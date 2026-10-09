@@ -1,19 +1,8 @@
 {
-  "name": "ALNASSR",
-  "short_name": "ALNASSR",
-  "description": "Multi-Shop Quick POS System",
-  "start_url": "./mobile.html",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
-  "orientation": "portrait",
-  "icons": [
-   {
   "name": "Rugama Quick POS",
   "short_name": "Rugama POS",
   "description": "Multi-Shop Quick POS System",
-  "start_url": "./mobile.html",
+  "start_url": "mobile.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -21,13 +10,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "logo.png",
+      "src": "https://cdn-icons-png.flaticon.com/192/3081/3081840.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "logo.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3081/3081840.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
