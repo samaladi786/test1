@@ -7,8 +7,8 @@
 
   <!-- PWA MANIFEST & ICONS -->
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="logo.png">
-  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#0f172a">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- COMMON CONFIG FILE -->
-  <script src="config.js?v=4"></script>
+  <script src="config.js?v=5"></script>
 
   <!-- SERVICE WORKER REGISTRATION -->
   <script>
@@ -41,12 +41,12 @@
   <!-- 1. LOGIN SCREEN -->
   <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-[99999] p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-6 shadow-2xl border text-center space-y-4">
-      <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg overflow-hidden">
-        <img id="loginLogoPreview" src="logo.png" alt="Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('loginDefaultIcon').classList.remove('hidden');" />
+      <div class="w-16 h-16 rounded-2xl bg-slate-900 text-white flex items-center justify-center mx-auto shadow-lg overflow-hidden border border-slate-700">
+        <img id="loginLogoPreview" src="icon-192.png" alt="Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('loginDefaultIcon').classList.remove('hidden');" />
         <i id="loginDefaultIcon" data-lucide="smartphone" class="w-7 h-7 hidden"></i>
       </div>
       <div>
-        <h2 class="text-base font-extrabold text-slate-800">മൊബൈൽ ക്വിക്ക് POS</h2>
+        <h2 class="text-base font-extrabold text-slate-800">ALNASSR മൊബൈൽ POS</h2>
         <p class="text-xs text-slate-500 mt-1">ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ നൽകുക</p>
       </div>
 
@@ -76,17 +76,19 @@
     <div class="flex items-center justify-between gap-2">
       
       <div class="flex items-center gap-2 overflow-hidden">
-        <div id="shopLogoBox" class="w-8 h-8 rounded-lg bg-white/10 p-0.5 flex items-center justify-center border border-white/20 shrink-0 overflow-hidden">
-          <img id="shopLogoImg" src="logo.png" alt="Logo" class="w-full h-full object-contain" onerror="this.style.display='none'; document.getElementById('shopDefaultIcon').classList.remove('hidden');" />
-          <i id="shopDefaultIcon" data-lucide="store" class="w-4 h-4 text-emerald-400 hidden"></i>
+        <!-- കടയുടെ ലോഗോ ബോക്സ് (ബാസ്കറ്റ് ഐക്കണിന് പകരം) -->
+        <div id="shopLogoBox" class="w-9 h-9 rounded-xl bg-white/10 p-0.5 flex items-center justify-center border border-white/20 shrink-0 overflow-hidden shadow-sm">
+          <img id="shopLogoImg" src="icon-192.png" alt="Shop Logo" class="w-full h-full object-contain rounded-lg" onerror="this.style.display='none'; document.getElementById('shopDefaultIcon').classList.remove('hidden');" />
+          <i id="shopDefaultIcon" data-lucide="store" class="w-5 h-5 text-emerald-400 hidden"></i>
         </div>
+        
         <div class="truncate">
           <!-- ADMIN DROPDOWN OR SHOP TITLE -->
           <div id="shopSelectorWrapper" class="hidden">
             <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-slate-700 outline-none cursor-pointer">
             </select>
           </div>
-          <h1 id="shopStaticTitle" class="text-xs font-black truncate">...</h1>
+          <h1 id="shopStaticTitle" class="text-xs font-black truncate">ALNASSR POS</h1>
           
           <!-- DATE PICKER BAR & OFFLINE BADGE -->
           <div class="flex items-center gap-1.5 mt-0.5">
@@ -317,9 +319,8 @@
 
   </main>
 
-  <!-- 4. FIXED THUMB-FRIENDLY BOTTOM NAVIGATION BAR -->
+  <!-- 4. FIXED BOTTOM NAVIGATION BAR -->
   <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 z-40 shadow-lg flex items-center justify-around">
-    
     <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-[11px] touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-emerald-50">
         <i data-lucide="shopping-cart" class="w-5 h-5"></i>
@@ -347,7 +348,6 @@
       </div>
       <span>ലിസ്റ്റ്</span>
     </button>
-
   </nav>
 
   <!-- PIN VERIFY MODAL FOR DELETE -->
@@ -378,7 +378,6 @@
 
     let pendingDeleteId = null;
 
-    // സൗദി തീയതി
     function getSaudiToday() {
       if (window.getSaudiBusinessDate && typeof window.getSaudiBusinessDate === 'function') {
         return window.getSaudiBusinessDate();
@@ -402,7 +401,6 @@
       renderQuickTotalsAndRecent();
     }
 
-    // ഓൺലൈൻ / ഓഫ്‍ലൈൻ സ്റ്റാറ്റസ് മാറ്റങ്ങൾ
     function updateNetworkStatus() {
       const badge = document.getElementById("networkStatusBadge");
       if (!badge) return;
@@ -420,10 +418,9 @@
     window.addEventListener('offline', updateNetworkStatus);
 
     document.addEventListener("DOMContentLoaded", () => {
-      const isLogged = sessionStorage.getItem("RUGAMA_LOGGED_IN") === "true";
-      const userRole = sessionStorage.getItem("RUGAMA_USER_ROLE");
+      const isLogged = sessionStorage.getItem("ALNASSR_LOGGED_IN") === "true";
+      const userRole = sessionStorage.getItem("ALNASSR_USER_ROLE");
 
-      // ഓഫ്‍ലൈൻ കാഷെയിൽ നിന്ന് ഡാറ്റ ആദ്യം എടുക്കുന്നു
       loadLocalCacheData();
 
       if (isLogged) {
@@ -447,7 +444,6 @@
       if (window.lucide) lucide.createIcons();
     });
 
-    // 1. ലോഗിൻ പരിശോധന
     function verifyLogin() {
       const input = document.getElementById("loginPasswordInput");
       if (!input) return;
@@ -455,11 +451,10 @@
 
       if (!enteredPin) return alert("പിൻ നൽകുക!");
 
-      // മാസ്റ്റർ പിൻ
       if (window.MASTER_PIN && enteredPin === String(window.MASTER_PIN)) {
-        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
-        sessionStorage.setItem("RUGAMA_USER_ROLE", "admin");
-        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+        sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
+        sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
+        sessionStorage.setItem("ALNASSR_ACTIVE_PIN", enteredPin);
 
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("admin");
@@ -467,13 +462,12 @@
         return;
       }
 
-      // ഷോപ്പ് പിൻ
       const matched = (SHOPS || []).find(s => String(s.pin) === enteredPin);
       if (matched) {
-        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
-        sessionStorage.setItem("RUGAMA_USER_ROLE", "shop");
-        sessionStorage.setItem("RUGAMA_ACTIVE_SHOP_ID", matched.id);
-        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+        sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
+        sessionStorage.setItem("ALNASSR_USER_ROLE", "shop");
+        sessionStorage.setItem("ALNASSR_ACTIVE_SHOP_ID", matched.id);
+        sessionStorage.setItem("ALNASSR_ACTIVE_PIN", enteredPin);
 
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("shop");
@@ -499,10 +493,10 @@
     }
 
     function logoutApp() {
-      sessionStorage.removeItem("RUGAMA_LOGGED_IN");
-      sessionStorage.removeItem("RUGAMA_USER_ROLE");
-      sessionStorage.removeItem("RUGAMA_ACTIVE_SHOP_ID");
-      sessionStorage.removeItem("RUGAMA_ACTIVE_PIN");
+      sessionStorage.removeItem("ALNASSR_LOGGED_IN");
+      sessionStorage.removeItem("ALNASSR_USER_ROLE");
+      sessionStorage.removeItem("ALNASSR_ACTIVE_SHOP_ID");
+      sessionStorage.removeItem("ALNASSR_ACTIVE_PIN");
 
       document.getElementById("loginScreen").classList.remove("hidden");
       const inp = document.getElementById("loginPasswordInput");
@@ -512,7 +506,6 @@
       }
     }
 
-    // 2. മൾട്ടി-ഷോപ്പ് ഇനിഷ്യലൈസ്
     function initMultiShopSystem(forceShopId = null) {
       const sel = document.getElementById("shopSelector");
       if (sel) sel.innerHTML = "";
@@ -526,11 +519,11 @@
         if (sel) sel.appendChild(opt);
       });
 
-      const role = sessionStorage.getItem("RUGAMA_USER_ROLE");
+      const role = sessionStorage.getItem("ALNASSR_USER_ROLE");
       if (role === 'shop') {
-        currentShopId = forceShopId || sessionStorage.getItem("RUGAMA_ACTIVE_SHOP_ID") || SHOPS[0].id;
+        currentShopId = forceShopId || sessionStorage.getItem("ALNASSR_ACTIVE_SHOP_ID") || SHOPS[0].id;
       } else {
-        const savedShopId = localStorage.getItem("RUGAMA_SELECTED_SHOP_ID");
+        const savedShopId = localStorage.getItem("ALNASSR_SELECTED_SHOP_ID");
         const matched = SHOPS.find(s => s.id === savedShopId);
         currentShopId = matched ? matched.id : SHOPS[0].id;
       }
@@ -539,14 +532,28 @@
       connectActiveShop();
     }
 
+    // ഷോപ്പ് മാറുമ്പോൾ ലോഗോയും പേരും അപ്‌ഡേറ്റ് ചെയ്യുന്നു
     function connectActiveShop() {
       currentShop = SHOPS.find(s => s.id === currentShopId) || SHOPS[0];
       if (!currentShop) return;
 
       currentShopId = currentShop.id;
-      localStorage.setItem("RUGAMA_SELECTED_SHOP_ID", currentShopId);
+      localStorage.setItem("ALNASSR_SELECTED_SHOP_ID", currentShopId);
 
       document.getElementById("shopStaticTitle").innerText = currentShop.name;
+      
+      // ലോഗോ അപ്‌ഡേറ്റ് ചെയ്യൽ
+      const logoImg = document.getElementById("shopLogoImg");
+      const defaultIcon = document.getElementById("shopDefaultIcon");
+      if (currentShop.logo) {
+        logoImg.src = currentShop.logo;
+        logoImg.style.display = 'block';
+        if (defaultIcon) defaultIcon.classList.add("hidden");
+      } else {
+        logoImg.style.display = 'none';
+        if (defaultIcon) defaultIcon.classList.remove("hidden");
+      }
+
       const header = document.getElementById("mobileAppHeader");
       if (header) {
         header.className = `bg-gradient-to-r ${currentShop.themeGradient || 'from-slate-900 via-slate-800 to-slate-900'} text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-4 py-2.5 transition-all duration-300`;
@@ -564,7 +571,6 @@
       connectActiveShop();
     }
 
-    // 3. ടാബ് മാറ്റൽ
     function switchMobileTab(tabId) {
       document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
       document.getElementById(`view-${tabId}`).classList.remove('hidden');
@@ -584,14 +590,13 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // 4. ഡാറ്റ ഫെച്ച് ചെയ്യൽ & ലോക്കൽ കാഷെ
     function loadLocalCacheData() {
       try {
-        const c = localStorage.getItem("CACHE_CUSTOMERS");
-        const v = localStorage.getItem("CACHE_VENDORS");
-        const e = localStorage.getItem("CACHE_EMPLOYEES");
-        const exp = localStorage.getItem("CACHE_EXPENSES");
-        const tx = localStorage.getItem("CACHE_TRANSACTIONS");
+        const c = localStorage.getItem("ALNASSR_CACHE_CUSTOMERS");
+        const v = localStorage.getItem("ALNASSR_CACHE_VENDORS");
+        const e = localStorage.getItem("ALNASSR_CACHE_EMPLOYEES");
+        const exp = localStorage.getItem("ALNASSR_CACHE_EXPENSES");
+        const tx = localStorage.getItem("ALNASSR_CACHE_TRANSACTIONS");
 
         if (c) customersList = JSON.parse(c);
         if (v) vendorsList = JSON.parse(v);
@@ -627,12 +632,11 @@
         expensesMasterList = expRes.data || [];
         transactionsList = tRes.data || [];
 
-        // ഫോണിൽ സൂക്ഷിക്കുന്നു
-        localStorage.setItem("CACHE_CUSTOMERS", JSON.stringify(customersList));
-        localStorage.setItem("CACHE_VENDORS", JSON.stringify(vendorsList));
-        localStorage.setItem("CACHE_EMPLOYEES", JSON.stringify(employeesList));
-        localStorage.setItem("CACHE_EXPENSES", JSON.stringify(expensesMasterList));
-        localStorage.setItem("CACHE_TRANSACTIONS", JSON.stringify(transactionsList));
+        localStorage.setItem("ALNASSR_CACHE_CUSTOMERS", JSON.stringify(customersList));
+        localStorage.setItem("ALNASSR_CACHE_VENDORS", JSON.stringify(vendorsList));
+        localStorage.setItem("ALNASSR_CACHE_EMPLOYEES", JSON.stringify(employeesList));
+        localStorage.setItem("ALNASSR_CACHE_EXPENSES", JSON.stringify(expensesMasterList));
+        localStorage.setItem("ALNASSR_CACHE_TRANSACTIONS", JSON.stringify(transactionsList));
 
         populateDropdowns();
         renderQuickTotalsAndRecent();
@@ -707,10 +711,9 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // 5. ഓഫ്‍ലൈൻ ക്യൂ മാനേജ്മെന്റ് (Offline Queue & Sync)
     function getOfflineQueue() {
       try {
-        return JSON.parse(localStorage.getItem("RUGAMA_OFFLINE_TXNS") || "[]");
+        return JSON.parse(localStorage.getItem("ALNASSR_OFFLINE_TXNS") || "[]");
       } catch (e) {
         return [];
       }
@@ -719,7 +722,7 @@
     function pushToOfflineQueue(payload, shopId) {
       const queue = getOfflineQueue();
       queue.push({ ...payload, _shopId: shopId, _timestamp: Date.now() });
-      localStorage.setItem("RUGAMA_OFFLINE_TXNS", JSON.stringify(queue));
+      localStorage.setItem("ALNASSR_OFFLINE_TXNS", JSON.stringify(queue));
       checkOfflineQueueUI();
     }
 
@@ -751,14 +754,13 @@
         }
       }
 
-      localStorage.setItem("RUGAMA_OFFLINE_TXNS", JSON.stringify(remaining));
+      localStorage.setItem("ALNASSR_OFFLINE_TXNS", JSON.stringify(remaining));
       checkOfflineQueueUI();
       if (queue.length > remaining.length) {
         fetchAllData();
       }
     }
 
-    // 6. ഇടപാടുകൾ സേവ് ചെയ്യൽ (ഓഫ്‍ലൈൻ + ഓൺലൈൻ സപ്പോർട്ട്)
     async function saveSaleEntry() {
       let rawName = document.getElementById("saleCustomerInput").value.trim();
       if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
@@ -771,7 +773,7 @@
           try { await supabaseClient.from('customers').insert([newCust]); } catch (e) {}
         }
         customersList.push(newCust);
-        localStorage.setItem("CACHE_CUSTOMERS", JSON.stringify(customersList));
+        localStorage.setItem("ALNASSR_CACHE_CUSTOMERS", JSON.stringify(customersList));
         populateDropdowns();
       }
 
@@ -825,7 +827,7 @@
           try { await supabaseClient.from('vendors').insert([newVend]); } catch (e) {}
         }
         vendorsList.push(newVend);
-        localStorage.setItem("CACHE_VENDORS", JSON.stringify(vendorsList));
+        localStorage.setItem("ALNASSR_CACHE_VENDORS", JSON.stringify(vendorsList));
         populateDropdowns();
       }
 
@@ -899,7 +901,7 @@
             try { await supabaseClient.from('expenses_master').insert([newExp]); } catch (e) {}
           }
           expensesMasterList.push(newExp);
-          localStorage.setItem("CACHE_EXPENSES", JSON.stringify(expensesMasterList));
+          localStorage.setItem("ALNASSR_CACHE_EXPENSES", JSON.stringify(expensesMasterList));
           populateDropdowns();
         }
 
@@ -936,7 +938,6 @@
       onUnifiedPartySelected();
     }
 
-    // 7. ലൈവ് ടോട്ടലുകളും സമീപകാല എൻട്രികളും
     function renderQuickTotalsAndRecent() {
       const selectedDate = getSelectedDate();
       let saleTotal = 0, purTotal = 0, expTotal = 0;
@@ -1004,7 +1005,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // 8. ഡിലീറ്റ് സുരക്ഷ (2-ദിവസത്തെ റൂളോടെയുള്ള PIN Verification)
     function requestDelete(id) {
       if (String(id).startsWith('temp_')) {
         alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. ഇത് നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
@@ -1044,7 +1044,7 @@
 
     async function verifyPinAndExecute() {
       const pinVal = document.getElementById("pinInput").value.trim();
-      const sessionPin = sessionStorage.getItem("RUGAMA_ACTIVE_PIN");
+      const sessionPin = sessionStorage.getItem("ALNASSR_ACTIVE_PIN");
       const masterPin = String(window.MASTER_PIN);
       const currentShopPin = currentShop ? String(currentShop.pin) : null;
 
