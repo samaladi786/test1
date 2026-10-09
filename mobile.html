@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- COMMON CONFIG FILE -->
-  <script src="config.js"></script>
+  <script src="config.js?v=4"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
@@ -73,12 +73,12 @@
         <div class="truncate">
           <!-- ADMIN DROPDOWN OR SHOP TITLE -->
           <div id="shopSelectorWrapper" class="hidden">
-            <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-slate-700 outline-none">
+            <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-slate-700 outline-none cursor-pointer">
             </select>
           </div>
           <h1 id="shopStaticTitle" class="text-xs font-black truncate">...</h1>
           
-          <!-- DATE PICKER BAR (തീയതി തിരഞ്ഞെടുക്കാനുള്ള ബോക്സ്) -->
+          <!-- DATE PICKER BAR -->
           <div class="flex items-center gap-1.5 mt-0.5">
             <input 
               type="date" 
@@ -89,7 +89,7 @@
             <button 
               type="button" 
               onclick="setTodayDate()" 
-              title="ഇന്നത്തെ തീയതിയിലേക്ക് മാറ്റുക" 
+              title="ഇന്നത്തെ തീയതി" 
               class="bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/40 touch-btn cursor-pointer">
               ഇന്ന്
             </button>
@@ -337,7 +337,7 @@
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
       <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
       <p class="text-xs text-slate-500">ഡിലീറ്റ് ചെയ്യാൻ ലോഗിൻ പിൻ നൽകുക</p>
-      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" id="pinInput" placeholder="••••" class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-rose-500" />
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" id="pinInput" placeholder="••••" class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-rose-500" onkeydown="if(event.key === 'Enter') verifyPinAndExecute()" />
       <div class="flex gap-2 pt-2">
         <button onclick="closePinModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-xs font-semibold cursor-pointer">റദ്ദാക്കുക</button>
         <button onclick="verifyPinAndExecute()" class="flex-1 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">ഡിലീറ്റ്</button>
@@ -368,13 +368,11 @@
       return new Date().toISOString().split('T')[0];
     }
 
-    // നിലവിൽ തിരഞ്ഞെടുത്ത തീയതി തിരികെ നൽകുന്നു
     function getSelectedDate() {
       const dt = document.getElementById("mobileFilterDate");
       return (dt && dt.value) ? dt.value : getSaudiToday();
     }
 
-    // "ഇന്ന്" ബട്ടൺ ക്ലിക്ക് ചെയ്യുമ്പോൾ
     function setTodayDate() {
       const today = getSaudiToday();
       const dt = document.getElementById("mobileFilterDate");
@@ -382,7 +380,6 @@
       renderQuickTotalsAndRecent();
     }
 
-    // തീയതി കലണ്ടറിൽ നിന്ന് മാറുമ്പോൾ
     function onDateChanged(val) {
       renderQuickTotalsAndRecent();
     }
@@ -403,11 +400,10 @@
         }, 300);
       }
 
-      // ഡിഫോൾട്ടായി ഇന്നത്തെ തീയതി സെറ്റ് ചെയ്യുന്നു
       const dtInput = document.getElementById("mobileFilterDate");
       if (dtInput) dtInput.value = getSaudiToday();
 
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     });
 
     // 1. ലോഗിൻ പരിശോധന
@@ -418,7 +414,7 @@
 
       if (!enteredPin) return alert("പിൻ നൽകുക!");
 
-      // മാസ്റ്റർ പിൻ പരിശോധിക്കുന്നു
+      // മാസ്റ്റർ പിൻ
       if (window.MASTER_PIN && enteredPin === String(window.MASTER_PIN)) {
         sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
         sessionStorage.setItem("RUGAMA_USER_ROLE", "admin");
@@ -430,7 +426,7 @@
         return;
       }
 
-      // ഷോപ്പ് പിൻ പരിശോധിക്കുന്നു
+      // ഷോപ്പ് പിൻ
       const matched = (SHOPS || []).find(s => String(s.pin) === enteredPin);
       if (matched) {
         sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
@@ -475,7 +471,7 @@
       }
     }
 
-    // 2. മൾട്ടി-ഷോപ്പ് കണക്റ്റിവിറ്റി
+    // 2. മൾട്ടി-ഷോപ്പ് ഇനിഷ്യലൈസ്
     function initMultiShopSystem(forceShopId = null) {
       const sel = document.getElementById("shopSelector");
       if (sel) sel.innerHTML = "";
@@ -556,7 +552,7 @@
           iconWrap.className = "p-1.5 rounded-xl bg-slate-50";
         }
       });
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     // 4. ഡാറ്റ ഫെച്ച് ചെയ്യൽ
@@ -646,17 +642,15 @@
         btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> ചിലവ് സേവ് ചെയ്യുക`;
         info.innerText = "";
       }
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
-    // 5. ഇടപാടുകൾ സേവ് ചെയ്യൽ (തിരഞ്ഞെടുത്ത തീയതിയിലേക്ക് സേവ് ആകുന്നു)
-   // 5. ഇടപാടുകൾ സേവ് ചെയ്യൽ (കസ്റ്റമർ, വെണ്ടർ, ചിലവ് - ഓട്ടോ ആഡിംഗ് ഉൾപ്പെടെ)
+    // 5. ഇടപാടുകൾ സേവ് ചെയ്യൽ (ഓട്ടോ-കസ്റ്റമർ, വെണ്ടർ, ചിലവ് ആഡിംഗ് ഉൾപ്പെടെ)
     async function saveSaleEntry() {
       let rawName = document.getElementById("saleCustomerInput").value.trim();
       if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
       let name = rawName.split(' (')[0].trim();
 
-      // കസ്റ്റമർ ഇല്ലെങ്കിൽ 'cash' ആയി കസ്റ്റമർ ടേബിളിൽ ചേർക്കുന്നു
       let cust = (customersList || []).find(c => c && c.name && c.name.toLowerCase() === name.toLowerCase());
       if (!cust) {
         const newCust = { name: name, type: 'cash', opening_balance: 0 };
@@ -704,7 +698,6 @@
       if (!rawName) return alert("വെണ്ടർ പേര് നൽകുക!");
       let name = rawName.split(' (')[0].trim();
 
-      // വെണ്ടർ ഇല്ലെങ്കിൽ 'cash' ആയി വെണ്ടർ ടേബിളിൽ ചേർക്കുന്നു
       let vend = (vendorsList || []).find(v => v && v.name && v.name.toLowerCase() === name.toLowerCase());
       if (!vend) {
         const newVend = { name: name, type: 'cash', opening_balance: 0 };
@@ -761,7 +754,6 @@
       let payload = {};
 
       if (emp) {
-        // ജീവനക്കാരനാണെങ്കിൽ സാലറി ആയി സേവ് ആകുന്നു
         payload = {
           date: getSelectedDate(),
           type: 'salary',
@@ -771,7 +763,6 @@
           credit_amount: 0
         };
       } else {
-        // ചിലവാണെങ്കിൽ: ലിസ്റ്റിൽ ഇല്ലാത്ത ഇനമാണോ എന്ന് പരിശോധിക്കുന്നു; ഇല്ലെങ്കിൽ expenses_master-ലേക്ക് ആഡ് ചെയ്യുന്നു
         let expName = rawVal.split(' (')[0].trim();
         let exp = (expensesMasterList || []).find(e => e && e.name && e.name.toLowerCase() === expName.toLowerCase());
 
@@ -810,20 +801,8 @@
         fetchAllData();
       }
     }
-      const { error } = await supabaseClient.from('transactions').insert([payload]);
-      if (error) alert("സേവ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
-      else {
-        alert("വിജയകരമായി സേവ് ചെയ്തു!");
-        document.getElementById("expSalCashAmt").value = "";
-        document.getElementById("expSalBankAmt").value = "";
-        document.getElementById("expSalNote").value = "";
-        document.getElementById("unifiedPartyInput").value = "";
-        onUnifiedPartySelected();
-        fetchAllData();
-      }
-    }
 
-    // 6. തിരഞ്ഞെടുത്ത തീയതിയിലെ ടോട്ടലുകളും ലിസ്റ്റും കണക്കാക്കുന്നു
+    // 6. ലൈവ് ടോട്ടലുകളും സമീപകാല എൻട്രികളും
     function renderQuickTotalsAndRecent() {
       const selectedDate = getSelectedDate();
       let saleTotal = 0, purTotal = 0, expTotal = 0;
@@ -888,11 +867,10 @@
           </div>
         `;
       }).join('');
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
-    // 7. ഡിലീറ്റ് സുരക്ഷ (PIN Verification)
-   // 7. ഡിലീറ്റ് സുരക്ഷ (2-ദിവസത്തെ റൂളോടെയുള്ള PIN Verification)
+    // 7. ഡിലീറ്റ് സുരക്ഷ (2-ദിവസത്തെ റൂളോടെയുള്ള PIN Verification)
     function requestDelete(id) {
       pendingDeleteId = id;
       
@@ -954,7 +932,6 @@
           }
         }
 
-        // 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണെങ്കിൽ മാസ്റ്റർ പിൻ നിർബന്ധം!
         if (isOlderThanLimit) {
           if (pinVal !== masterPin) {
             alert("⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ള എൻട്രികൾ ഡിലീറ്റ് ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ തന്നെ നൽകണം!");
@@ -962,7 +939,6 @@
             return;
           }
         } else {
-          // 2 ദിവസത്തിനുള്ളിലുള്ളതാണെങ്കിൽ സാധാരണ ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ മതിയാകും
           const isValidPin = (pinVal === sessionPin) || (pinVal === masterPin) || (pinVal === currentShopPin);
           if (!isValidPin) {
             alert("പിൻ തെറ്റാണ്! ശരിയായ പാസ്‌വേഡ് നൽകുക.");
