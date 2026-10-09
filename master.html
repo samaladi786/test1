@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rugama Super Market - Master & Reports Portal</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- External GitHub config.js Connection -->
+  <script src="config.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
+    body { font-family: 'Manrope', 'Noto Sans Malayalam', sans-serif; }
+    @media print {
+      body * { visibility: hidden; }
+      #printableArea, #printableArea * { visibility: visible; }
+      #printableArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 10px; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- 1. LOGIN SCREEN (നേരിട്ട് master.html തുറന്നാൽ മാത്രം കാണിക്കും) -->
+  <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-[99999] p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg">
+        <i data-lucide="lock" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <h2 class="text-base font-extrabold text-slate-800">റൂഗാമ മാസ്റ്റർ പോർട്ടൽ</h2>
+        <p class="text-xs text-slate-500 mt-1">തുടരാൻ ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ നൽകുക</p>
+      </div>
+
+      <form onsubmit="event.preventDefault(); verifyLogin();" class="space-y-4">
+        <input 
+          type="password" 
+          maxlength="8" 
+          id="loginPasswordInput" 
+          placeholder="••••" 
+          autocomplete="current-password"
+          autofocus
+          class="text-center text-2xl tracking-[0.4em] font-black w-48 py-3 border-2 rounded-2xl mx-auto block outline-none focus:border-emerald-600 bg-slate-50" 
+        />
+        <button 
+          type="submit" 
+          class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i> ലോഗിൻ ചെയ്യുക
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. DYNAMIC THEMED HEADER WITH LOGO & COLOR SHIFT -->
+  <header id="mainAppHeader" class="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white shadow-lg sticky top-0 z-40 transition-all duration-500 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Shop Logo & Identity Info -->
+      <div class="flex items-center space-x-3.5">
+        <div id="shopLogoBox" class="w-11 h-11 rounded-2xl bg-white/10 p-1.5 flex items-center justify-center shadow-inner border border-white/20 backdrop-blur-sm overflow-hidden">
+          <img id="shopLogoImg" src="" alt="Shop Logo" class="w-full h-full object-contain hidden" />
+          <i id="shopDefaultIcon" data-lucide="store" class="w-6 h-6 text-emerald-400"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 id="shopHeaderTitle" class="text-base sm:text-lg font-black tracking-tight leading-tight">...</h1>
+            <span id="shopBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full border bg-emerald-500/20 text-emerald-300 border-emerald-500/40 uppercase tracking-wider">ACTIVE</span>
+          </div>
+          <p id="shopTagline" class="text-[11px] text-slate-300 font-medium">Master & Reports Portal</p>
+        </div>
+      </div>
+
+      <!-- Shop Selector & Controls -->
+      <div class="flex items-center gap-2.5">
+        <!-- ഈ ഡ്രോപ്പ്ഡൗൺ മാസ്റ്റർ പിൻ വഴി കയറുമ്പോൾ മാത്രമേ കാണിക്കൂ -->
+        <div id="shopSwitcherWrapper" class="hidden flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-inner">
+          <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
+          <span class="text-xs font-semibold text-slate-300">ഷോപ്പ് മാറ്റുക:</span>
+          <select id="selectedShopKey" onchange="switchActiveShop()" class="bg-slate-900 text-white text-xs font-bold rounded-lg px-2.5 py-1 outline-none border border-white/20 cursor-pointer focus:ring-2 focus:ring-emerald-400">
+            <!-- Loaded dynamically from config.js -->
+          </select>
+        </div>
+
+        <!-- പ്രധാന സെയിൽസ് പേജിലേക്ക് (index.html) തിരികെ പോകാനുള്ള ബട്ടൺ -->
+        <a href="index.html" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow cursor-pointer">
+          <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> സെയിൽസ് പോർട്ടൽ
+        </a>
+
+        <button onclick="fetchAllData()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-2 rounded-xl border border-white/10 transition flex items-center gap-1 shadow cursor-pointer">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> റിഫ്രഷ്
+        </button>
+        <button onclick="logoutApp()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow cursor-pointer">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i> ലോഗ് ഔട്ട്
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- 3. NAVIGATION TABS -->
+  <div class="bg-white border-b sticky top-[67px] z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto flex overflow-x-auto text-xs font-bold text-slate-600">
+      <button onclick="switchTab('master')" id="tabBtn-master" class="tab-btn px-5 py-3 border-b-2 border-emerald-600 text-emerald-700 flex items-center gap-2 whitespace-nowrap cursor-pointer">
+        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> മാസ്റ്റർ എൻട്രികൾ
+      </button>
+      <button onclick="switchTab('statements')" id="tabBtn-statements" class="tab-btn px-5 py-3 border-b-2 border-transparent hover:text-emerald-600 flex items-center gap-2 whitespace-nowrap cursor-pointer">
+        <i data-lucide="file-text" class="w-4 h-4 text-indigo-600"></i> സ്റ്റേറ്റ്മെന്റുകൾ (Reports)
+      </button>
+      <button onclick="switchTab('excel')" id="tabBtn-excel" class="tab-btn px-5 py-3 border-b-2 border-transparent hover:text-emerald-600 flex items-center gap-2 whitespace-nowrap cursor-pointer">
+        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i> എക്സൽ ഇമ്പോർട്ട് & എക്സ്പോർട്ട്
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-1 space-y-4">
+
+    <!-- TAB 1: MASTER ENTRIES -->
+    <div id="view-master" class="tab-view space-y-4">
+      <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+        <h2 class="font-bold text-sm text-slate-800 border-b pb-2 flex items-center gap-2">
+          <i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i> <span id="openingShopLabel">സ്ഥാപനത്തിന്റെ</span> തുടക്ക ബാലൻസുകൾ (App Settings)
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">തുടക്കത്തിലെ ക്യാഷ് (Opening Cash ₹):</label>
+            <input type="number" step="any" id="setOpeningCash" placeholder="0.00" class="w-full text-xs font-bold p-2.5 rounded-lg border bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">തുടക്കത്തിലെ ബാങ്ക് ബാലൻസ് (Opening Bank ₹):</label>
+            <input type="number" step="any" id="setOpeningBank" placeholder="0.00" class="w-full text-xs font-bold p-2.5 rounded-lg border bg-slate-50" />
+          </div>
+          <div class="flex items-end">
+            <button onclick="saveAppSettingsBalances()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-1 shadow cursor-pointer">
+              <i data-lucide="save" class="w-3.5 h-3.5"></i> സേവ് ചെയ്യുക
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MASTER CARDS -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- AGENTS -->
+        <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3 flex flex-col justify-between">
+          <div class="space-y-3">
+            <h2 class="font-bold text-sm text-teal-800 border-b pb-2 flex items-center gap-2">
+              <i data-lucide="user-check" class="w-4 h-4"></i> ഏജന്റുമാർ (Agents)
+            </h2>
+            <div class="flex gap-2">
+              <input type="text" id="masterAgentName" placeholder="ഏജന്റ് പേര് *" class="flex-1 text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <button onclick="addMasterItem('agents')" class="py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> സേവ്
+              </button>
+            </div>
+          </div>
+          <div class="mt-3">
+            <span class="text-[11px] font-bold text-slate-500 uppercase block mb-1">നിലവിലുള്ള ഏജന്റുകൾ</span>
+            <div id="masterAgentList" class="divide-y border rounded-xl p-2 bg-slate-50 max-h-48 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+
+        <!-- CUSTOMERS -->
+        <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3 flex flex-col justify-between">
+          <div class="space-y-3">
+            <h2 class="font-bold text-sm text-emerald-800 border-b pb-2 flex items-center gap-2">
+              <i data-lucide="users" class="w-4 h-4"></i> കസ്റ്റമർമാർ (Customers)
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input type="text" id="masterCustName" placeholder="കസ്റ്റമർ പേര് *" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <select id="masterCustType" class="text-xs p-2.5 rounded-lg border bg-slate-50 font-semibold">
+                <option value="credit">Credit Customer</option>
+                <option value="cash">Cash Customer</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="masterCustAgent" class="text-xs p-2.5 rounded-lg border bg-slate-50">
+                <option value="">ഏജന്റ് ഇല്ല</option>
+              </select>
+              <input type="number" step="any" id="masterCustOpening" placeholder="പഴയ കടം / ബാലൻസ് (₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+            </div>
+            <button onclick="addMasterItem('customers')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-1 cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> കസ്റ്റമറെ സേവ് ചെയ്യുക
+            </button>
+          </div>
+          <div class="mt-3">
+            <span class="text-[11px] font-bold text-slate-500 uppercase block mb-1">നിലവിലുള്ള കസ്റ്റമർമാർ</span>
+            <div id="masterCustList" class="divide-y border rounded-xl p-2 bg-slate-50 max-h-48 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+
+        <!-- VENDORS -->
+        <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3 flex flex-col justify-between">
+          <div class="space-y-3">
+            <h2 class="font-bold text-sm text-blue-800 border-b pb-2 flex items-center gap-2">
+              <i data-lucide="truck" class="w-4 h-4"></i> വെണ്ടർമാർ / സപ്ലയർമാർ (Vendors)
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input type="text" id="masterVendorName" placeholder="വെണ്ടർ പേര് *" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <select id="masterVendorType" class="text-xs font-semibold p-2.5 rounded-lg border bg-slate-50">
+                <option value="credit">Credit Vendor</option>
+                <option value="cash">Cash Vendor</option>
+              </select>
+              <input type="number" step="any" id="masterVendorOpening" placeholder="പഴയ ബാക്കി (₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+            </div>
+            <button onclick="addMasterItem('vendors')" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-1 cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> വെണ്ടറെ സേവ് ചെയ്യുക
+            </button>
+          </div>
+          <div class="mt-3">
+            <span class="text-[11px] font-bold text-slate-500 uppercase block mb-1">നിലവിലുള്ള വെണ്ടർമാർ</span>
+            <div id="masterVendorList" class="divide-y border rounded-xl p-2 bg-slate-50 max-h-48 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+
+        <!-- EMPLOYEES -->
+        <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3 flex flex-col justify-between">
+          <div class="space-y-3">
+            <h2 class="font-bold text-sm text-purple-800 border-b pb-2 flex items-center gap-2">
+              <i data-lucide="user-plus" class="w-4 h-4"></i> ജീവനക്കാർ (Employees)
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input type="text" id="masterEmpName" placeholder="സ്റ്റാഫ് പേര് *" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <input type="date" id="masterEmpJoin" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input type="number" step="any" id="masterEmpSalary" placeholder="മാസ ശമ്പളം (₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <input type="number" step="any" id="masterEmpOpening" placeholder="തുടക്കത്തിൽ കൊടുക്കാനുള്ള ബാക്കി (₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+            </div>
+            <button onclick="addMasterItem('employees')" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-1 cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> ജീവനക്കാരനെ സേവ് ചെയ്യുക
+            </button>
+          </div>
+          <div class="mt-3">
+            <span class="text-[11px] font-bold text-slate-500 uppercase block mb-1">ജീവനക്കാരുടെ ലിസ്റ്റ്</span>
+            <div id="masterEmpList" class="divide-y border rounded-xl p-2 bg-slate-50 max-h-48 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPENSES -->
+      <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+        <h2 class="font-bold text-sm text-amber-800 border-b pb-2 flex items-center gap-2">
+          <i data-lucide="receipt" class="w-4 h-4"></i> ചിലവുകളുടെ മാസ്റ്റർ ലിസ്റ്റ് (Expenses Master)
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <input type="text" id="masterExpName" placeholder="ചിലവ് പേര് (ഉദാ: വാടക, EB Bill) *" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+          <input type="number" step="any" id="masterExpOpening" placeholder="പഴയ ബാക്കി തുക (Opening ₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+          <button onclick="addMasterItem('expenses_master')" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-1 cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> ചിലവ് ഇനം സേവ് ചെയ്യുക
+          </button>
+        </div>
+        <div class="mt-2">
+          <span class="text-[11px] font-bold text-slate-500 uppercase block mb-1">സേവ് ചെയ്ത ചിലവ് ഇനങ്ങൾ</span>
+          <div id="masterExpList" class="divide-y border rounded-xl p-2 bg-slate-50 max-h-40 overflow-y-auto text-xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: DETAILED STATEMENTS -->
+    <div id="view-statements" class="tab-view hidden space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Controls Column -->
+        <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-4">
+          <h3 class="font-bold text-sm text-slate-800 border-b pb-2 flex items-center gap-2">
+            <i data-lucide="filter" class="w-4 h-4 text-emerald-600"></i> Statement Filters
+          </h3>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Select Report Category:</label>
+            <select id="statementCategorySelect" onchange="handleStatementCategoryChange()" class="w-full border rounded-lg p-2.5 text-xs bg-slate-50 font-bold text-slate-800">
+              <optgroup label="Summary Reports (Excel Style)">
+                <option value="all_vendors">All Vendors (Credit Only)</option>
+                <option value="all_customers">All Customers (Credit Only)</option>
+                <option value="all_employees">All Employees</option>
+                <option value="all_agents">All Agents</option>
+              </optgroup>
+              <optgroup label="Single Party Detailed Ledger">
+                <option value="single_vendor">Single Vendor</option>
+                <option value="single_customer">Single Customer</option>
+                <option value="single_employee">Single Employee</option>
+                <option value="single_agent">Single Agent</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div id="singleEntityBox" class="hidden">
+            <label id="singleEntityLabel" class="block text-xs font-bold text-slate-600 mb-1">Select Party:</label>
+            <div class="relative">
+              <input type="text" id="partySearchInput" list="partyDataList"
+                     placeholder="Click to pick or type name..."
+                     onfocus="this.select()"
+                     class="w-full border rounded-lg p-2.5 text-xs bg-slate-50 font-semibold focus:ring-2 focus:ring-emerald-500 outline-none" />
+              <datalist id="partyDataList"></datalist>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">ക്ലിക്ക് ചെയ്താൽ പേര് ഓട്ടോ-സെലക്ട് ആകും, പുതിയ പേര് ടൈപ്പ് ചെയ്യാം.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Period Type:</label>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label class="flex items-center gap-1.5 p-2 border rounded-lg bg-slate-50 cursor-pointer">
+                <input type="radio" name="dateFilterMode" value="month" checked onchange="toggleDateFilterMode()" class="text-emerald-600">
+                <span class="font-bold">Monthly</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-2 border rounded-lg bg-slate-50 cursor-pointer">
+                <input type="radio" name="dateFilterMode" value="date" onchange="toggleDateFilterMode()" class="text-emerald-600">
+                <span class="font-bold">Daily / As of Date</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="filterMonthBox">
+            <label class="block text-xs font-bold text-slate-600 mb-1">Select Month:</label>
+            <input type="month" id="statementMonthInput" class="w-full border rounded-lg p-2.5 text-xs bg-slate-50 font-semibold" />
+          </div>
+
+          <div id="filterDateBox" class="hidden">
+            <label class="block text-xs font-bold text-slate-600 mb-1">Select Date:</label>
+            <input type="date" id="statementDateInput" class="w-full border rounded-lg p-2.5 text-xs bg-slate-50 font-semibold" />
+          </div>
+
+          <button onclick="generateLiveStatement()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-2 shadow cursor-pointer">
+            <i data-lucide="search" class="w-4 h-4"></i> Generate Statement
+          </button>
+        </div>
+
+        <!-- Output Column -->
+        <div class="lg:col-span-2 space-y-2">
+          <div class="flex justify-between items-center px-1">
+            <span class="text-xs text-slate-500 font-semibold">Report Preview:</span>
+            <button onclick="window.print()" class="bg-slate-900 hover:bg-black text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow cursor-pointer">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print / PDF
+            </button>
+          </div>
+
+          <div id="printableArea" class="bg-white p-6 rounded-2xl border shadow-sm min-h-[460px]">
+            <div id="statementReportArea">
+              <div class="text-center py-20 text-slate-400 space-y-2">
+                <i data-lucide="file-check" class="w-12 h-12 mx-auto stroke-1"></i>
+                <p class="text-xs">റിപ്പോർട്ട് കാണാൻ ഫിൽട്ടർ തിരഞ്ഞെടുത്ത് "Generate Statement" ക്ലിക്ക് ചെയ്യുക.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 3: EXCEL IMPORT & EXPORT -->
+    <div id="view-excel" class="tab-view hidden space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-4">
+          <div class="flex items-center gap-2 border-b pb-2 text-emerald-800">
+            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+            <h3 class="font-bold text-sm">എക്സൽ വഴി ബൾക്ക് ഇമ്പോർട്ട്</h3>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ടേബിൾ തിരഞ്ഞെടുക്കുക:</label>
+            <select id="excelTargetTable" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50 font-semibold">
+              <option value="vendors">Vendors</option>
+              <option value="customers">Customers</option>
+              <option value="employees">Employees</option>
+              <option value="expenses_master">Expenses Master</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Excel (.xlsx) അല്ലെങ്കിൽ .csv ഫയൽ:</label>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+          </div>
+          <div class="flex gap-2">
+            <button onclick="processExcelUpload()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 shadow cursor-pointer">
+              <i data-lucide="check" class="w-4 h-4"></i> അപ്‌ലോഡ് ചെയ്യുക
+            </button>
+            <button onclick="downloadSampleTemplate()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold border transition cursor-pointer">
+              മാതൃകാ ഫയൽ
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-4">
+          <div class="flex items-center gap-2 border-b pb-2 text-indigo-800">
+            <i data-lucide="download-cloud" class="w-5 h-5"></i>
+            <h3 class="font-bold text-sm">ഡാറ്റ എക്സ്പോർട്ട് (Download Excel)</h3>
+          </div>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            സൂപ്പർബേസിലുള്ള മുഴുവൻ മാസ്റ്റർ ലിസ്റ്റുകളും എക്സൽ ഫയലായി ഡൗൺലോഡ് ചെയ്ത് സൂക്ഷിക്കാം.
+          </p>
+          <div class="pt-4">
+            <button onclick="exportAllToExcel()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow cursor-pointer">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> മുഴുവൻ ഡാറ്റയും ഡൗൺലോഡ് ചെയ്യുക (.xlsx)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- EDIT & PIN MODALS -->
+  <div id="editRecordModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[9999] hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 id="editModalTitle" class="text-sm font-extrabold text-slate-800">വിവരങ്ങൾ തിരുത്തുക</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <input type="hidden" id="editModalTable">
+      <input type="hidden" id="editModalId">
+      <div id="editModalFormFields" class="space-y-3"></div>
+      <div class="flex justify-end gap-2 pt-3 border-t">
+        <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-lg bg-slate-100 text-xs font-semibold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveRecordEdit()" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">അപ്‌ഡേറ്റ് ചെയ്യുക</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[9999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
+      <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+        <i data-lucide="trash-2" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-800">ഡിലീറ്റ് സെക്യൂരിറ്റി പിൻ</h3>
+      <p class="text-xs text-slate-500">ഡിലീറ്റ് ചെയ്യാൻ നിങ്ങളുടെ ലോഗിൻ പിൻ നൽകുക</p>
+      <input type="password" maxlength="8" id="pinInput" placeholder="••••" class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-rose-500" />
+      <div class="flex gap-2 pt-2">
+        <button onclick="closePinModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-xs font-semibold cursor-pointer">റദ്ദാക്കുക</button>
+        <button onclick="verifyPinAndExecute()" class="flex-1 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">ഡിലീറ്റ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    let activeShopId = null;
+    let supabaseClient = null;
+
+    let masterAgents = [];
+    let masterCustomers = [];
+    let masterVendors = [];
+    let masterEmployees = [];
+    let masterExpensesList = [];
+    let allTransactions = [];
+    let allAgentTransactions = [];
+    let appSettingsRecord = null;
+
+    let pendingDeleteTable = null;
+    let pendingDeleteId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const isLogged = sessionStorage.getItem("RUGAMA_LOGGED_IN") === "true";
+      const userRole = sessionStorage.getItem("RUGAMA_USER_ROLE");
+
+      if (isLogged) {
+        document.getElementById("loginScreen").classList.add("hidden");
+        applyRolePermissions(userRole);
+      } else {
+        document.getElementById("loginScreen").classList.remove("hidden");
+        setTimeout(() => {
+          const inp = document.getElementById("loginPasswordInput");
+          if (inp) inp.focus();
+        }, 300);
+      }
+
+      const today = (window.getSaudiBusinessDate && typeof window.getSaudiBusinessDate === 'function') 
+                    ? window.getSaudiBusinessDate() 
+                    : new Date().toISOString().split('T')[0];
+      const monthNow = today.substring(0, 7);
+
+      if(document.getElementById("masterEmpJoin")) document.getElementById("masterEmpJoin").value = today;
+      if(document.getElementById("statementDateInput")) document.getElementById("statementDateInput").value = today;
+      if(document.getElementById("statementMonthInput")) document.getElementById("statementMonthInput").value = monthNow;
+
+      lucide.createIcons();
+      if (isLogged) {
+        initMultiShopSystem();
+      }
+    });
+
+    // 1. ലോഗിൻ പരിശോധന & റോൾ ക്രമീകരണം
+    function verifyLogin() {
+      const input = document.getElementById("loginPasswordInput");
+      if (!input) return;
+      const enteredPin = input.value.trim();
+
+      if (!enteredPin) {
+        alert("ദയവായി പിൻ നമ്പർ നൽകുക!");
+        return;
+      }
+
+      // എ. മാസ്റ്റർ പിൻ പരിശോധിക്കുന്നു (Super Admin)
+      if (window.MASTER_PIN && enteredPin === String(window.MASTER_PIN)) {
+        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
+        sessionStorage.setItem("RUGAMA_USER_ROLE", "admin");
+        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+
+        document.getElementById("loginScreen").classList.add("hidden");
+        applyRolePermissions("admin");
+        initMultiShopSystem();
+        return;
+      }
+
+      // ബി. ഓരോ ഷോപ്പിന്റെയും പിൻ പരിശോധിക്കുന്നു (Shop Staff Mode)
+      const matchedShop = (window.SHOPS_CONFIG || []).find(s => String(s.pin) === enteredPin);
+      if (matchedShop) {
+        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
+        sessionStorage.setItem("RUGAMA_USER_ROLE", "shop");
+        sessionStorage.setItem("RUGAMA_ACTIVE_SHOP_ID", matchedShop.id);
+        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+
+        document.getElementById("loginScreen").classList.add("hidden");
+        applyRolePermissions("shop");
+        initMultiShopSystem(matchedShop.id);
+        return;
+      }
+
+      alert("പാസ്‌വേഡ് തെറ്റാണ്! ശരിയായ PIN നൽകുക.");
+      input.value = "";
+      input.focus();
+    }
+
+    // 2. റോൾ അനുസരിച്ച് ഡ്രോപ്പ്ഡൗൺ ഹൈഡ് ചെയ്യുക / കാണിക്കുക
+    function applyRolePermissions(role) {
+      const switcher = document.getElementById("shopSwitcherWrapper");
+      if (role === 'admin') {
+        switcher.classList.remove("hidden");
+      } else {
+        switcher.classList.add("hidden");
+      }
+    }
+
+    // 3. ലോഗ് ഔട്ട് ഫംഗ്ഷൻ (Logout)
+    function logoutApp() {
+      sessionStorage.removeItem("RUGAMA_LOGGED_IN");
+      sessionStorage.removeItem("RUGAMA_USER_ROLE");
+      sessionStorage.removeItem("RUGAMA_ACTIVE_SHOP_ID");
+      sessionStorage.removeItem("RUGAMA_ACTIVE_PIN");
+
+      document.getElementById("loginScreen").classList.remove("hidden");
+      const inp = document.getElementById("loginPasswordInput");
+      if (inp) {
+        inp.value = "";
+        setTimeout(() => inp.focus(), 200);
+      }
+    }
+
+    // 4. മൾട്ടി-ഷോപ്പ് സിസ്റ്റം ഇനിഷ്യലൈസ് ചെയ്യുന്നു
+    function initMultiShopSystem(forceShopId = null) {
+      const select = document.getElementById("selectedShopKey");
+      select.innerHTML = "";
+
+      if (!window.SHOPS_CONFIG || !Array.isArray(window.SHOPS_CONFIG) || window.SHOPS_CONFIG.length === 0) {
+        alert("config.js ഫയലിൽ SHOPS_CONFIG കണ്ടെത്താനായില്ല!");
+        return;
+      }
+
+      window.SHOPS_CONFIG.forEach(shop => {
+        const opt = document.createElement("option");
+        opt.value = shop.id;
+        opt.innerText = shop.name;
+        select.appendChild(opt);
+      });
+
+      const role = sessionStorage.getItem("RUGAMA_USER_ROLE");
+      if (role === 'shop') {
+        activeShopId = forceShopId || sessionStorage.getItem("RUGAMA_ACTIVE_SHOP_ID") || window.SHOPS_CONFIG[0].id;
+      } else {
+        const savedShopId = localStorage.getItem("RUGAMA_SELECTED_SHOP_ID");
+        const matched = window.SHOPS_CONFIG.find(s => s.id === savedShopId);
+        activeShopId = matched ? matched.id : window.SHOPS_CONFIG[0].id;
+      }
+
+      select.value = activeShopId;
+      connectShopSupabase();
+    }
+
+    function connectShopSupabase() {
+      const currentShop = window.SHOPS_CONFIG.find(s => s.id === activeShopId) || window.SHOPS_CONFIG[0];
+      if (!currentShop) return;
+
+      activeShopId = currentShop.id;
+      localStorage.setItem("RUGAMA_SELECTED_SHOP_ID", activeShopId);
+
+      document.getElementById("shopHeaderTitle").innerText = currentShop.name;
+      document.getElementById("openingShopLabel").innerText = currentShop.name;
+      document.getElementById("shopTagline").innerText = currentShop.tagline || 'Branch Dashboard';
+
+      const header = document.getElementById("mainAppHeader");
+      header.className = `bg-gradient-to-r ${currentShop.themeGradient || 'from-emerald-950 via-slate-900 to-teal-950'} text-white shadow-lg sticky top-0 z-40 transition-all duration-500 border-b border-white/10`;
+
+      const badge = document.getElementById("shopBadge");
+      badge.className = `text-[10px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wider ${currentShop.badgeBg || 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'}`;
+
+      const logoImg = document.getElementById("shopLogoImg");
+      const defIcon = document.getElementById("shopDefaultIcon");
+      if (currentShop.logo) {
+        logoImg.src = currentShop.logo;
+        logoImg.classList.remove("hidden");
+        defIcon.classList.add("hidden");
+      } else {
+        logoImg.classList.add("hidden");
+        defIcon.classList.remove("hidden");
+        defIcon.className = `w-6 h-6 ${currentShop.accentColor || 'text-emerald-400'}`;
+      }
+
+      if (!currentShop.url || !currentShop.key) {
+        alert(`${currentShop.name}-നായി ശരിയായ Supabase URL / Key config.js-ൽ ഇല്ല.`);
+        return;
+      }
+
+      supabaseClient = window.supabase.createClient(currentShop.url, currentShop.key);
+      fetchAllData();
+    }
+
+    function switchActiveShop() {
+      activeShopId = document.getElementById("selectedShopKey").value;
+      connectShopSupabase();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-emerald-600', 'text-emerald-700');
+        btn.classList.add('border-transparent');
+      });
+
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+      activeBtn.classList.remove('border-transparent');
+      activeBtn.classList.add('border-emerald-600', 'text-emerald-700');
+
+      if (tabId === 'statements') {
+        handleStatementCategoryChange();
+      }
+      lucide.createIcons();
+    }
+
+    async function fetchAllData() {
+      if (!supabaseClient) return;
+      try {
+        const [agRes, custRes, vendRes, empRes, expRes, txnsRes, agTxnsRes, settingsRes] = await Promise.all([
+          supabaseClient.from('agents').select('*'),
+          supabaseClient.from('customers').select('*'),
+          supabaseClient.from('vendors').select('*'),
+          supabaseClient.from('employees').select('*'),
+          supabaseClient.from('expenses_master').select('*'),
+          supabaseClient.from('transactions').select('*').limit(10000),
+          supabaseClient.from('agent_transactions').select('*').limit(10000),
+          supabaseClient.from('app_settings').select('*')
+        ]);
+
+        masterAgents = agRes.data || [];
+        masterCustomers = custRes.data || [];
+        masterVendors = vendRes.data || [];
+        masterEmployees = empRes.data || [];
+        masterExpensesList = expRes.data || [];
+        allTransactions = txnsRes.data || [];
+        allAgentTransactions = agTxnsRes.data || [];
+
+        if (settingsRes.data && settingsRes.data.length > 0) {
+          appSettingsRecord = settingsRes.data[0];
+          document.getElementById("setOpeningCash").value = appSettingsRecord.opening_cash || 0;
+          document.getElementById("setOpeningBank").value = appSettingsRecord.opening_bank || 0;
+        } else {
+          document.getElementById("setOpeningCash").value = 0;
+          document.getElementById("setOpeningBank").value = 0;
+        }
+
+        renderMasterLists();
+        populateAgentDropdown();
+        handleStatementCategoryChange();
+        lucide.createIcons();
+      } catch (err) {
+        console.error("Fetch Error:", err);
+      }
+    }
+
+    async function saveAppSettingsBalances() {
+      if (!supabaseClient) return;
+      const opening_cash = parseFloat(document.getElementById("setOpeningCash").value) || 0;
+      const opening_bank = parseFloat(document.getElementById("setOpeningBank").value) || 0;
+      const currentShop = window.SHOPS_CONFIG.find(s => s.id === activeShopId);
+      const shopName = currentShop ? currentShop.name : 'റൂഗാമ സൂപ്പർ മാർക്കറ്റ്';
+
+      if (appSettingsRecord && appSettingsRecord.id) {
+        const { error } = await supabaseClient.from('app_settings').update({ opening_cash, opening_bank }).eq('id', appSettingsRecord.id);
+        if (error) alert("സേവ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+        else alert("തുടക്ക ബാലൻസ് സേവ് ചെയ്തു!");
+      } else {
+        const { error } = await supabaseClient.from('app_settings').insert([{ shop_name: shopName, opening_cash, opening_bank }]);
+        if (error) alert("സേവ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+        else alert("തുടക്ക ബാലൻസ് സേവ് ചെയ്തു!");
+      }
+      fetchAllData();
+    }
+
+    function populateAgentDropdown() {
+      const sel = document.getElementById("masterCustAgent");
+      if(!sel) return;
+      sel.innerHTML = '<option value="">ഏജന്റ് ഇല്ല</option>';
+      masterAgents.forEach(a => {
+        sel.innerHTML += `<option value="${a.id}">${a.name}</option>`;
+      });
+    }
+
+    function renderMasterLists() {
+      const agList = document.getElementById("masterAgentList"); 
+      if(agList) {
+        agList.innerHTML = masterAgents.length === 0 ? '<div class="py-2 text-slate-400 text-center">ഏജന്റുമാർ ഇല്ല</div>' : masterAgents.map(x => `
+          <div class="py-1.5 flex justify-between items-center text-xs">
+            <span><b>${x.name}</b></span>
+            <div class="flex items-center gap-2">
+              <button onclick="openEditModal('agents', '${x.id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Edit</button>
+              <button onclick="requestPin('agents', '${x.id}')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const custList = document.getElementById("masterCustList"); 
+      if(custList) {
+        custList.innerHTML = masterCustomers.length === 0 ? '<div class="py-2 text-slate-400 text-center">കസ്റ്റമർമാർ ഇല്ല</div>' : masterCustomers.map(x => {
+          let ag = masterAgents.find(a => String(a.id) === String(x.agent_id) || String(a.name) === String(x.agent_id));
+          return `
+            <div class="py-1.5 flex justify-between items-center text-xs">
+              <span><b>${x.name}</b> (${x.type || 'credit'})${ag ? ` [Agent: ${ag.name}]` : ''} - ₹${x.opening_balance || 0}</span>
+              <div class="flex items-center gap-2">
+                <button onclick="openEditModal('customers', '${x.id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Edit</button>
+                <button onclick="requestPin('customers', '${x.id}')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const vendList = document.getElementById("masterVendorList"); 
+      if(vendList) {
+        vendList.innerHTML = masterVendors.length === 0 ? '<div class="py-2 text-slate-400 text-center">വെണ്ടർമാർ ഇല്ല</div>' : masterVendors.map(x => `
+          <div class="py-1.5 flex justify-between items-center text-xs">
+            <span><b>${x.name}</b> (${x.type || 'credit'}) - ₹${x.opening_balance || 0}</span>
+            <div class="flex items-center gap-2">
+              <button onclick="openEditModal('vendors', '${x.id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Edit</button>
+              <button onclick="requestPin('vendors', '${x.id}')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const empList = document.getElementById("masterEmpList"); 
+      if(empList) {
+        empList.innerHTML = masterEmployees.length === 0 ? '<div class="py-2 text-slate-400 text-center">ജീവനക്കാർ ഇല്ല</div>' : masterEmployees.map(x => `
+          <div class="py-1.5 flex justify-between items-center text-xs">
+            <span><b>${x.name}</b> - ശമ്പളം: ₹${x.monthly_salary || 0} (തുടക്ക ബാക്കി: ₹${x.opening_advance || 0})</span>
+            <div class="flex items-center gap-2">
+              <button onclick="openEditModal('employees', '${x.id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Edit</button>
+              <button onclick="requestPin('employees', '${x.id}')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const expList = document.getElementById("masterExpList"); 
+      if(expList) {
+        expList.innerHTML = masterExpensesList.length === 0 ? '<div class="py-2 text-slate-400 text-center">ചിലവ് ഇനങ്ങൾ ഇല്ല</div>' : masterExpensesList.map(x => `
+          <div class="py-1.5 flex justify-between items-center text-xs">
+            <span><b>${x.name}</b> - ₹${x.opening_balance || 0}</span>
+            <div class="flex items-center gap-2">
+              <button onclick="openEditModal('expenses_master', '${x.id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Edit</button>
+              <button onclick="requestPin('expenses_master', '${x.id}')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    async function addMasterItem(table) {
+      if (!supabaseClient) return alert("സൂപ്പർബേസ് ക്ലയന്റ് കണക്ട് ചെയ്തിട്ടില്ല!");
+      let payload = {};
+
+      if (table === 'agents') {
+        const name = document.getElementById("masterAgentName").value.trim();
+        if (!name) return alert("ഏജന്റ് പേര് നൽകുക!");
+        payload = { name };
+      } else if (table === 'customers') {
+        const name = document.getElementById("masterCustName").value.trim();
+        const type = document.getElementById("masterCustType").value;
+        const agent_id = document.getElementById("masterCustAgent").value || null;
+        const opening_balance = parseFloat(document.getElementById("masterCustOpening").value) || 0;
+        if (!name) return alert("കസ്റ്റമർ പേര് നൽകുക!");
+        payload = { name, type, agent_id, opening_balance };
+      } else if (table === 'vendors') {
+        const name = document.getElementById("masterVendorName").value.trim();
+        const type = document.getElementById("masterVendorType").value;
+        const opening_balance = parseFloat(document.getElementById("masterVendorOpening").value) || 0;
+        if (!name) return alert("വെണ്ടർ പേര് നൽകുക!");
+        payload = { name, type, opening_balance };
+      } else if (table === 'employees') {
+        const name = document.getElementById("masterEmpName").value.trim();
+        const joining_date = document.getElementById("masterEmpJoin").value;
+        const monthly_salary = parseFloat(document.getElementById("masterEmpSalary").value) || 0;
+        const opening_advance = parseFloat(document.getElementById("masterEmpOpening").value) || 0;
+        if (!name) return alert("സ്റ്റാഫ് പേര് നൽകുക!");
+        payload = { name, joining_date, monthly_salary, opening_advance, status: 'active' };
+      } else if (table === 'expenses_master') {
+        const name = document.getElementById("masterExpName").value.trim();
+        const opening_balance = parseFloat(document.getElementById("masterExpOpening").value) || 0;
+        if (!name) return alert("ചിലവ് പേര് നൽകുക!");
+        payload = { name, opening_balance };
+      }
+
+      const { error } = await supabaseClient.from(table).insert([payload]);
+      if (error) {
+        alert("സേവ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+      } else {
+        alert("സേവ് ചെയ്തു!");
+        fetchAllData();
+      }
+    }
+
+    function openEditModal(table, id) {
+      document.getElementById("editModalTable").value = table;
+      document.getElementById("editModalId").value = id;
+      const container = document.getElementById("editModalFormFields");
+      container.innerHTML = "";
+
+      let record = null;
+      if (table === 'agents') record = masterAgents.find(x => String(x.id) === String(id));
+      if (table === 'customers') record = masterCustomers.find(x => String(x.id) === String(id));
+      if (table === 'vendors') record = masterVendors.find(x => String(x.id) === String(id));
+      if (table === 'employees') record = masterEmployees.find(x => String(x.id) === String(id));
+      if (table === 'expenses_master') record = masterExpensesList.find(x => String(x.id) === String(id));
+
+      if (!record) return alert("റെക്കോർഡ് കണ്ടെത്താനായില്ല!");
+      document.getElementById("editModalTitle").innerText = `${table.toUpperCase()} വിവരങ്ങൾ തിരുത്തുക`;
+
+      if (table === 'agents') {
+        container.innerHTML = `<div><label class="block text-xs font-bold text-slate-600 mb-1">ഏജന്റ് പേര്</label><input type="text" id="edit_name" value="${record.name || ''}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>`;
+      } else if (table === 'customers') {
+        let agentOptions = '<option value="">ഏജന്റ് ഇല്ല</option>' + masterAgents.map(a => `<option value="${a.id}" ${record.agent_id == a.id ? 'selected':''}>${a.name}</option>`).join('');
+        container.innerHTML = `
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">കസ്റ്റമർ പേര്</label><input type="text" id="edit_name" value="${record.name || ''}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">ടൈപ്പ്</label>
+            <select id="edit_type" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50 font-semibold">
+              <option value="credit" ${record.type === 'credit' ? 'selected':''}>Credit Customer</option>
+              <option value="cash" ${record.type === 'cash' ? 'selected':''}>Cash Customer</option>
+            </select>
+          </div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">ഏജന്റ്</label><select id="edit_agent" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50">${agentOptions}</select></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">തുടക്ക ബാലൻസ് (₹)</label><input type="number" step="any" id="edit_opening" value="${record.opening_balance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+        `;
+      } else if (table === 'vendors') {
+        container.innerHTML = `
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">വെണ്ടർ പേര്</label><input type="text" id="edit_name" value="${record.name || ''}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">ടൈപ്പ്</label>
+            <select id="edit_type" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50">
+              <option value="credit" ${record.type === 'credit' ? 'selected':''}>Credit Vendor</option>
+              <option value="cash" ${record.type === 'cash' ? 'selected':''}>Cash Vendor</option>
+            </select>
+          </div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">തുടക്ക ബാക്കി (₹)</label><input type="number" step="any" id="edit_opening" value="${record.opening_balance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+        `;
+      } else if (table === 'employees') {
+        container.innerHTML = `
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">ജീവനക്കാരന്റെ പേര്</label><input type="text" id="edit_name" value="${record.name || ''}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">ജോയിനിംഗ് തീയതി</label><input type="date" id="edit_join" value="${record.joining_date || ''}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">മാസ ശമ്പളം (₹)</label><input type="number" step="any" id="edit_salary" value="${record.monthly_salary || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">തുടക്കത്തിൽ കൊടുക്കാനുള്ള ബാക്കി (₹)</label><input type="number" step="any" id="edit_advance" value="${record.opening_advance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+        `;
+      } else if (table === 'expenses_master') {
+        container.innerHTML = `
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">ചിലവ് പേര്</label><input type="text" id="edit_name" value="${record.name || ''}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">പഴയ ബാക്കി (₹)</label><input type="number" step="any" id="edit_opening" value="${record.opening_balance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+        `;
+      }
+
+      document.getElementById("editRecordModal").classList.remove("hidden");
+      lucide.createIcons();
+    }
+
+    function closeEditModal() {
+      document.getElementById("editRecordModal").classList.add("hidden");
+    }
+
+    async function saveRecordEdit() {
+      if (!supabaseClient) return;
+      const table = document.getElementById("editModalTable").value;
+      const id = document.getElementById("editModalId").value;
+      let payload = {};
+
+      if (table === 'agents') {
+        payload = { name: document.getElementById("edit_name").value.trim() };
+      } else if (table === 'customers') {
+        payload = {
+          name: document.getElementById("edit_name").value.trim(),
+          type: document.getElementById("edit_type").value,
+          agent_id: document.getElementById("edit_agent").value || null,
+          opening_balance: parseFloat(document.getElementById("edit_opening").value) || 0
+        };
+      } else if (table === 'vendors') {
+        payload = {
+          name: document.getElementById("edit_name").value.trim(),
+          type: document.getElementById("edit_type").value,
+          opening_balance: parseFloat(document.getElementById("edit_opening").value) || 0
+        };
+      } else if (table === 'employees') {
+        payload = {
+          name: document.getElementById("edit_name").value.trim(),
+          joining_date: document.getElementById("edit_join").value,
+          monthly_salary: parseFloat(document.getElementById("edit_salary").value) || 0,
+          opening_advance: parseFloat(document.getElementById("edit_advance").value) || 0
+        };
+      } else if (table === 'expenses_master') {
+        payload = {
+          name: document.getElementById("edit_name").value.trim(),
+          opening_balance: parseFloat(document.getElementById("edit_opening").value) || 0
+        };
+      }
+
+      const { error } = await supabaseClient.from(table).update(payload).eq('id', id);
+      if (error) alert("അപ്‌ഡേറ്റ് പരാജയപ്പെട്ടു: " + error.message);
+      else {
+        alert("വിവരങ്ങൾ അപ്‌ഡേറ്റ് ചെയ്തു!");
+        closeEditModal();
+        fetchAllData();
+      }
+    }
+
+    function requestPin(table, id) {
+      pendingDeleteTable = table;
+      pendingDeleteId = id;
+      document.getElementById("pinInput").value = "";
+      document.getElementById("pinModal").classList.remove("hidden");
+      document.getElementById("pinInput").focus();
+    }
+    
+    function closePinModal() { 
+      document.getElementById("pinModal").classList.add("hidden"); 
+      pendingDeleteTable = null; 
+      pendingDeleteId = null;
+    }
+
+    // 5. ഡിലീറ്റ് പിൻ പരിശോധന
+    async function verifyPinAndExecute() {
+      const pinVal = document.getElementById("pinInput").value.trim();
+      const sessionPin = sessionStorage.getItem("RUGAMA_ACTIVE_PIN");
+      const masterPin = String(window.MASTER_PIN);
+
+      const currentShop = (window.SHOPS_CONFIG || []).find(s => s.id === activeShopId);
+      const currentShopPin = currentShop ? String(currentShop.pin) : null;
+
+      const isValidPin = (pinVal === sessionPin) || (pinVal === masterPin) || (pinVal === currentShopPin);
+
+      if (isValidPin) {
+        const table = pendingDeleteTable;
+        const id = pendingDeleteId;
+        closePinModal();
+        
+        if (table && id && supabaseClient) {
+          const { error } = await supabaseClient.from(table).delete().eq('id', id);
+          if (error) alert("ഡിലീറ്റ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+          else {
+            alert("വിവരങ്ങൾ വിജയകരമായി ഡിലീറ്റ് ചെയ്തു!");
+            fetchAllData();
+          }
+        }
+      } else { 
+        alert("പിൻ തെറ്റാണ്! ശരിയായ പാസ്‌വേഡ് നൽകുക."); 
+      }
+    }
+
+    function normalizeDateStr(dStr) {
+      if (!dStr) return '';
+      dStr = String(dStr).trim();
+      let m1 = dStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (m1) {
+        return `${m1[3]}-${m1[2].padStart(2, '0')}-${m1[1].padStart(2, '0')}`;
+      }
+      let m2 = dStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+      if (m2) {
+        return `${m2[1]}-${m2[2].padStart(2, '0')}-${m2[3].padStart(2, '0')}`;
+      }
+      return dStr.substring(0, 10);
+    }
+
+    function isPartyMatch(transactionParty, targetName) {
+      if (!transactionParty || !targetName) return false;
+      const tp = transactionParty.trim().toLowerCase();
+      const tn = targetName.trim().toLowerCase();
+      if (tp === tn) return true;
+      if (tp.includes(tn) || tn.includes(tp)) return true;
+      return false;
+    }
+
+    function getCompletedServiceMonths(joinDateStr, evalDateStr) {
+      if (!joinDateStr || !evalDateStr) return 0;
+      
+      const normJ = normalizeDateStr(joinDateStr);
+      const normE = normalizeDateStr(evalDateStr);
+
+      const jParts = normJ.split('-').map(Number);
+      const eParts = normE.split('-').map(Number);
+      if (jParts.length < 3 || eParts.length < 3) return 0;
+
+      const jDate = new Date(jParts[0], jParts[1] - 1, jParts[2]);
+      const eDate = new Date(eParts[0], eParts[1] - 1, eParts[2]);
+
+      if (eDate < jDate) return 0;
+
+      let months = 0;
+      let currYear = jParts[0];
+      let currMonth = jParts[1];
+      let joinDay = jParts[2];
+
+      while (true) {
+        let nextMonth = currMonth + 1;
+        let nextYear = currYear;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear += 1;
+        }
+
+        let daysInNextMonth = new Date(nextYear, nextMonth, 0).getDate();
+        let targetDay = Math.min(joinDay, daysInNextMonth);
+        let cycleCompletionDate = new Date(nextYear, nextMonth - 1, targetDay);
+
+        if (eDate >= cycleCompletionDate) {
+          months++;
+          currYear = nextYear;
+          currMonth = nextMonth;
+        } else {
+          break;
+        }
+      }
+
+      return months;
+    }
+
+    function getNextSalaryDueDate(joinDateStr, completedMonths) {
+      if (!joinDateStr) return '-';
+      const normJ = normalizeDateStr(joinDateStr);
+      const jParts = normJ.split('-').map(Number);
+      let jYear = jParts[0], jMonth = jParts[1], jDay = jParts[2];
+      
+      let targetMonth = jMonth + completedMonths + 1;
+      let targetYear = jYear;
+      while (targetMonth > 12) {
+        targetMonth -= 12;
+        targetYear += 1;
+      }
+      let daysInTarget = new Date(targetYear, targetMonth, 0).getDate();
+      let day = Math.min(jDay, daysInTarget);
+      return `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function toggleDateFilterMode() {
+      const mode = document.querySelector('input[name="dateFilterMode"]:checked').value;
+      if (mode === 'month') {
+        document.getElementById("filterMonthBox").classList.remove("hidden");
+        document.getElementById("filterDateBox").classList.add("hidden");
+      } else {
+        document.getElementById("filterMonthBox").classList.add("hidden");
+        document.getElementById("filterDateBox").classList.remove("hidden");
+      }
+    }
+
+    function handleStatementCategoryChange() {
+      const cat = document.getElementById("statementCategorySelect").value;
+      const singleBox = document.getElementById("singleEntityBox");
+      const singleLabel = document.getElementById("singleEntityLabel");
+      const dataList = document.getElementById("partyDataList");
+      const partyInput = document.getElementById("partySearchInput");
+
+      partyInput.value = "";
+      dataList.innerHTML = "";
+
+      if (cat.startsWith("single_")) {
+        singleBox.classList.remove("hidden");
+
+        if (cat === "single_vendor") {
+          singleLabel.innerText = "Select Vendor (Type or Click):";
+          masterVendors.forEach(v => dataList.innerHTML += `<option value="${v.name}">${v.name}</option>`);
+          if (masterVendors.length) partyInput.value = masterVendors[0].name;
+        } else if (cat === "single_customer") {
+          singleLabel.innerText = "Select Customer (Type or Click):";
+          masterCustomers.forEach(c => dataList.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+          if (masterCustomers.length) partyInput.value = masterCustomers[0].name;
+        } else if (cat === "single_employee") {
+          singleLabel.innerText = "Select Employee (Type or Click):";
+          masterEmployees.forEach(e => dataList.innerHTML += `<option value="${e.name}">${e.name}</option>`);
+          if (masterEmployees.length) partyInput.value = masterEmployees[0].name;
+        } else if (cat === "single_agent") {
+          singleLabel.innerText = "Select Agent (Type or Click):";
+          masterAgents.forEach(a => dataList.innerHTML += `<option value="${a.name}">${a.name}</option>`);
+          if (masterAgents.length) partyInput.value = masterAgents[0].name;
+        }
+      } else {
+        singleBox.classList.add("hidden");
+      }
+    }
+
+    function getPartyTxns(partyName, dateMode, targetVal) {
+      if (!partyName) return { inPeriod: [], cumulative: [] };
+
+      let inPeriod = [];
+      let cumulative = [];
+      const normTarget = normalizeDateStr(targetVal);
+
+      allTransactions.forEach(t => {
+        if (!isPartyMatch(t.party_name, partyName)) return;
+
+        const normT = normalizeDateStr(t.date);
+        if (!normT) return;
+
+        if (dateMode === 'month') {
+          const tMonth = normT.substring(0, 7);
+          const targetMonth = targetVal.substring(0, 7);
+          if (tMonth === targetMonth) inPeriod.push(t);
+          if (tMonth <= targetMonth) cumulative.push(t);
+        } else {
+          if (normT === normTarget) inPeriod.push(t);
+          if (normT <= normTarget) cumulative.push(t);
+        }
+      });
+
+      return { inPeriod, cumulative };
+    }
+
+    function generateLiveStatement() {
+      const cat = document.getElementById("statementCategorySelect").value;
+      const dateMode = document.querySelector('input[name="dateFilterMode"]:checked').value;
+      const targetMonth = document.getElementById("statementMonthInput").value;
+      const targetDate = document.getElementById("statementDateInput").value;
+      const reportDiv = document.getElementById("statementReportArea");
+      const targetVal = dateMode === 'month' ? targetMonth : targetDate;
+      const periodLabel = dateMode === 'month' ? `Month: ${targetMonth}` : `Date: ${targetDate}`;
+
+      let evalDateStr = targetDate;
+      if (dateMode === 'month') {
+        const parts = targetMonth.split('-').map(Number);
+        const lastDay = new Date(parts[0], parts[1], 0).getDate();
+        evalDateStr = `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+      }
+
+      if (cat === 'all_vendors') {
+        const creditVendors = masterVendors.filter(v => (v.type || 'credit').toLowerCase() === 'credit');
+        let tableRows = "";
+        let totalOpen = 0, totalPurchases = 0, totalPaid = 0, totalClosing = 0;
+        let count = 0;
+
+        creditVendors.forEach(v => {
+          const opening = parseFloat(v.opening_balance) || 0;
+          const { inPeriod, cumulative } = getPartyTxns(v.name, dateMode, targetVal);
+
+          let pPurchase = 0, pPaid = 0;
+          inPeriod.forEach(t => {
+            pPurchase += Math.abs(parseFloat(t.credit_amount || 0));
+            pPaid += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0));
+          });
+
+          let cPurchase = 0, cPaid = 0;
+          cumulative.forEach(t => {
+            cPurchase += Math.abs(parseFloat(t.credit_amount || 0));
+            cPaid += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0));
+          });
+          const closingBalance = opening + cPurchase - cPaid;
+
+          if (inPeriod.length === 0 && Math.abs(closingBalance) < 0.01) return;
+
+          count++;
+          totalOpen += opening;
+          totalPurchases += pPurchase;
+          totalPaid += pPaid;
+          totalClosing += closingBalance;
+
+          tableRows += `
+            <tr class="border-b text-xs hover:bg-slate-50">
+              <td class="p-2 text-center font-mono text-slate-400 border">${count}</td>
+              <td class="p-2 font-bold text-slate-800 border">${v.name}</td>
+              <td class="p-2 text-right font-mono border">₹${opening.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-emerald-700 border">₹${pPurchase.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-blue-700 border">₹${pPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-black text-rose-700 bg-rose-50/50 border">₹${closingBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+            </tr>
+          `;
+        });
+
+        reportDiv.innerHTML = `
+          <div class="border-b pb-3 mb-3 flex justify-between items-start">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">ALL VENDORS STATEMENT (CREDIT ONLY)</h2>
+              <p class="text-[11px] text-slate-500 font-semibold">${periodLabel} | Active/Due Vendors: <strong>${count}</strong></p>
+            </div>
+            <div class="text-right bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg">
+              <span class="text-[10px] text-blue-600 font-bold block uppercase">Total Payable Balance:</span>
+              <span class="text-base font-black text-blue-800 font-mono">₹${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+            </div>
+          </div>
+
+          <table class="w-full text-left border-collapse border text-xs">
+            <thead class="bg-slate-100 text-[11px] uppercase font-bold text-slate-700 border">
+              <tr>
+                <th class="p-2 text-center w-12 border">#</th>
+                <th class="p-2 border">Vendor Name</th>
+                <th class="p-2 text-right border">Opening (₹)</th>
+                <th class="p-2 text-right border">Purchase in Period</th>
+                <th class="p-2 text-right border">Paid in Period</th>
+                <th class="p-2 text-right border bg-rose-50 text-rose-800">Closing Balance (₹)</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows || '<tr><td colspan="6" class="text-center p-4 text-slate-400">No active transactions or dues found for this period.</td></tr>'}</tbody>
+            <tfoot class="bg-slate-100 font-bold border">
+              <tr>
+                <td colspan="2" class="p-2 text-right uppercase border">Total:</td>
+                <td class="p-2 text-right font-mono border">₹${totalOpen.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-emerald-800 border">₹${totalPurchases.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-blue-800 border">₹${totalPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-rose-700 font-black border">₹${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else if (cat === 'all_customers') {
+        const creditCustomers = masterCustomers.filter(c => (c.type || 'credit').toLowerCase() === 'credit');
+        let tableRows = "";
+        let totalOpen = 0, totalBilled = 0, totalPaid = 0, totalClosing = 0;
+        let count = 0;
+
+        creditCustomers.forEach(c => {
+          const opening = parseFloat(c.opening_balance) || 0;
+          const { inPeriod, cumulative } = getPartyTxns(c.name, dateMode, targetVal);
+
+          let pBilled = 0, pPaid = 0;
+          inPeriod.forEach(t => {
+            pBilled += Math.abs(parseFloat(t.credit_amount || 0));
+            pPaid += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0));
+          });
+
+          let cBilled = 0, cPaid = 0;
+          cumulative.forEach(t => {
+            cBilled += Math.abs(parseFloat(t.credit_amount || 0));
+            cPaid += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0));
+          });
+          const closingBalance = opening + cBilled - cPaid;
+
+          if (inPeriod.length === 0 && Math.abs(closingBalance) < 0.01) return;
+
+          count++;
+          totalOpen += opening;
+          totalBilled += pBilled;
+          totalPaid += pPaid;
+          totalClosing += closingBalance;
+
+          const ag = masterAgents.find(a => String(a.id) === String(c.agent_id) || String(a.name) === String(c.agent_id));
+
+          tableRows += `
+            <tr class="border-b text-xs hover:bg-slate-50">
+              <td class="p-2 text-center font-mono text-slate-400 border">${count}</td>
+              <td class="p-2 font-bold text-slate-800 border">${c.name}</td>
+              <td class="p-2 text-slate-500 border">${ag ? ag.name : '-'}</td>
+              <td class="p-2 text-right font-mono border">₹${opening.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-rose-600 border">₹${pBilled.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-emerald-600 border">₹${pPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-black text-rose-700 bg-rose-50/50 border">₹${closingBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+            </tr>
+          `;
+        });
+
+        reportDiv.innerHTML = `
+          <div class="border-b pb-3 mb-3 flex justify-between items-start">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">ALL CUSTOMERS STATEMENT (CREDIT ONLY)</h2>
+              <p class="text-[11px] text-slate-500 font-semibold">${periodLabel} | Active/Due Customers: <strong>${count}</strong></p>
+            </div>
+            <div class="text-right bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg">
+              <span class="text-[10px] text-rose-600 font-bold block uppercase">Total Receivable Due:</span>
+              <span class="text-base font-black text-rose-700 font-mono">₹${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+            </div>
+          </div>
+
+          <table class="w-full text-left border-collapse border text-xs">
+            <thead class="bg-slate-100 text-[11px] uppercase font-bold text-slate-700 border">
+              <tr>
+                <th class="p-2 text-center w-12 border">#</th>
+                <th class="p-2 border">Customer Name</th>
+                <th class="p-2 border">Agent</th>
+                <th class="p-2 text-right border">Opening (₹)</th>
+                <th class="p-2 text-right border">Billed in Period</th>
+                <th class="p-2 text-right border">Paid in Period</th>
+                <th class="p-2 text-right border bg-rose-50 text-rose-800">Closing Balance (₹)</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows || '<tr><td colspan="7" class="text-center p-4 text-slate-400">No active transactions or dues found for this period.</td></tr>'}</tbody>
+            <tfoot class="bg-slate-100 font-bold border">
+              <tr>
+                <td colspan="3" class="p-2 text-right uppercase border">Total:</td>
+                <td class="p-2 text-right font-mono border">₹${totalOpen.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-rose-700 border">₹${totalBilled.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-emerald-700 border">₹${totalPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-rose-700 font-black border">₹${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else if (cat === 'all_employees') {
+        let tableRows = "";
+        let totalMonthlyRate = 0, totalEarned = 0, totalPeriodAdv = 0, totalCumAdv = 0, totalNet = 0;
+        let count = 0;
+
+        masterEmployees.forEach(e => {
+          const sal = parseFloat(e.monthly_salary) || 0;
+          const openingPayable = parseFloat(e.opening_advance || 0);
+          const { inPeriod, cumulative } = getPartyTxns(e.name, dateMode, targetVal);
+
+          let advanceInPeriod = 0;
+          inPeriod.forEach(t => {
+            advanceInPeriod += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0)) + Math.abs(parseFloat(t.credit_amount || 0));
+          });
+
+          let advanceCumulative = 0;
+          cumulative.forEach(t => {
+            advanceCumulative += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0)) + Math.abs(parseFloat(t.credit_amount || 0));
+          });
+
+          const completedMonths = getCompletedServiceMonths(e.joining_date, evalDateStr);
+          const earnedSalary = completedMonths * sal;
+          const netPayable = openingPayable + earnedSalary - advanceCumulative;
+
+          if (sal === 0 && openingPayable === 0 && earnedSalary === 0 && advanceCumulative === 0) return;
+
+          count++;
+          totalMonthlyRate += sal;
+          totalEarned += earnedSalary;
+          totalPeriodAdv += advanceInPeriod;
+          totalCumAdv += advanceCumulative;
+          totalNet += netPayable;
+
+          tableRows += `
+            <tr class="border-b text-xs hover:bg-slate-50">
+              <td class="p-2 text-center font-mono text-slate-400 border">${count}</td>
+              <td class="p-2 font-bold text-slate-800 border">${e.name}</td>
+              <td class="p-2 text-center font-mono text-slate-500 border">${e.joining_date || '-'}</td>
+              <td class="p-2 text-right font-mono border">₹${openingPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-center font-mono font-bold text-blue-700 border">${completedMonths} Mo</td>
+              <td class="p-2 text-right font-mono font-bold text-emerald-700 border">₹${earnedSalary.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-bold text-purple-700 bg-purple-50/50 border">₹${advanceInPeriod.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-amber-700 border">₹${advanceCumulative.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-black ${netPayable >= 0 ? 'text-emerald-700 bg-emerald-50/50' : 'text-rose-700 bg-rose-50/50'} border">₹${netPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+            </tr>
+          `;
+        });
+
+        reportDiv.innerHTML = `
+          <div class="border-b pb-3 mb-3 flex justify-between items-start">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">ALL EMPLOYEES SALARY & ADVANCE STATEMENT</h2>
+              <p class="text-[11px] text-slate-500 font-semibold">${periodLabel} | Total Employees: <strong>${count}</strong></p>
+            </div>
+            <div class="text-right bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-lg">
+              <span class="text-[10px] text-purple-600 font-bold block uppercase">Total Balance Payable:</span>
+              <span class="text-sm font-black ${totalNet >= 0 ? 'text-emerald-800' : 'text-rose-800'} font-mono">₹${totalNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+            </div>
+          </div>
+
+          <table class="w-full text-left border-collapse border text-xs">
+            <thead class="bg-slate-100 text-[11px] uppercase font-bold text-slate-700 border">
+              <tr>
+                <th class="p-2 text-center w-12 border">#</th>
+                <th class="p-2 border">Employee</th>
+                <th class="p-2 text-center border">Joined</th>
+                <th class="p-2 text-right border">Opening Due</th>
+                <th class="p-2 text-center border text-blue-800">Service</th>
+                <th class="p-2 text-right border text-emerald-800">Earned Salary</th>
+                <th class="p-2 text-right border bg-purple-50 text-purple-800">Advance in Period</th>
+                <th class="p-2 text-right border">Total Advance</th>
+                <th class="p-2 text-right border">Net Payable (₹)</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows || '<tr><td colspan="9" class="text-center p-4 text-slate-400">No active employees found.</td></tr>'}</tbody>
+            <tfoot class="bg-slate-100 font-bold border">
+              <tr>
+                <td colspan="3" class="p-2 text-right uppercase border">Total:</td>
+                <td class="p-2 text-right font-mono border">-</td>
+                <td class="p-2 border text-center">-</td>
+                <td class="p-2 text-right font-mono text-emerald-800 border">₹${totalEarned.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-purple-800 border">₹${totalPeriodAdv.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-amber-700 border">₹${totalCumAdv.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono ${totalNet >= 0 ? 'text-emerald-800' : 'text-rose-800'} font-black border">₹${totalNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else if (cat === 'all_agents') {
+        let tableRows = "";
+        let grandCustomerDue = 0, grandCollected = 0;
+        let count = 0;
+
+        masterAgents.forEach(ag => {
+          const myCusts = masterCustomers.filter(c => 
+            String(c.agent_id || '').trim().toLowerCase() === String(ag.id).trim().toLowerCase() ||
+            String(c.agent_id || '').trim().toLowerCase() === String(ag.name).trim().toLowerCase()
+          );
+
+          let agentCustDue = 0;
+          myCusts.forEach(c => {
+            const opening = parseFloat(c.opening_balance) || 0;
+            const { cumulative } = getPartyTxns(c.name, dateMode, targetVal);
+            let cBilled = 0, cPaid = 0;
+            cumulative.forEach(t => {
+              cBilled += Math.abs(parseFloat(t.credit_amount || 0));
+              cPaid += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0));
+            });
+            agentCustDue += (opening + cBilled - cPaid);
+          });
+
+          const agTxns = allAgentTransactions.filter(t => {
+            const matchAg = String(t.agent_id || '').trim().toLowerCase() === String(ag.id).trim().toLowerCase() ||
+                            String(t.agent_id || '').trim().toLowerCase() === String(ag.name).trim().toLowerCase();
+            if (!matchAg) return false;
+            const normT = normalizeDateStr(t.date);
+            const normTarget = normalizeDateStr(targetVal);
+            return dateMode === 'month' ? normT.startsWith(targetVal.substring(0, 7)) : normT === normTarget;
+          });
+
+          let collectedInPeriod = 0;
+          agTxns.forEach(t => collectedInPeriod += Math.abs(parseFloat(t.amount || 0)));
+
+          if (myCusts.length === 0 && Math.abs(agentCustDue) < 0.01 && collectedInPeriod === 0) return;
+
+          count++;
+          grandCustomerDue += agentCustDue;
+          grandCollected += collectedInPeriod;
+
+          tableRows += `
+            <tr class="border-b text-xs hover:bg-slate-50">
+              <td class="p-2 text-center font-mono text-slate-400 border">${count}</td>
+              <td class="p-2 font-bold text-slate-800 border">${ag.name}</td>
+              <td class="p-2 text-center font-mono border">${myCusts.length}</td>
+              <td class="p-2 text-right font-mono font-bold text-rose-700 border">₹${agentCustDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-bold text-emerald-700 border">₹${collectedInPeriod.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-black text-slate-800 bg-slate-50 border">₹${(agentCustDue - collectedInPeriod).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+            </tr>
+          `;
+        });
+
+        reportDiv.innerHTML = `
+          <div class="border-b pb-3 mb-3 flex justify-between items-start">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">ALL AGENTS COLLECTION & DUE STATEMENT</h2>
+              <p class="text-[11px] text-slate-500 font-semibold">${periodLabel} | Total Agents: <strong>${count}</strong></p>
+            </div>
+            <div class="text-right bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-lg">
+              <span class="text-[10px] text-teal-700 font-bold block uppercase">Total Agent Due:</span>
+              <span class="text-sm font-black text-teal-800 font-mono">₹${grandCustomerDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+            </div>
+          </div>
+
+          <table class="w-full text-left border-collapse border text-xs">
+            <thead class="bg-slate-100 text-[11px] uppercase font-bold text-slate-700 border">
+              <tr>
+                <th class="p-2 text-center w-12 border">#</th>
+                <th class="p-2 border">Agent Name</th>
+                <th class="p-2 text-center border">Customers Count</th>
+                <th class="p-2 text-right border text-rose-800">Total Customer Due (₹)</th>
+                <th class="p-2 text-right border text-emerald-800">Collected in Period (₹)</th>
+                <th class="p-2 text-right border">Net Remaining Due (₹)</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows || '<tr><td colspan="6" class="text-center p-4 text-slate-400">No active agents or dues found.</td></tr>'}</tbody>
+            <tfoot class="bg-slate-100 font-bold border">
+              <tr>
+                <td colspan="3" class="p-2 text-right uppercase border">Total:</td>
+                <td class="p-2 text-right font-mono text-rose-700 border">₹${grandCustomerDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-emerald-700 border">₹${grandCollected.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono font-black border">₹${(grandCustomerDue - grandCollected).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else if (cat === 'single_vendor') {
+        const vName = document.getElementById("partySearchInput").value.trim();
+        const v = masterVendors.find(x => isPartyMatch(x.name, vName));
+        if (!v) return alert("ദയവായി ശരിയായ വെണ്ടറുടെ പേര് നൽകുക!");
+
+        const opening = parseFloat(v.opening_balance) || 0;
+        const { inPeriod } = getPartyTxns(v.name, dateMode, targetVal);
+
+        let running = opening;
+        let rows = `
+          <tr class="border-b bg-slate-50 font-bold text-xs">
+            <td class="p-2 border">-</td>
+            <td class="p-2 border">Opening Balance</td>
+            <td class="p-2 text-right font-mono border">₹${opening.toFixed(2)}</td>
+            <td class="p-2 text-right font-mono border">₹0.00</td>
+            <td class="p-2 text-right font-mono text-blue-900 border">₹${running.toFixed(2)}</td>
+          </tr>
+        `;
+
+        inPeriod.forEach(t => {
+          const purchase = Math.abs(parseFloat(t.credit_amount || 0));
+          const paid = Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0));
+          running += (purchase - paid);
+
+          rows += `
+            <tr class="border-b text-xs hover:bg-slate-50">
+              <td class="p-2 font-mono text-slate-500 border">${t.date || '-'}</td>
+              <td class="p-2 border">${t.type || 'Transaction'}</td>
+              <td class="p-2 text-right font-mono text-emerald-700 border">₹${purchase.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono text-blue-700 border">₹${paid.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono font-bold border">₹${running.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+
+        reportDiv.innerHTML = `
+          <div class="border-b pb-4 mb-4 flex justify-between items-start">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">VENDOR DETAILED LEDGER</h2>
+              <p class="text-[11px] text-slate-500 font-semibold">${periodLabel}</p>
+            </div>
+            <div class="text-right">
+              <h4 class="font-bold text-slate-800 text-sm">${v.name}</h4>
+              <p class="text-xs text-slate-500">${v.type || 'Vendor'}</p>
+            </div>
+          </div>
+
+          <table class="w-full text-left border-collapse border text-xs">
+            <thead class="bg-slate-100 text-[11px] uppercase border text-slate-700 font-bold">
+              <tr>
+                <th class="p-2 border">Date</th>
+                <th class="p-2 border">Particulars</th>
+                <th class="p-2 text-right border">Purchase (Cr)</th>
+                <th class="p-2 text-right border">Paid (Dr)</th>
+                <th class="p-2 text-right border">Balance (₹)</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+
+          <div class="flex justify-end mt-4">
+            <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl text-right">
+              <span class="text-xs text-blue-700 font-bold">Net Closing Balance:</span>
+              <div class="text-lg font-black text-blue-900 font-mono">₹${running.toFixed(2)}</div>
+            </div>
+          </div>
+        `;
+      } else if (cat === 'single_customer') {
+        const cName = document.getElementById("partySearchInput").value.trim();
+        const c = masterCustomers.find(x => isPartyMatch(x.name, cName));
+        if (!c) return alert("ദയവായി ശരിയായ കസ്റ്റമറുടെ പേര് നൽകുക!");
+
+        const opening = parseFloat(c.opening_balance) || 0;
+        const { inPeriod } = getPartyTxns(c.name, dateMode, targetVal);
+
+        let running = opening;
+        let rows = `
+          <tr class="border-b bg-slate-50 font-bold text-xs">
+            <td class="p-2 border">-</td>
+            <td class="p-2 border">Opening Balance</td>
+            <td class="p-2 text-right font-mono border">₹${opening.toFixed(2)}</td>
+            <td class="p-2 text-right font-mono border">₹0.00</td>
+            <td class="p-2 text-right font-mono text-emerald-800 border">₹${running.toFixed(2)}</td>
+          </tr>
+        `;
+
+        inPeriod.forEach(t => {
+          const debit = Math.abs(parseFloat(t.credit_amount || 0));
+          const credit = Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0));
+          running += (debit - credit);
+
+          rows += `
+            <tr class="border-b text-xs hover:bg-slate-50">
+              <td class="p-2 font-mono text-slate-500 border">${t.date || '-'}</td>
+              <td class="p-2 border">${t.type || 'Bill / Payment'}</td>
+              <td class="p-2 text-right font-mono text-rose-600 border">₹${debit.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono text-emerald-600 border">₹${credit.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono font-bold border">₹${running.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+
+        reportDiv.innerHTML = `
+          <div class="border-b pb-4 mb-4 flex justify-between items-start">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">CUSTOMER DETAILED LEDGER</h2>
+              <p class="text-[11px] text-slate-500 font-semibold">${periodLabel}</p>
+            </div>
+            <div class="text-right">
+              <h4 class="font-bold text-slate-800 text-sm">${c.name}</h4>
+              <p class="text-xs text-slate-500">${c.type || 'Customer'}</p>
+            </div>
+          </div>
+
+          <table class="w-full text-left border-collapse border text-xs">
+            <thead class="bg-slate-100 text-[11px] uppercase border text-slate-700 font-bold">
+              <tr>
+                <th class="p-2 border">Date</th>
+                <th class="p-2 border">Particulars</th>
+                <th class="p-2 text-right border">Debit (Due)</th>
+                <th class="p-2 text-right border">Credit (Paid)</th>
+                <th class="p-2 text-right border">Balance (₹)</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+
+          <div class="flex justify-end mt-4">
+            <div class="bg-rose-50 border border-rose-200 p-3 rounded-xl text-right">
+              <span class="text-xs text-rose-700 font-bold">Net Closing Due:</span>
+              <div class="text-lg font-black text-rose-900 font-mono">₹${running.toFixed(2)}</div>
+            </div>
+          </div>
+        `;
+      } else if (cat === 'single_employee') {
+        const eName = document.getElementById("partySearchInput").value.trim();
+        const e = masterEmployees.find(x => isPartyMatch(x.name, eName));
+        if (!e) return alert("ദയവായി ശരിയായ ജീവനക്കാരന്റെ പേര് നൽകുക!");
+
+        const sal = parseFloat(e.monthly_salary) || 0;
+        const openingPayable = parseFloat(e.opening_advance || 0);
+        const { inPeriod, cumulative } = getPartyTxns(e.name, dateMode, targetVal);
+
+        let advanceInPeriod = 0;
+        inPeriod.forEach(t => {
+          advanceInPeriod += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0)) + Math.abs(parseFloat(t.credit_amount || 0));
+        });
+
+        let advanceCumulative = 0;
+        cumulative.forEach(t => {
+          advanceCumulative += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0)) + Math.abs(parseFloat(t.credit_amount || 0));
+        });
+
+        const completedMonths = getCompletedServiceMonths(e.joining_date, evalDateStr);
+        const earnedSalary = completedMonths * sal;
+        const netPayable = openingPayable + earnedSalary - advanceCumulative;
+        const nextDueDate = getNextSalaryDueDate(e.joining_date, completedMonths);
+
+        let runningLedgerBal = openingPayable;
+        let ledgerRows = `
+          <tr class="border-b bg-slate-50 font-bold text-xs">
+            <td class="p-2 border">-</td>
+            <td class="p-2 border">Opening Balance Due to Staff</td>
+            <td class="p-2 text-right font-mono border text-blue-800">₹${openingPayable.toFixed(2)}</td>
+            <td class="p-2 text-right font-mono border">₹0.00</td>
+            <td class="p-2 text-right font-mono font-bold border text-blue-900">₹${runningLedgerBal.toFixed(2)}</td>
+          </tr>
+        `;
+
+        if (completedMonths > 0) {
+          runningLedgerBal += earnedSalary;
+          ledgerRows += `
+            <tr class="border-b bg-emerald-50/40 font-bold text-xs">
+              <td class="p-2 border font-mono">${e.joining_date || '-'}</td>
+              <td class="p-2 border">Earned Salary (${completedMonths} Month(s) Completed)</td>
+              <td class="p-2 text-right font-mono border text-emerald-800">+₹${earnedSalary.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono border">₹0.00</td>
+              <td class="p-2 text-right font-mono font-bold border text-emerald-900">₹${runningLedgerBal.toFixed(2)}</td>
+            </tr>
+          `;
+        }
+
+        inPeriod.forEach(t => {
+          const advAmt = Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0)) + Math.abs(parseFloat(t.credit_amount || 0));
+          runningLedgerBal -= advAmt;
+          ledgerRows += `
+            <tr class="border-b text-xs hover:bg-slate-50">
+              <td class="p-2 font-mono text-slate-500 border">${t.date || '-'}</td>
+              <td class="p-2 border">${t.type || 'Advance / Payment Taken'}</td>
+              <td class="p-2 text-right font-mono border">₹0.00</td>
+              <td class="p-2 text-right font-mono text-purple-700 font-bold border">₹${advAmt.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono font-bold border ${runningLedgerBal >= 0 ? 'text-emerald-800' : 'text-rose-800'}">₹${runningLedgerBal.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+
+        reportDiv.innerHTML = `
+          <div class="border-b pb-4 mb-4 flex justify-between items-start">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">EMPLOYEE DETAILED STATEMENT</h2>
+              <p class="text-[11px] text-slate-500 font-semibold">${periodLabel}</p>
+            </div>
+            <div class="text-right">
+              <h4 class="font-bold text-slate-800 text-sm">${e.name}</h4>
+              <p class="text-xs text-slate-500">Joined: <strong>${e.joining_date || '-'}</strong></p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-4">
+            <div class="bg-slate-50 p-3 rounded-xl border text-center">
+              <span class="text-xs text-slate-500 font-semibold">Monthly Salary Rate</span>
+              <div class="text-base font-extrabold text-slate-800 font-mono mt-1">₹${sal.toFixed(2)}</div>
+            </div>
+            <div class="bg-blue-50 p-3 rounded-xl border border-blue-200 text-center">
+              <span class="text-xs text-blue-700 font-semibold">Opening Due to Staff</span>
+              <div class="text-base font-extrabold text-blue-900 font-mono mt-1">₹${openingPayable.toFixed(2)}</div>
+              <span class="text-[10px] text-blue-600 font-bold">(Kodukkan Ullathu)</span>
+            </div>
+            <div class="bg-purple-50 p-3 rounded-xl border border-purple-200 text-center">
+              <span class="text-xs text-purple-700 font-semibold">Advance in Period</span>
+              <div class="text-base font-extrabold text-purple-900 font-mono mt-1">₹${advanceInPeriod.toFixed(2)}</div>
+              <span class="text-[10px] text-purple-600 font-bold font-mono">Total Taken: ₹${advanceCumulative.toFixed(2)}</span>
+            </div>
+            <div class="${netPayable >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'} p-3 rounded-xl border text-center">
+              <span class="text-xs ${netPayable >= 0 ? 'text-emerald-700' : 'text-rose-700'} font-semibold">${netPayable >= 0 ? 'Net Balance Payable to Staff' : 'Advance Due from Staff'}</span>
+              <div class="text-base font-extrabold ${netPayable >= 0 ? 'text-emerald-900' : 'text-rose-900'} font-mono mt-1">₹${Math.abs(netPayable).toFixed(2)}</div>
+              <span class="text-[10px] ${netPayable >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-bold font-mono">${netPayable >= 0 ? 'Kodukkan Ullathu' : 'Thirike Tharan Ullathu'}</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border rounded-lg p-2.5 text-xs flex justify-between items-center text-slate-600 mb-3">
+            <span><i data-lucide="info" class="w-3.5 h-3.5 inline mr-1 text-blue-600"></i> Completed: <b>${completedMonths} Month(s)</b> (Earned: ₹${earnedSalary.toFixed(2)}) | Next 1-Month Salary Due Date:</span>
+            <span class="font-bold font-mono text-slate-800">${nextDueDate}</span>
+          </div>
+
+          <h4 class="font-bold text-xs text-slate-700 mb-2">Advance & Salary Transaction Ledger</h4>
+          <table class="w-full text-left border-collapse border text-xs">
+            <thead class="bg-slate-100 text-[11px] uppercase border text-slate-700 font-bold">
+              <tr>
+                <th class="p-2 border">Date</th>
+                <th class="p-2 border">Particulars</th>
+                <th class="p-2 text-right border text-emerald-800">Earned / Due (Cr)</th>
+                <th class="p-2 text-right border text-purple-800">Advance Paid (Dr)</th>
+                <th class="p-2 text-right border">Net Balance (₹)</th>
+              </tr>
+            </thead>
+            <tbody>${ledgerRows}</tbody>
+          </table>
+        `;
+      } else if (cat === 'single_agent') {
+        const agName = document.getElementById("partySearchInput").value.trim();
+        const ag = masterAgents.find(x => isPartyMatch(x.name, agName));
+        if (!ag) return alert("ദയവായി ശരിയായ ഏജന്റിന്റെ പേര് നൽകുക!");
+
+        const myCusts = masterCustomers.filter(c => 
+          String(c.agent_id || '').trim().toLowerCase() === String(ag.id).trim().toLowerCase() ||
+          String(c.agent_id || '').trim().toLowerCase() === String(ag.name).trim().toLowerCase()
+        );
+
+        const agTxns = allAgentTransactions.filter(t => {
+          const matchAg = String(t.agent_id || '').trim().toLowerCase() === String(ag.id).trim().toLowerCase() ||
+                          String(t.agent_id || '').trim().toLowerCase() === String(ag.name).trim().toLowerCase();
+          if (!matchAg) return false;
+          const normT = normalizeDateStr(t.date);
+          const normTarget = normalizeDateStr(targetVal);
+          return dateMode === 'month' ? normT.startsWith(targetVal.substring(0, 7)) : normT === normTarget;
+        });
+
+        let custTotalDue = 0;
+        let custRows = myCusts.map((c, i) => {
+          const opening = parseFloat(c.opening_balance) || 0;
+          const { cumulative } = getPartyTxns(c.name, dateMode, targetVal);
+          let cBilled = 0, cPaid = 0;
+          cumulative.forEach(t => {
+            cBilled += Math.abs(parseFloat(t.credit_amount || 0));
+            cPaid += Math.abs(parseFloat(t.cash_amount || 0)) + Math.abs(parseFloat(t.bank_amount || 0));
+          });
+          const due = (opening + cBilled - cPaid);
+          custTotalDue += due;
+
+          return `
+            <tr class="border-b text-xs hover:bg-slate-50">
+              <td class="p-2 font-mono text-slate-400 border">${i + 1}</td>
+              <td class="p-2 font-bold text-slate-800 border">${c.name}</td>
+              <td class="p-2 border">${c.type || 'credit'}</td>
+              <td class="p-2 text-right font-mono font-bold text-rose-700 border">₹${due.toFixed(2)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        let totalColl = 0;
+        let txnRows = agTxns.map((t, idx) => {
+          totalColl += Math.abs(parseFloat(t.amount || 0));
+          return `
+            <tr class="border-b text-xs hover:bg-slate-50">
+              <td class="p-2 font-mono text-slate-400 border">${idx + 1}</td>
+              <td class="p-2 font-mono border">${t.date || '-'}</td>
+              <td class="p-2 border">${t.note || t.type || 'Collection'}</td>
+              <td class="p-2 text-right font-mono font-bold text-emerald-700 border">₹${Math.abs(parseFloat(t.amount || 0)).toFixed(2)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        reportDiv.innerHTML = `
+          <div class="border-b pb-4 mb-4 flex justify-between items-start">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">AGENT DETAILED STATEMENT</h2>
+              <p class="text-[11px] text-slate-500 font-semibold">${periodLabel}</p>
+            </div>
+            <div class="text-right">
+              <h4 class="font-bold text-slate-800 text-sm">${ag.name}</h4>
+              <p class="text-xs text-slate-500">Total Customers: ${myCusts.length}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="border rounded-xl p-3 bg-rose-50/50">
+              <span class="text-xs font-bold text-rose-800 block">Assigned Customers Total Due:</span>
+              <span class="text-lg font-black font-mono text-rose-700">₹${custTotalDue.toFixed(2)}</span>
+            </div>
+            <div class="border rounded-xl p-3 bg-emerald-50/50">
+              <span class="text-xs font-bold text-emerald-800 block">Total Collected in Period:</span>
+              <span class="text-lg font-black font-mono text-emerald-700">₹${totalColl.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <h4 class="font-bold text-xs text-slate-700 mb-2">1. Assigned Customers Outstanding</h4>
+          <table class="w-full text-left border-collapse border text-xs mb-4">
+            <thead class="bg-slate-100 text-[11px] uppercase border text-slate-700 font-bold">
+              <tr><th class="p-2 border w-12">#</th><th class="p-2 border">Customer</th><th class="p-2 border">Type</th><th class="p-2 text-right border">Due Balance (₹)</th></tr>
+            </thead>
+            <tbody>${custRows || '<tr><td colspan="4" class="text-center p-3 text-slate-400">No customers linked.</td></tr>'}</tbody>
+          </table>
+
+          <h4 class="font-bold text-xs text-slate-700 mb-2">2. Agent Collection Receipts</h4>
+          <table class="w-full text-left border-collapse border text-xs">
+            <thead class="bg-slate-100 text-[11px] uppercase border text-slate-700 font-bold">
+              <tr><th class="p-2 border w-12">#</th><th class="p-2 border">Date</th><th class="p-2 border">Particulars / Note</th><th class="p-2 text-right border">Amount (₹)</th></tr>
+            </thead>
+            <tbody>${txnRows || '<tr><td colspan="4" class="text-center p-3 text-slate-400">No collection entries found.</td></tr>'}</tbody>
+          </table>
+        `;
+      }
+
+      lucide.createIcons();
+    }
+
+    function downloadSampleTemplate() {
+      const table = document.getElementById("excelTargetTable").value;
+      let sampleData = [];
+
+      if (table === 'vendors') {
+        sampleData = [{ name: "Royal Foods", type: "credit", opening_balance: 12000 }];
+      } else if (table === 'customers') {
+        sampleData = [{ name: "Shafeeq", type: "credit", opening_balance: 1500, agent_id: "" }];
+      } else if (table === 'employees') {
+        sampleData = [{ name: "Anwar Sadath", joining_date: "2026-01-01", monthly_salary: 18000, opening_advance: 0, status: "active" }];
+      } else if (table === 'expenses_master') {
+        sampleData = [{ name: "Shop Rent", opening_balance: 25000 }];
+      }
+
+      const ws = XLSX.utils.json_to_sheet(sampleData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Sample");
+      XLSX.writeFile(wb, `${table}_template.xlsx`);
+    }
+
+    function processExcelUpload() {
+      if (!supabaseClient) return alert("സൂപ്പർബേസ് ക്ലയന്റ് കണക്ട് ചെയ്തിട്ടില്ല!");
+      const fileInput = document.getElementById("excelFileInput");
+      const table = document.getElementById("excelTargetTable").value;
+
+      if (!fileInput.files.length) return alert("ദയവായി ഫയൽ തിരഞ്ഞെടുക്കുക!");
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = async function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.SheetNames[0];
+          const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+
+          if (jsonData.length === 0) return alert("ഫയലിൽ വിവരങ്ങൾ ഒന്നും കാണാനായില്ല!");
+
+          const cleanPayloads = jsonData.map(row => {
+            let rowObj = { ...row };
+            delete rowObj.id;
+            return rowObj;
+          });
+
+          const { error } = await supabaseClient.from(table).insert(cleanPayloads);
+          if (error) {
+            alert("അപ്‌ലോഡ് പരാജയപ്പെട്ടു: " + error.message);
+          } else {
+            alert(`${cleanPayloads.length} റെക്കോർഡുകൾ വിജയകരമായി സൂപ്പബേസിൽ കയറ്റി!`);
+            fileInput.value = "";
+            fetchAllData();
+          }
+        } catch (err) {
+          alert("ഫയൽ വായിക്കുന്നതിൽ പിശക് സംഭവിച്ചു: " + err.message);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function exportAllToExcel() {
+      const wb = XLSX.utils.book_new();
+      const currentShop = window.SHOPS_CONFIG.find(s => s.id === activeShopId);
+      const shopName = currentShop ? currentShop.name : "Shop_Data";
+
+      if (masterVendors.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(masterVendors), "Vendors");
+      if (masterCustomers.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(masterCustomers), "Customers");
+      if (masterEmployees.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(masterEmployees), "Employees");
+      if (masterExpensesList.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(masterExpensesList), "Expenses");
+      if (masterAgents.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(masterAgents), "Agents");
+
+      XLSX.writeFile(wb, `${shopName}_Master_Data_${new Date().toISOString().substring(0,10)}.xlsx`);
+    }
+  </script>
+</body>
+</html>

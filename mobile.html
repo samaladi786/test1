@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title id="mobilePageTitle">Rugama Quick POS</title>
+
+  <!-- PWA MANIFEST & ICONS -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- COMMON CONFIG FILE -->
+  <script src="config.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
+    body { 
+      font-family: 'Manrope', 'Noto Sans Malayalam', sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+    .touch-btn:active { transform: scale(0.97); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col pb-24">
+
+  <!-- 1. LOGIN SCREEN -->
+  <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-[99999] p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-6 shadow-2xl border text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg">
+        <i data-lucide="smartphone" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <h2 class="text-base font-extrabold text-slate-800">മൊബൈൽ ക്വിക്ക് POS</h2>
+        <p class="text-xs text-slate-500 mt-1">ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ നൽകുക</p>
+      </div>
+
+      <form onsubmit="event.preventDefault(); verifyLogin();" class="space-y-4">
+        <input 
+          type="password" 
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="8" 
+          id="loginPasswordInput" 
+          placeholder="••••" 
+          autocomplete="current-password"
+          autofocus
+          class="text-center text-2xl tracking-[0.4em] font-black w-44 py-3 border-2 rounded-2xl mx-auto block outline-none focus:border-emerald-600 bg-slate-50" 
+        />
+        <button 
+          type="submit" 
+          class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-md touch-btn flex items-center justify-center gap-1.5 cursor-pointer">
+          <i data-lucide="log-in" class="w-4 h-4"></i> ലോഗിൻ ചെയ്യുക
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. STICKY TOP HEADER -->
+  <header id="mobileAppHeader" class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-4 py-2.5 transition-all duration-300">
+    <div class="flex items-center justify-between gap-2">
+      
+      <div class="flex items-center gap-2 overflow-hidden">
+        <div id="shopLogoBox" class="w-8 h-8 rounded-lg bg-white/10 p-1 flex items-center justify-center border border-white/20 shrink-0">
+          <img id="shopLogoImg" src="" alt="Logo" class="w-full h-full object-contain hidden" />
+          <i id="shopDefaultIcon" data-lucide="store" class="w-4 h-4 text-emerald-400"></i>
+        </div>
+        <div class="truncate">
+          <!-- ADMIN DROPDOWN OR SHOP TITLE -->
+          <div id="shopSelectorWrapper" class="hidden">
+            <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-slate-700 outline-none">
+            </select>
+          </div>
+          <h1 id="shopStaticTitle" class="text-xs font-black truncate">...</h1>
+          
+          <!-- DATE PICKER BAR (തീയതി തിരഞ്ഞെടുക്കാനുള്ള ബോക്സ്) -->
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <input 
+              type="date" 
+              id="mobileFilterDate" 
+              onchange="onDateChanged(this.value)" 
+              class="bg-slate-800 text-emerald-400 text-[11px] font-black px-2 py-0.5 rounded-md border border-slate-700 outline-none cursor-pointer" 
+            />
+            <button 
+              type="button" 
+              onclick="setTodayDate()" 
+              title="ഇന്നത്തെ തീയതിയിലേക്ക് മാറ്റുക" 
+              class="bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/40 touch-btn cursor-pointer">
+              ഇന്ന്
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 shrink-0">
+        <!-- DESKTOP PORTAL LINK -->
+        <a href="index.html" title="ഡെസ്ക്ടോപ്പ് വ്യൂ" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
+          <i data-lucide="monitor" class="w-4 h-4"></i>
+        </a>
+        <!-- REFRESH BUTTON -->
+        <button onclick="fetchAllData(true)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+        <!-- LOGOUT BUTTON -->
+        <button onclick="logoutApp()" class="p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs touch-btn cursor-pointer">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- QUICK DAILY METRIC BAR -->
+    <div class="grid grid-cols-3 gap-1.5 mt-2 pt-2 border-t border-white/10 text-center">
+      <div class="bg-black/30 rounded-lg p-1 border border-white/5">
+        <span class="text-[9px] text-emerald-400 font-bold block uppercase">സെയിൽസ്</span>
+        <span id="quickSaleTotal" class="text-xs font-black text-white">0</span>
+      </div>
+      <div class="bg-black/30 rounded-lg p-1 border border-white/5">
+        <span class="text-[9px] text-blue-400 font-bold block uppercase">പർച്ചേസ്</span>
+        <span id="quickPurTotal" class="text-xs font-black text-white">0</span>
+      </div>
+      <div class="bg-black/30 rounded-lg p-1 border border-white/5">
+        <span class="text-[9px] text-amber-400 font-bold block uppercase">ചിലവ്</span>
+        <span id="quickExpTotal" class="text-xs font-black text-white">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. MAIN WORKSPACE CONTAINER -->
+  <main class="w-full max-w-md mx-auto px-3.5 pt-3 flex-1">
+
+    <!-- TAB 1: SALE ENTRY -->
+    <div id="view-sale" class="tab-view space-y-3">
+      <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between border-b pb-2">
+          <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-1.5">
+            <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് എൻട്രി (Sales)
+          </h2>
+          <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">ക്വിക്ക് ബില്ലിംഗ്</span>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">കസ്റ്റമർ:</label>
+          <input 
+            list="customerListOptions" 
+            id="saleCustomerInput" 
+            onclick="this.select()"
+            onfocus="this.select()"
+            oninput="onCustomerSelected()"
+            onchange="onCustomerSelected()"
+            value="SHOPE" 
+            placeholder="കസ്റ്റമർ പേര്..." 
+            class="w-full text-sm font-black p-2.5 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+          <datalist id="customerListOptions"></datalist>
+          <span id="custOpeningInfo" class="text-[11px] font-black text-emerald-700 block mt-1 truncate"></span>
+        </div>
+
+        <!-- SALE AMOUNTS -->
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-emerald-50/80 p-2 rounded-2xl border border-emerald-200">
+            <label class="block text-[10px] font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് (Cash)</label>
+            <input type="number" step="any" inputmode="decimal" id="saleCash" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-emerald-500 text-emerald-700" />
+          </div>
+          <div class="bg-blue-50/80 p-2 rounded-2xl border border-blue-200">
+            <label class="block text-[10px] font-black text-blue-900 mb-0.5 text-center">🏦 ബാങ്ക് (Bank)</label>
+            <input type="number" step="any" inputmode="decimal" id="saleBank" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+          </div>
+        </div>
+
+        <div id="saleCreditBox" class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
+          <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">🛒 ബാക്കി കടം (Credit Due)</label>
+          <input type="number" step="any" inputmode="decimal" id="saleCredit" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+        </div>
+
+        <button onclick="saveSaleEntry()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> സെയിൽ സേവ് ചെയ്യുക
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 2: PURCHASE ENTRY -->
+    <div id="view-purchase" class="tab-view hidden space-y-3">
+      <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between border-b pb-2">
+          <h2 class="font-extrabold text-sm text-blue-900 flex items-center gap-1.5">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് എൻട്രി (Purchase)
+          </h2>
+          <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">വെണ്ടർ പെയ്മെന്റ്</span>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">വെണ്ടർ:</label>
+          <input 
+            list="vendorListOptions" 
+            id="purchaseVendorInput" 
+            onclick="this.select()"
+            onfocus="this.select()"
+            oninput="onVendorSelected()"
+            onchange="onVendorSelected()"
+            placeholder="വെണ്ടർ പേര്..." 
+            class="w-full text-sm font-black p-2.5 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <datalist id="vendorListOptions"></datalist>
+          <span id="vendorOpeningInfo" class="text-[11px] font-black text-blue-700 block mt-1 truncate"></span>
+        </div>
+
+        <!-- PURCHASE AMOUNTS -->
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-blue-50/80 p-2 rounded-2xl border border-blue-200">
+            <label class="block text-[10px] font-black text-blue-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
+            <input type="number" step="any" inputmode="decimal" id="purCash" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+          </div>
+          <div class="bg-indigo-50/80 p-2 rounded-2xl border border-indigo-200">
+            <label class="block text-[10px] font-black text-indigo-900 mb-0.5 text-center">🏦 ബാങ്ക് നൽകിയത്</label>
+            <input type="number" step="any" inputmode="decimal" id="purBank" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-700" />
+          </div>
+        </div>
+
+        <div id="purCreditBox" class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
+          <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">🚚 ക്രെഡിറ്റ് പർച്ചേസ് ബില്ല്</label>
+          <input type="number" step="any" inputmode="decimal" id="purCredit" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+        </div>
+
+        <button onclick="savePurchaseEntry()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-blue-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> പർച്ചേസ് സേവ് ചെയ്യുക
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 3: EXPENSE & SALARY ENTRY -->
+    <div id="view-expense" class="tab-view hidden space-y-3">
+      <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between border-b pb-2">
+          <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-1.5">
+            <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവ് & സാലറി (Outflow)
+          </h2>
+          <span id="currentExpTypeBadge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">ചിലവ്</span>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">ഇനം / ജീവനക്കാരൻ:</label>
+          <input 
+            list="unifiedPartyOptions" 
+            id="unifiedPartyInput" 
+            onclick="this.select()"
+            onfocus="this.select()"
+            oninput="onUnifiedPartySelected()"
+            onchange="onUnifiedPartySelected()"
+            placeholder="പേര് തിരഞ്ഞെടുക്കുക..." 
+            class="w-full text-sm font-black p-2.5 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-amber-500"
+          />
+          <datalist id="unifiedPartyOptions"></datalist>
+          <span id="unifiedPartyInfo" class="text-[11px] font-black text-amber-700 block mt-1 truncate"></span>
+        </div>
+
+        <!-- AMOUNTS -->
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
+            <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
+            <input type="number" step="any" inputmode="decimal" id="expSalCashAmt" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+          </div>
+          <div class="bg-purple-50/80 p-2 rounded-2xl border border-purple-200">
+            <label class="block text-[10px] font-black text-purple-900 mb-0.5 text-center">🏦 ബാങ്ക് നൽകിയത്</label>
+            <input type="number" step="any" inputmode="decimal" id="expSalBankAmt" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-purple-500 text-purple-700" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-600 mb-0.5">വിവരണം / കുറിപ്പ് (Note):</label>
+          <input type="text" id="expSalNote" placeholder="കുറിപ്പ്..." class="w-full text-xs p-2.5 rounded-xl border bg-slate-50 outline-none" />
+        </div>
+
+        <button id="btnSaveUnified" onclick="saveUnifiedExpSalEntry()" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> ചിലവ് സേവ് ചെയ്യുക
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 4: RECENT ENTRIES OF SELECTED DATE -->
+    <div id="view-recent" class="tab-view hidden space-y-3">
+      <div class="bg-white p-4 rounded-3xl border shadow-sm space-y-2.5">
+        <div class="flex items-center justify-between border-b pb-2">
+          <h2 class="font-extrabold text-sm text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="history" class="w-4 h-4 text-slate-600"></i> ഇടപാടുകൾ (Selected Date)
+          </h2>
+          <span id="recentCountBadge" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">0 എൻട്രികൾ</span>
+        </div>
+        <div id="todayRecentList" class="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto space-y-1 text-xs">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 4. FIXED THUMB-FRIENDLY BOTTOM NAVIGATION BAR -->
+  <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 z-40 shadow-lg flex items-center justify-around">
+    
+    <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-[11px] touch-btn cursor-pointer">
+      <div class="p-1.5 rounded-xl bg-emerald-50">
+        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+      </div>
+      <span>സെയിൽ</span>
+    </button>
+
+    <button onclick="switchMobileTab('purchase')" id="mTab-purchase" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
+      <div class="p-1.5 rounded-xl bg-slate-50">
+        <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+      </div>
+      <span>പർച്ചേസ്</span>
+    </button>
+
+    <button onclick="switchMobileTab('expense')" id="mTab-expense" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
+      <div class="p-1.5 rounded-xl bg-slate-50">
+        <i data-lucide="receipt" class="w-5 h-5"></i>
+      </div>
+      <span>ചിലവ്</span>
+    </button>
+
+    <button onclick="switchMobileTab('recent')" id="mTab-recent" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
+      <div class="p-1.5 rounded-xl bg-slate-50">
+        <i data-lucide="history" class="w-5 h-5"></i>
+      </div>
+      <span>ലിസ്റ്റ്</span>
+    </button>
+
+  </nav>
+
+  <!-- PIN VERIFY MODAL FOR DELETE -->
+  <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
+      <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
+      <p class="text-xs text-slate-500">ഡിലീറ്റ് ചെയ്യാൻ ലോഗിൻ പിൻ നൽകുക</p>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" id="pinInput" placeholder="••••" class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-rose-500" />
+      <div class="flex gap-2 pt-2">
+        <button onclick="closePinModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-xs font-semibold cursor-pointer">റദ്ദാക്കുക</button>
+        <button onclick="verifyPinAndExecute()" class="flex-1 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">ഡിലീറ്റ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    let SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : [];
+    let currentShopId = null;
+    let currentShop = null;
+    let supabaseClient = null;
+
+    let customersList = [];
+    let vendorsList = [];
+    let employeesList = [];
+    let expensesMasterList = [];
+    let transactionsList = [];
+
+    let pendingDeleteId = null;
+
+    // സൗദി തീയതി (രാവിലെ 6:00 AM കട്ട്-ഓഫ്)
+    function getSaudiToday() {
+      if (window.getSaudiBusinessDate && typeof window.getSaudiBusinessDate === 'function') {
+        return window.getSaudiBusinessDate();
+      }
+      return new Date().toISOString().split('T')[0];
+    }
+
+    // നിലവിൽ തിരഞ്ഞെടുത്ത തീയതി തിരികെ നൽകുന്നു
+    function getSelectedDate() {
+      const dt = document.getElementById("mobileFilterDate");
+      return (dt && dt.value) ? dt.value : getSaudiToday();
+    }
+
+    // "ഇന്ന്" ബട്ടൺ ക്ലിക്ക് ചെയ്യുമ്പോൾ
+    function setTodayDate() {
+      const today = getSaudiToday();
+      const dt = document.getElementById("mobileFilterDate");
+      if (dt) dt.value = today;
+      renderQuickTotalsAndRecent();
+    }
+
+    // തീയതി കലണ്ടറിൽ നിന്ന് മാറുമ്പോൾ
+    function onDateChanged(val) {
+      renderQuickTotalsAndRecent();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const isLogged = sessionStorage.getItem("RUGAMA_LOGGED_IN") === "true";
+      const userRole = sessionStorage.getItem("RUGAMA_USER_ROLE");
+
+      if (isLogged) {
+        document.getElementById("loginScreen").classList.add("hidden");
+        applyRolePermissions(userRole);
+        initMultiShopSystem();
+      } else {
+        document.getElementById("loginScreen").classList.remove("hidden");
+        setTimeout(() => {
+          const inp = document.getElementById("loginPasswordInput");
+          if (inp) inp.focus();
+        }, 300);
+      }
+
+      // ഡിഫോൾട്ടായി ഇന്നത്തെ തീയതി സെറ്റ് ചെയ്യുന്നു
+      const dtInput = document.getElementById("mobileFilterDate");
+      if (dtInput) dtInput.value = getSaudiToday();
+
+      lucide.createIcons();
+    });
+
+    // 1. ലോഗിൻ പരിശോധന
+    function verifyLogin() {
+      const input = document.getElementById("loginPasswordInput");
+      if (!input) return;
+      const enteredPin = input.value.trim();
+
+      if (!enteredPin) return alert("പിൻ നൽകുക!");
+
+      // മാസ്റ്റർ പിൻ പരിശോധിക്കുന്നു
+      if (window.MASTER_PIN && enteredPin === String(window.MASTER_PIN)) {
+        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
+        sessionStorage.setItem("RUGAMA_USER_ROLE", "admin");
+        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+
+        document.getElementById("loginScreen").classList.add("hidden");
+        applyRolePermissions("admin");
+        initMultiShopSystem();
+        return;
+      }
+
+      // ഷോപ്പ് പിൻ പരിശോധിക്കുന്നു
+      const matched = (SHOPS || []).find(s => String(s.pin) === enteredPin);
+      if (matched) {
+        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
+        sessionStorage.setItem("RUGAMA_USER_ROLE", "shop");
+        sessionStorage.setItem("RUGAMA_ACTIVE_SHOP_ID", matched.id);
+        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+
+        document.getElementById("loginScreen").classList.add("hidden");
+        applyRolePermissions("shop");
+        initMultiShopSystem(matched.id);
+        return;
+      }
+
+      alert("പാസ്‌വേഡ് തെറ്റാണ്!");
+      input.value = "";
+      input.focus();
+    }
+
+    function applyRolePermissions(role) {
+      const switcher = document.getElementById("shopSelectorWrapper");
+      const staticTitle = document.getElementById("shopStaticTitle");
+      if (role === 'admin') {
+        if (switcher) switcher.classList.remove("hidden");
+        if (staticTitle) staticTitle.classList.add("hidden");
+      } else {
+        if (switcher) switcher.classList.add("hidden");
+        if (staticTitle) staticTitle.classList.remove("hidden");
+      }
+    }
+
+    function logoutApp() {
+      sessionStorage.removeItem("RUGAMA_LOGGED_IN");
+      sessionStorage.removeItem("RUGAMA_USER_ROLE");
+      sessionStorage.removeItem("RUGAMA_ACTIVE_SHOP_ID");
+      sessionStorage.removeItem("RUGAMA_ACTIVE_PIN");
+
+      document.getElementById("loginScreen").classList.remove("hidden");
+      const inp = document.getElementById("loginPasswordInput");
+      if (inp) {
+        inp.value = "";
+        setTimeout(() => inp.focus(), 200);
+      }
+    }
+
+    // 2. മൾട്ടി-ഷോപ്പ് കണക്റ്റിവിറ്റി
+    function initMultiShopSystem(forceShopId = null) {
+      const sel = document.getElementById("shopSelector");
+      if (sel) sel.innerHTML = "";
+
+      if (!SHOPS || SHOPS.length === 0) return alert("config.js ഫയലിൽ വിവരങ്ങൾ ഇല്ല!");
+
+      SHOPS.forEach(shop => {
+        const opt = document.createElement("option");
+        opt.value = shop.id;
+        opt.textContent = shop.name;
+        if (sel) sel.appendChild(opt);
+      });
+
+      const role = sessionStorage.getItem("RUGAMA_USER_ROLE");
+      if (role === 'shop') {
+        currentShopId = forceShopId || sessionStorage.getItem("RUGAMA_ACTIVE_SHOP_ID") || SHOPS[0].id;
+      } else {
+        const savedShopId = localStorage.getItem("RUGAMA_SELECTED_SHOP_ID");
+        const matched = SHOPS.find(s => s.id === savedShopId);
+        currentShopId = matched ? matched.id : SHOPS[0].id;
+      }
+
+      if (sel) sel.value = currentShopId;
+      connectActiveShop();
+    }
+
+    function connectActiveShop() {
+      currentShop = SHOPS.find(s => s.id === currentShopId) || SHOPS[0];
+      if (!currentShop) return;
+
+      currentShopId = currentShop.id;
+      localStorage.setItem("RUGAMA_SELECTED_SHOP_ID", currentShopId);
+
+      document.getElementById("shopStaticTitle").innerText = currentShop.name;
+      const header = document.getElementById("mobileAppHeader");
+      if (header) {
+        header.className = `bg-gradient-to-r ${currentShop.themeGradient || 'from-slate-900 via-slate-800 to-slate-900'} text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-4 py-2.5 transition-all duration-300`;
+      }
+
+      const logoImg = document.getElementById("shopLogoImg");
+      const defIcon = document.getElementById("shopDefaultIcon");
+      if (currentShop.logo && logoImg) {
+        logoImg.src = currentShop.logo;
+        logoImg.classList.remove("hidden");
+        if (defIcon) defIcon.classList.add("hidden");
+      } else if (defIcon) {
+        if (logoImg) logoImg.classList.add("hidden");
+        defIcon.classList.remove("hidden");
+        defIcon.className = `w-4 h-4 ${currentShop.accentColor || 'text-emerald-400'}`;
+      }
+
+      if (window.supabase && currentShop.url && currentShop.key) {
+        supabaseClient = window.supabase.createClient(currentShop.url, currentShop.key);
+      }
+
+      fetchAllData();
+    }
+
+    function onShopChanged(newId) {
+      currentShopId = newId;
+      connectActiveShop();
+    }
+
+    // 3. ടാബ് മാറ്റൽ
+    function switchMobileTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+      const tabs = ['sale', 'purchase', 'expense', 'recent'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`mTab-${t}`);
+        const iconWrap = btn.querySelector('div');
+        if (t === tabId) {
+          btn.className = `flex flex-col items-center gap-1 font-extrabold text-[11px] touch-btn cursor-pointer ${t === 'sale' ? 'text-emerald-600' : t === 'purchase' ? 'text-blue-600' : t === 'expense' ? 'text-amber-600' : 'text-slate-800'}`;
+          iconWrap.className = `p-1.5 rounded-xl ${t === 'sale' ? 'bg-emerald-100' : t === 'purchase' ? 'bg-blue-100' : t === 'expense' ? 'bg-amber-100' : 'bg-slate-200'}`;
+        } else {
+          btn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer";
+          iconWrap.className = "p-1.5 rounded-xl bg-slate-50";
+        }
+      });
+      lucide.createIcons();
+    }
+
+    // 4. ഡാറ്റ ഫെച്ച് ചെയ്യൽ
+    async function fetchAllData(manual = false) {
+      if (!supabaseClient) return;
+      try {
+        const [cRes, vRes, eRes, expRes, tRes] = await Promise.all([
+          supabaseClient.from('customers').select('*').order('name'),
+          supabaseClient.from('vendors').select('*').order('name'),
+          supabaseClient.from('employees').select('*').order('name'),
+          supabaseClient.from('expenses_master').select('*').order('name'),
+          supabaseClient.from('transactions').select('*').order('date', { ascending: false }).limit(500)
+        ]);
+
+        customersList = cRes.data || [];
+        vendorsList = vRes.data || [];
+        employeesList = eRes.data || [];
+        expensesMasterList = expRes.data || [];
+        transactionsList = tRes.data || [];
+
+        populateDropdowns();
+        renderQuickTotalsAndRecent();
+        if (manual) alert("ഡാറ്റ റിഫ്രഷ് ചെയ്തു!");
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    }
+
+    function populateDropdowns() {
+      const cDL = document.getElementById("customerListOptions");
+      if (cDL) {
+        cDL.innerHTML = "";
+        customersList.forEach(c => cDL.innerHTML += `<option value="${c.name}">`);
+      }
+      const vDL = document.getElementById("vendorListOptions");
+      if (vDL) {
+        vDL.innerHTML = "";
+        vendorsList.forEach(v => vDL.innerHTML += `<option value="${v.name}">`);
+      }
+      const uDL = document.getElementById("unifiedPartyOptions");
+      if (uDL) {
+        uDL.innerHTML = "";
+        expensesMasterList.forEach(e => uDL.innerHTML += `<option value="${e.name}">`);
+        employeesList.forEach(em => uDL.innerHTML += `<option value="${em.name}">`);
+      }
+    }
+
+    function onCustomerSelected() {
+      const val = document.getElementById("saleCustomerInput").value.trim().toLowerCase();
+      const cust = customersList.find(c => c.name.toLowerCase() === val);
+      const info = document.getElementById("custOpeningInfo");
+      if (cust && (cust.type || '').toLowerCase() === 'credit') {
+        info.innerText = `ക്രെഡിറ്റ് കസ്റ്റമർ (ഓൾഡ് ബാക്കി: ₹${cust.opening_balance || 0})`;
+      } else {
+        info.innerText = "";
+      }
+    }
+
+    function onVendorSelected() {
+      const val = document.getElementById("purchaseVendorInput").value.trim().toLowerCase();
+      const vend = vendorsList.find(v => v.name.toLowerCase() === val);
+      const info = document.getElementById("vendorOpeningInfo");
+      if (vend && (vend.type || '').toLowerCase() === 'credit') {
+        info.innerText = `ക്രെഡിറ്റ് വെണ്ടർ (കൊടുക്കാനുള്ളത്: ₹${vend.opening_balance || 0})`;
+      } else {
+        info.innerText = "";
+      }
+    }
+
+    function onUnifiedPartySelected() {
+      const val = document.getElementById("unifiedPartyInput").value.trim().toLowerCase();
+      const emp = employeesList.find(e => e.name.toLowerCase() === val);
+      const badge = document.getElementById("currentExpTypeBadge");
+      const btn = document.getElementById("btnSaveUnified");
+      const info = document.getElementById("unifiedPartyInfo");
+
+      if (emp) {
+        badge.className = "text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-bold";
+        badge.innerText = "സാലറി";
+        btn.className = "w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-purple-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5";
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> സാലറി സേവ് ചെയ്യുക`;
+        info.innerText = `സ്റ്റാഫ് ശമ്പളം: ₹${emp.monthly_salary || 0}`;
+      } else {
+        badge.className = "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold";
+        badge.innerText = "ചിലവ്";
+        btn.className = "w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5";
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> ചിലവ് സേവ് ചെയ്യുക`;
+        info.innerText = "";
+      }
+      lucide.createIcons();
+    }
+
+    // 5. ഇടപാടുകൾ സേവ് ചെയ്യൽ (തിരഞ്ഞെടുത്ത തീയതിയിലേക്ക് സേവ് ആകുന്നു)
+    async function saveSaleEntry() {
+      const name = document.getElementById("saleCustomerInput").value.trim();
+      if (!name) return alert("കസ്റ്റമർ പേര് നൽകുക!");
+
+      const cash = parseFloat(document.getElementById("saleCash").value) || 0;
+      const bank = parseFloat(document.getElementById("saleBank").value) || 0;
+      const credit = parseFloat(document.getElementById("saleCredit").value) || 0;
+
+      if (cash <= 0 && bank <= 0 && credit <= 0) return alert("തുക നൽകുക!");
+
+      const payload = {
+        date: getSelectedDate(),
+        type: 'sale',
+        party_name: name,
+        cash_amount: cash,
+        bank_amount: bank,
+        credit_amount: credit
+      };
+
+      const { error } = await supabaseClient.from('transactions').insert([payload]);
+      if (error) alert("സേവ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+      else {
+        alert("സെയിൽ വിജയകരമായി സേവ് ചെയ്തു!");
+        document.getElementById("saleCash").value = "";
+        document.getElementById("saleBank").value = "";
+        document.getElementById("saleCredit").value = "";
+        document.getElementById("saleCustomerInput").value = "SHOPE";
+        onCustomerSelected();
+        fetchAllData();
+      }
+    }
+
+    async function savePurchaseEntry() {
+      const name = document.getElementById("purchaseVendorInput").value.trim();
+      if (!name) return alert("വെണ്ടർ പേര് നൽകുക!");
+
+      const cash = parseFloat(document.getElementById("purCash").value) || 0;
+      const bank = parseFloat(document.getElementById("purBank").value) || 0;
+      const credit = parseFloat(document.getElementById("purCredit").value) || 0;
+
+      if (cash <= 0 && bank <= 0 && credit <= 0) return alert("തുക നൽകുക!");
+
+      const payload = {
+        date: getSelectedDate(),
+        type: 'purchase',
+        party_name: name,
+        cash_amount: -cash,
+        bank_amount: -bank,
+        credit_amount: credit
+      };
+
+      const { error } = await supabaseClient.from('transactions').insert([payload]);
+      if (error) alert("സേവ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+      else {
+        alert("പർച്ചേസ് വിജയകരമായി സേവ് ചെയ്തു!");
+        document.getElementById("purCash").value = "";
+        document.getElementById("purBank").value = "";
+        document.getElementById("purCredit").value = "";
+        document.getElementById("purchaseVendorInput").value = "";
+        onVendorSelected();
+        fetchAllData();
+      }
+    }
+
+    async function saveUnifiedExpSalEntry() {
+      const name = document.getElementById("unifiedPartyInput").value.trim();
+      if (!name) return alert("ഇനം അല്ലെങ്കിൽ ജീവനക്കാരന്റെ പേര് നൽകുക!");
+
+      const cash = parseFloat(document.getElementById("expSalCashAmt").value) || 0;
+      const bank = parseFloat(document.getElementById("expSalBankAmt").value) || 0;
+      const note = document.getElementById("expSalNote").value.trim();
+
+      if (cash <= 0 && bank <= 0) return alert("തുക നൽകുക!");
+
+      const emp = employeesList.find(e => e.name.toLowerCase() === name.toLowerCase());
+      let payload = {};
+
+      if (emp) {
+        payload = {
+          date: getSelectedDate(),
+          type: 'salary',
+          party_name: `Staff: ${emp.name} - ${note || 'സാലറി'}`,
+          cash_amount: -cash,
+          bank_amount: -bank,
+          credit_amount: 0
+        };
+      } else {
+        payload = {
+          date: getSelectedDate(),
+          type: 'expense',
+          party_name: `${name} (${note || name})`,
+          cash_amount: -cash,
+          bank_amount: -bank,
+          credit_amount: 0
+        };
+      }
+
+      const { error } = await supabaseClient.from('transactions').insert([payload]);
+      if (error) alert("സേവ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+      else {
+        alert("വിജയകരമായി സേവ് ചെയ്തു!");
+        document.getElementById("expSalCashAmt").value = "";
+        document.getElementById("expSalBankAmt").value = "";
+        document.getElementById("expSalNote").value = "";
+        document.getElementById("unifiedPartyInput").value = "";
+        onUnifiedPartySelected();
+        fetchAllData();
+      }
+    }
+
+    // 6. തിരഞ്ഞെടുത്ത തീയതിയിലെ ടോട്ടലുകളും ലിസ്റ്റും കണക്കാക്കുന്നു
+    function renderQuickTotalsAndRecent() {
+      const selectedDate = getSelectedDate();
+      let saleTotal = 0, purTotal = 0, expTotal = 0;
+      let dateFilteredList = [];
+
+      transactionsList.forEach(t => {
+        const isSelectedDate = String(t.date).startsWith(selectedDate);
+        if (isSelectedDate) {
+          dateFilteredList.push(t);
+          if (t.type === 'sale') {
+            saleTotal += (parseFloat(t.cash_amount) || 0) + (parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+          } else if (t.type === 'purchase') {
+            purTotal += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+          } else if (t.type === 'expense' || t.type === 'salary') {
+            expTotal += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+          }
+        }
+      });
+
+      document.getElementById("quickSaleTotal").innerText = `₹${saleTotal.toLocaleString('en-IN')}`;
+      document.getElementById("quickPurTotal").innerText = `₹${purTotal.toLocaleString('en-IN')}`;
+      document.getElementById("quickExpTotal").innerText = `₹${expTotal.toLocaleString('en-IN')}`;
+      document.getElementById("recentCountBadge").innerText = `${dateFilteredList.length} എൻട്രികൾ`;
+
+      const listContainer = document.getElementById("todayRecentList");
+      if (dateFilteredList.length === 0) {
+        listContainer.innerHTML = `<div class="py-6 text-center text-slate-400">തിരഞ്ഞെടുത്ത തീയതിയിൽ എൻട്രികൾ ഒന്നും ഇല്ല</div>`;
+        return;
+      }
+
+      listContainer.innerHTML = dateFilteredList.map(t => {
+        let amt = 0, colorClass = "text-slate-800", typeBadge = "";
+        if (t.type === 'sale') {
+          amt = (parseFloat(t.cash_amount) || 0) + (parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+          colorClass = "text-emerald-700";
+          typeBadge = `<span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded text-[9px] font-bold">സെയിൽ</span>`;
+        } else if (t.type === 'purchase') {
+          amt = Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+          colorClass = "text-blue-700";
+          typeBadge = `<span class="bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded text-[9px] font-bold">പർച്ചേസ്</span>`;
+        } else {
+          amt = Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+          colorClass = "text-amber-700";
+          typeBadge = `<span class="bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded text-[9px] font-bold">ചിലവ്</span>`;
+        }
+
+        return `
+          <div class="py-2.5 flex items-center justify-between">
+            <div class="space-y-0.5 truncate pr-2">
+              <div class="flex items-center gap-1.5">
+                ${typeBadge}
+                <span class="font-extrabold text-slate-800 truncate">${t.party_name}</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block">${t.date}</span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="font-black ${colorClass}">₹${amt.toLocaleString('en-IN')}</span>
+              <button onclick="requestDelete('${t.id}')" class="text-rose-500 hover:text-rose-700 p-1 cursor-pointer">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    // 7. ഡിലീറ്റ് സുരക്ഷ (PIN Verification)
+    function requestDelete(id) {
+      pendingDeleteId = id;
+      document.getElementById("pinInput").value = "";
+      document.getElementById("pinModal").classList.remove("hidden");
+      document.getElementById("pinInput").focus();
+    }
+
+    function closePinModal() {
+      document.getElementById("pinModal").classList.add("hidden");
+      pendingDeleteId = null;
+    }
+
+    async function verifyPinAndExecute() {
+      const pinVal = document.getElementById("pinInput").value.trim();
+      const sessionPin = sessionStorage.getItem("RUGAMA_ACTIVE_PIN");
+      const masterPin = String(window.MASTER_PIN);
+      const currentShopPin = currentShop ? String(currentShop.pin) : null;
+
+      const isValidPin = (pinVal === sessionPin) || (pinVal === masterPin) || (pinVal === currentShopPin);
+
+      if (isValidPin && pendingDeleteId) {
+        const id = pendingDeleteId;
+        closePinModal();
+        const { error } = await supabaseClient.from('transactions').delete().eq('id', id);
+        if (error) alert("ഡിലീറ്റ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+        else {
+          alert("വിജയകരമായി ഡിലീറ്റ് ചെയ്തു!");
+          fetchAllData();
+        }
+      } else {
+        alert("പിൻ തെറ്റാണ്!");
+        document.getElementById("pinInput").value = "";
+      }
+    }
+  </script>
+</body>
+</html>

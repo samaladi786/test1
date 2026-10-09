@@ -1,0 +1,4015 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title id="pageTitle">Rugama Super Market - Quick POS</title>
+
+  <!-- PWA MANIFEST & ICONS -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#0f172a">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- COMMON CONFIG FILE -->
+  <script src="config.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
+    body { font-family: 'Manrope', 'Noto Sans Malayalam', sans-serif; }
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    /* CONTINUOUS 2-COLUMN FLOW */
+    .report-continuous-flow {
+      column-count: 2;
+      column-gap: 12px;
+    }
+    .report-block {
+      break-inside: auto;
+      margin-bottom: 12px;
+    }
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    /* A4 PRINT STYLES */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 6mm 8mm;
+      }
+      header, main, #offlineSyncBanner, #transferModal, #pinModal, #newPartyModal, #newVendorModal, #newCustomerModal, #stopEmployeeModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        color: #000 !important;
+      }
+      #reportModal {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      #reportModal > div {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+      }
+      .report-continuous-flow {
+        column-count: 2 !important;
+        column-gap: 14px !important;
+      }
+      #reportPrintContainer, #statementPrintContainer {
+        font-size: 13px !important;
+        line-height: 1.35 !important;
+      }
+      #reportPrintContainer table, #statementPrintContainer table {
+        font-size: 11.5px !important;
+        width: 100% !important;
+      }
+      #reportPrintContainer th, #statementPrintContainer th {
+        font-size: 11.5px !important;
+        padding: 5px 4px !important;
+        font-weight: 800 !important;
+      }
+      #reportPrintContainer td, #statementPrintContainer td {
+        font-size: 11px !important;
+        padding: 4px 4px !important;
+      }
+      #reportPrintContainer tfoot td, #statementPrintContainer tfoot td {
+        font-size: 11.5px !important;
+        padding: 5px 4px !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col pb-8">
+
+  <!-- 1. LOGIN SCREEN -->
+  <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-[99999] p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg">
+        <i data-lucide="lock" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <h2 class="text-base font-extrabold text-slate-800">റൂഗാമ POS പോർട്ടൽ</h2>
+        <p class="text-xs text-slate-500 mt-1">തുടരാൻ ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ നൽകുക</p>
+      </div>
+
+      <form onsubmit="event.preventDefault(); verifyLogin();" class="space-y-4">
+        <input 
+          type="password" 
+          maxlength="8" 
+          id="loginPasswordInput" 
+          placeholder="••••" 
+          autocomplete="current-password"
+          autofocus
+          class="text-center text-2xl tracking-[0.4em] font-black w-48 py-3 border-2 rounded-2xl mx-auto block outline-none focus:border-emerald-600 bg-slate-50" 
+        />
+        <button 
+          type="submit" 
+          class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i> ലോഗിൻ ചെയ്യുക
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. TOP HEADER (DYNAMIC THEME & SHOP SWITCHER) -->
+  <header id="mainAppHeader" class="bg-slate-900 text-white sticky top-0 z-40 shadow-md no-print transition-all duration-500 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      
+      <div class="flex items-center space-x-2.5">
+        <div id="shopLogoBox" class="w-9 h-9 rounded-xl bg-white/10 p-1 flex items-center justify-center shadow border border-white/20 overflow-hidden">
+          <img id="shopLogoImg" src="" alt="Logo" class="w-full h-full object-contain hidden" />
+          <i id="shopDefaultIcon" data-lucide="store" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <!-- SHOP SELECTOR (മാസ്റ്റർ പിൻ അടിച്ചു കയറിയാൽ മാത്രം കാണിക്കും) -->
+            <div id="shopSelectorWrapper" class="hidden">
+              <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-black text-sm sm:text-base px-2 py-1 rounded-xl border border-slate-700 outline-none cursor-pointer focus:ring-1 focus:ring-emerald-400">
+              </select>
+            </div>
+            <!-- SHOP TITLE (ഷോപ്പ് സ്റ്റാഫ് ലോഗിൻ ചെയ്യുമ്പോൾ ഇത് കാണിക്കും) -->
+            <h1 id="shopStaticTitle" class="text-sm sm:text-base font-black tracking-tight leading-tight">...</h1>
+          </div>
+          <div class="flex items-center gap-2 mt-0.5">
+            <p id="shopTagline" class="text-[11px] text-slate-300 font-semibold">ഡെസ്ക്ടോപ്പ് ക്വിക്ക് POS</p>
+            <span id="syncStatusBadge" class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">● ഓൺലൈൻ</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- MASTER PORTAL BUTTON (master.html-ലേക്ക് പോകാനുള്ള ലിങ്ക്) -->
+        <a href="master.html" title="മാസ്റ്റർ എൻട്രികളും റിപ്പോർട്ടുകളും" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer transition">
+          <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> മാസ്റ്റർ & റിപ്പോർട്ടുകൾ
+        </a>
+
+        <!-- MOBILE VIEW LINK -->
+        <a href="mobile.html" title="മൊബൈൽ ക്വിക്ക് മോഡ്" class="px-3 py-1.5 bg-teal-700 hover:bg-teal-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow cursor-pointer transition">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> മൊബൈൽ POS
+        </a>
+
+        <button type="button" onclick="openTransferModal()" class="px-3 py-1.5 bg-purple-700 hover:bg-purple-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow cursor-pointer transition">
+          <i data-lucide="repeat" class="w-3.5 h-3.5"></i> ക്യാഷ് / ബാങ്ക് മാറ്റം
+        </button>
+
+        <button type="button" onclick="openReportModal()" class="px-3 py-1.5 bg-violet-700 hover:bg-violet-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow cursor-pointer transition">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i> റിപ്പോർട്ടുകൾ & സ്റ്റേറ്റ്മെന്റ്
+        </button>
+
+        <button type="button" onclick="fetchAllData(true)" title="റിഫ്രഷ്" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-xs cursor-pointer text-white">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+        </button>
+
+        <!-- LOGOUT BUTTON -->
+        <button type="button" onclick="logoutApp()" title="ലോഗ് ഔട്ട്" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow cursor-pointer transition">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i> ലോഗ് ഔട്ട്
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- OFFLINE / SYNC BANNER -->
+  <div id="offlineSyncBanner" class="hidden bg-amber-500 text-slate-900 px-4 py-1.5 text-xs font-bold text-center flex items-center justify-between shadow sticky top-[57px] z-30 no-print">
+    <span>⚠️ <span id="unsyncedCountText">0</span> എൻട്രികൾ ക്ലൗഡിലേക്ക് സിങ്ക് ആകാനുണ്ട്.</span>
+    <button type="button" onclick="syncOfflineQueue(true)" class="bg-slate-900 hover:bg-slate-800 text-white text-[10px] px-2.5 py-1 rounded-lg font-bold cursor-pointer transition">
+      ഇപ്പോൾ സിങ്ക് ചെയ്യുക
+    </button>
+  </div>
+
+  <!-- MAIN WIDE CONTAINER -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-3 flex-1 space-y-3">
+
+    <!-- DATE & QUICK SUMMARY BAR -->
+    <div class="bg-white p-2.5 rounded-2xl border shadow-sm flex flex-wrap items-center justify-between gap-2 no-print">
+      <div class="flex items-center gap-2">
+        <i data-lucide="calendar" class="w-4 h-4 text-slate-600"></i>
+        <span class="text-xs font-bold text-slate-600">ബിസിനസ്സ് തീയതി:</span>
+        <input type="date" id="filterDate" onchange="onBusinessDateChanged()" class="text-xs font-bold p-1.5 rounded-xl border bg-slate-50 outline-none cursor-pointer" />
+        <button onclick="setTodayDate()" class="bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-slate-800 transition cursor-pointer">
+          ഇന്ന് (6 AM സിങ്ക്)
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3 text-xs font-bold">
+        <span class="text-blue-700">പർച്ചേസ്: <span id="topPurSummary">0</span></span>
+        <span class="text-slate-300">|</span>
+        <span class="text-amber-700">ചിലവ്/സാലറി: <span id="topExpSummary">0</span></span>
+        <span class="text-slate-300">|</span>
+        <span class="text-emerald-700">സെയിൽസ്: <span id="topSaleSummary">0</span></span>
+      </div>
+    </div>
+
+    <!-- 3-COLUMN WORKSPACE (PURCHASE | EXPENSE & SALARY | SALE) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+
+      <!-- COLUMN 1: PURCHASE ENTRY -->
+      <div class="bg-white p-3.5 rounded-2xl border-2 border-blue-200 shadow-sm space-y-3 flex flex-col justify-between">
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between border-b pb-1.5">
+            <h2 class="font-bold text-sm text-blue-900 flex items-center gap-1.5">
+              <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> 1. പർച്ചേസ് എൻട്രി (Purchase)
+            </h2>
+            <button type="button" onclick="openNewVendorModal()" class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow flex items-center gap-1 cursor-pointer transition">
+              ➕ ന്യൂ വെണ്ടർ
+            </button>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">വെണ്ടർ തിരഞ്ഞെടുക്കുക / ടൈപ്പ് ചെയ്യുക:</label>
+            <input 
+              list="vendorListOptions" 
+              id="purchaseVendorInput" 
+              onclick="this.select()"
+              onfocus="this.select()"
+              oninput="onVendorSelected()" 
+              onchange="onVendorSelected()" 
+              placeholder="വെണ്ടർ പേര്..." 
+              class="w-full text-sm font-extrabold p-2.5 rounded-xl border-2 border-blue-400 bg-blue-50/40 text-slate-900 outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white shadow-sm transition"
+            />
+            <datalist id="vendorListOptions"></datalist>
+            <span id="vendorOpeningInfo" class="text-[11px] font-black text-blue-700 block mt-1 truncate"></span>
+          </div>
+
+          <div id="purchaseFieldsContainer" class="pt-0.5"></div>
+
+          <button onclick="savePurchaseEntry()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow cursor-pointer">
+            + പർച്ചേസ് സേവ് ചെയ്യുക
+          </button>
+        </div>
+
+        <!-- DASHBOARD PURCHASE SUMMARY CARD -->
+        <div class="mt-3 pt-2.5 border-t">
+          <div onclick="openTodayPurchaseModal()" class="bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 p-3 rounded-2xl border-2 border-blue-300 shadow-sm cursor-pointer transition active:scale-95 flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-black text-blue-900 uppercase block">ഇന്നത്തെ പർച്ചേസ് ഇടപാടുകൾ</span>
+              <div class="flex items-baseline gap-1 mt-0.5">
+                <span class="text-xs font-bold text-blue-700">Total:</span>
+                <span id="todayPurCardTotal" class="text-lg font-black text-blue-900">₹ 0</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-[11px] font-black text-blue-700 bg-white px-2.5 py-1.5 rounded-xl border border-blue-200 shadow-sm">
+              <span>വിശദാംശങ്ങൾ</span>
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 2: EXPENSE & SALARY -->
+      <div class="bg-white p-3.5 rounded-2xl border-2 border-amber-200 shadow-sm space-y-3 flex flex-col justify-between">
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between border-b pb-1.5">
+            <h2 class="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+              <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> 2. ചിലവ് & സാലറി
+            </h2>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="openStopEmployeeWithPin()" title="സ്റ്റാഫ് ലീവ് / സ്റ്റോപ്പ് മാനേജ് ചെയ്യുക" class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow flex items-center gap-1 cursor-pointer transition">
+                🛑 ലീവ്/സ്റ്റോപ്പ്
+              </button>
+              <button type="button" onclick="openNewPartyModal()" class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white shadow flex items-center gap-1 cursor-pointer transition">
+                ➕ ന്യൂ ഇനം/സ്റ്റാഫ്
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-[11px] font-bold text-slate-700">ചിലവ് ഇനം / ജീവനക്കാരൻ:</label>
+              <span id="currentTypeBadge" class="text-[10px] font-extrabold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border">തിരഞ്ഞെടുക്കുക</span>
+            </div>
+            <input 
+              list="unifiedPartyOptions" 
+              id="unifiedPartyInput" 
+              onclick="this.select()"
+              onfocus="this.select()"
+              oninput="onUnifiedPartySelected()" 
+              onchange="onUnifiedPartySelected()" 
+              placeholder="പേര് ടൈപ്പ് ചെയ്യുക അല്ലെങ്കിൽ തിരഞ്ഞെടുക്കുക..." 
+              class="w-full text-xs font-extrabold p-2.5 rounded-xl border-2 border-amber-400 bg-amber-50/40 text-slate-900 outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white shadow-sm transition"
+            />
+            <datalist id="unifiedPartyOptions"></datalist>
+            <span id="unifiedPartyInfo" class="text-[11px] font-black truncate block mt-1"></span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-0.5">ക്യാഷ് നൽകിയത്:</label>
+              <input type="number" step="any" id="expSalCashAmt" placeholder="0.00" class="w-full text-xs p-2 rounded-xl border bg-slate-50 font-bold" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-0.5">ബാങ്ക് നൽകിയത്:</label>
+              <input type="number" step="any" id="expSalBankAmt" placeholder="0.00" class="w-full text-xs p-2 rounded-xl border bg-slate-50 font-bold" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-600 mb-0.5">വിവരണം / കുറിപ്പ് (Note):</label>
+            <input type="text" id="expSalNote" placeholder="വിവരണം / കുറിപ്പ്..." class="w-full text-xs p-2 rounded-xl border bg-slate-50" />
+          </div>
+
+          <button id="btnSaveUnified" onclick="saveUnifiedExpSalEntry()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow cursor-pointer">
+            + സേവ് ചെയ്യുക
+          </button>
+        </div>
+
+        <!-- DASHBOARD EXPENSE & SALARY SUMMARY CARD -->
+        <div class="mt-3 pt-2.5 border-t">
+          <div onclick="openTodayExpenseModal()" class="bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 p-3 rounded-2xl border-2 border-amber-300 shadow-sm cursor-pointer transition active:scale-95 flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-black text-amber-900 uppercase block">ഇന്നത്തെ ചിലവുകൾ & സാലറി</span>
+              <div class="flex items-baseline gap-1 mt-0.5">
+                <span class="text-xs font-bold text-amber-700">Total:</span>
+                <span id="todayExpCardTotal" class="text-lg font-black text-amber-900">₹ 0</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-[11px] font-black text-amber-700 bg-white px-2.5 py-1.5 rounded-xl border border-amber-200 shadow-sm">
+              <span>വിശദാംശങ്ങൾ</span>
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 3: SALES ENTRY -->
+      <div class="bg-white p-3.5 rounded-2xl border-2 border-emerald-200 shadow-sm space-y-3 flex flex-col justify-between">
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between border-b pb-1.5">
+            <h2 class="font-bold text-sm text-emerald-900 flex items-center gap-1.5">
+              <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> 3. സെയിൽസ് എൻട്രി (Sales)
+            </h2>
+            <button type="button" onclick="openNewCustomerModal()" class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow flex items-center gap-1 cursor-pointer transition">
+              ➕ ന്യൂ കസ്റ്റമർ
+            </button>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">കസ്റ്റമർ തിരഞ്ഞെടുക്കുക / ടൈപ്പ് ചെയ്യുക:</label>
+            <input 
+              list="customerListOptions" 
+              id="saleCustomerInput" 
+              onclick="this.select()"
+              onfocus="this.select()"
+              oninput="onCustomerSelected()" 
+              onchange="onCustomerSelected()" 
+              placeholder="കസ്റ്റമർ പേര്..." 
+              value="SHOPE"
+              class="w-full text-sm font-extrabold p-2.5 rounded-xl border-2 border-emerald-400 bg-emerald-50/40 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white shadow-sm transition"
+            />
+            <datalist id="customerListOptions"></datalist>
+            <span id="custOpeningInfo" class="text-[11px] font-black text-emerald-700 block mt-1 truncate"></span>
+          </div>
+
+          <div id="saleFieldsContainer" class="pt-0.5"></div>
+
+          <button onclick="saveSaleEntry()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow cursor-pointer">
+            + സെയിൽ സേവ് ചെയ്യുക
+          </button>
+        </div>
+
+        <!-- DASHBOARD SALES SUMMARY CARD -->
+        <div class="mt-3 pt-2.5 border-t">
+          <div onclick="openTodaySalesModal()" class="bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 p-3 rounded-2xl border-2 border-emerald-300 shadow-sm cursor-pointer transition active:scale-95 flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-black text-emerald-900 uppercase block">ഇന്നത്തെ സെയിൽസ് ഇടപാടുകൾ</span>
+              <div class="flex items-baseline gap-1 mt-0.5">
+                <span class="text-xs font-bold text-emerald-700">Total:</span>
+                <span id="todaySaleCardTotal" class="text-lg font-black text-emerald-900">₹ 0</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-[11px] font-black text-emerald-700 bg-white px-2.5 py-1.5 rounded-xl border border-emerald-200 shadow-sm">
+              <span>വിശദാംശങ്ങൾ</span>
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM: കയ്യിലുള്ള ആകെ ഫണ്ട് -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-3.5 rounded-2xl shadow-md border border-slate-700 space-y-2">
+      <div class="flex flex-wrap justify-between items-center gap-2">
+        <span class="text-xs font-black uppercase text-slate-300 flex items-center gap-1.5">
+          <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i> കയ്യിലുള്ള ആകെ ഫണ്ട് (Total Liquid Funds)
+        </span>
+        <span class="text-[10px] font-extrabold bg-slate-700/80 px-2.5 py-0.5 rounded-full text-emerald-300">ലൈവ് ബാലൻസ്</span>
+      </div>
+      <div class="flex flex-wrap items-baseline justify-between gap-4 pt-0.5">
+        <h2 id="cardLiquidTotal" class="text-2xl sm:text-3xl font-black tracking-tight text-emerald-400">0.00</h2>
+        <div class="flex flex-wrap gap-4 text-xs sm:text-sm font-bold text-slate-200">
+          <span id="cardCashInHand" class="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">💵 കയ്യിലുള്ള ക്യാഷ്: 0</span>
+          <span id="cardBankBalance" class="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">🏦 ബാങ്ക് ബാലൻസ്: 0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 COMBINED METRIC CARDS (INCOME | PURCHASE | EXPENSE) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-0.5">
+      <div class="bg-white p-3 rounded-2xl border-2 border-emerald-200 shadow-sm space-y-1">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold text-emerald-900 uppercase">ആകെ ഇൻകം (Income Inflow)</span>
+          <i data-lucide="arrow-down-left" class="w-3.5 h-3.5 text-emerald-600"></i>
+        </div>
+        <div id="cardIncomeCombinedFormula" class="text-sm font-black text-emerald-700 tracking-tight">
+          Cash: 0 | Bank: 0 = ₹ 0
+        </div>
+      </div>
+
+      <div class="bg-white p-3 rounded-2xl border-2 border-blue-200 shadow-sm space-y-1">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold text-blue-900 uppercase">ആകെ പർച്ചേസ് പെയ്മെന്റ് (Purchase Outflow)</span>
+          <i data-lucide="shopping-cart" class="w-3.5 h-3.5 text-blue-600"></i>
+        </div>
+        <div id="cardPurchaseCombinedFormula" class="text-sm font-black text-blue-700 tracking-tight">
+          Cash: 0 | Bank: 0 = ₹ 0
+        </div>
+      </div>
+
+      <div class="bg-white p-3 rounded-2xl border-2 border-amber-200 shadow-sm space-y-1">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold text-amber-900 uppercase">ആകെ ചിലവ് & സാലറി (Exp/Sal Outflow)</span>
+          <i data-lucide="receipt" class="w-3.5 h-3.5 text-amber-600"></i>
+        </div>
+        <div id="cardExpSalCombinedFormula" class="text-sm font-black text-amber-700 tracking-tight">
+          Cash: 0 | Bank: 0 = ₹ 0
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: TODAY'S PURCHASES POPUP -->
+  <!-- ======================================================== -->
+  <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto no-print backdrop-blur-sm">
+    <div class="max-w-2xl w-full bg-white p-4 sm:p-6 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-sm font-extrabold text-blue-900 flex items-center gap-1.5">
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> ഇന്നത്തെ പർച്ചേസ് ഇടപാടുകൾ (Purchase Breakdown)
+        </h3>
+        <button onclick="closeTodayPurchaseModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="text-[11px] font-black text-blue-900 uppercase block">1. ക്യാഷ് വെണ്ടർമാർ (Cash Purchases)</span>
+        <div id="modalCashPurchasesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="space-y-1.5 pt-2 border-t">
+        <span class="text-[11px] font-black text-indigo-900 uppercase block">2. ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
+        <div id="modalCreditPurchasesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodayPurchaseModal()" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">
+          ഡാഷ്‌ബോർഡിലേക്ക് തിരികെ പോകുക
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: TODAY'S EXPENSES & SALARIES POPUP -->
+  <!-- ======================================================== -->
+  <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto no-print backdrop-blur-sm">
+    <div class="max-w-2xl w-full bg-white p-4 sm:p-6 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-sm font-extrabold text-amber-900 flex items-center gap-1.5">
+          <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ഇന്നത്തെ ചിലവുകൾ & സാലറി (Outflow Breakdown)
+        </h3>
+        <button onclick="closeTodayExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="text-[11px] font-black text-purple-900 uppercase block">1. സാലറി നൽകിയത് (Staff Salaries)</span>
+        <div id="modalSalariesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="space-y-1.5 pt-2 border-t">
+        <span class="text-[11px] font-black text-amber-900 uppercase block">2. ഷോപ്പ് ചിലവുകൾ (Shop Expenses)</span>
+        <div id="modalExpensesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodayExpenseModal()" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">
+          ഡാഷ്‌ബോർഡിലേക്ക് തിരികെ പോകുക
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: TODAY'S SALES POPUP -->
+  <!-- ======================================================== -->
+  <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto no-print backdrop-blur-sm">
+    <div class="max-w-2xl w-full bg-white p-4 sm:p-6 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-sm font-extrabold text-emerald-900 flex items-center gap-1.5">
+          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> ഇന്നത്തെ സെയിൽസ് ഇടപാടുകൾ (Sales Breakdown)
+        </h3>
+        <button onclick="closeTodaySalesModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="text-[11px] font-black text-emerald-900 uppercase block">1. ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
+        <div id="modalCashSalesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="space-y-1.5 pt-2 border-t">
+        <span class="text-[11px] font-black text-amber-900 uppercase block">2. ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
+        <div id="modalCreditSalesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodaySalesModal()" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">
+          ഡാഷ്‌ബോർഡിലേക്ക് തിരികെ പോകുക
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1: NEW CREDIT VENDOR MODAL -->
+  <div id="newVendorModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 no-print backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-sm font-extrabold text-blue-900 flex items-center gap-1.5">
+          🚚 പുതിയ ക്രെഡിറ്റ് വെണ്ടറെ ചേർക്കുക
+        </h3>
+        <button onclick="closeNewVendorModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">വെണ്ടർ പേര്:</label>
+          <input type="text" id="newVendName" placeholder="വെണ്ടർ പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ഓൾഡ് ബാലൻസ് / കൊടുക്കാനുള്ളത് (₹):</label>
+          <input type="number" step="any" id="newVendOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewVendorModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewVendorMaster()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">സേവ് ചെയ്യുക</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: NEW CREDIT CUSTOMER MODAL -->
+  <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 no-print backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-sm font-extrabold text-emerald-900 flex items-center gap-1.5">
+          🛒 പുതിയ ക്രെഡിറ്റ് കസ്റ്റമറെ ചേർക്കുക
+        </h3>
+        <button onclick="closeNewCustomerModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">കസ്റ്റമർ പേര്:</label>
+          <input type="text" id="newCustName" placeholder="കസ്റ്റമർ പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ഏജന്റ് തിരഞ്ഞെടുക്കുക (Route Agent):</label>
+          <select id="newCustAgentSelect" onchange="onNewCustAgentChange()" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500 cursor-pointer">
+            <option value="">-- ഏജന്റ് ഇല്ല (No Agent) --</option>
+            <option value="__NEW__">➕ പുതിയ ഏജന്റ് ടൈപ്പ് ചെയ്യുക...</option>
+          </select>
+          <input type="text" id="newCustAgentCustom" placeholder="പുതിയ ഏജന്റ് പേര് ടൈപ്പ് ചെയ്യുക..." class="hidden w-full mt-1.5 p-2 rounded-xl border bg-white font-bold outline-none focus:border-emerald-500" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ഓൾഡ് ബാലൻസ് / കിട്ടാനുള്ളത് (₹):</label>
+          <input type="number" step="any" id="newCustOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewCustomerModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewCustomerMaster()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ് ചെയ്യുക</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: NEW PARTY MASTER (EXPENSE VS EMPLOYEE) -->
+  <div id="newPartyModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 no-print backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+          ➕ പുതിയത് ചേർക്കുക
+        </h3>
+        <button onclick="closeNewPartyModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold border">
+        <button type="button" onclick="switchNewPartyType('expense')" id="btnNewTypeExp" class="flex-1 py-1.5 rounded-lg bg-amber-600 text-white shadow transition cursor-pointer">
+          ⚡ ചിലവ് ഇനം
+        </button>
+        <button type="button" onclick="switchNewPartyType('employee')" id="btnNewTypeEmp" class="flex-1 py-1.5 rounded-lg text-slate-600 transition cursor-pointer">
+          👥 ജീവനക്കാരൻ
+        </button>
+      </div>
+
+      <div id="newExpFields" class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ചിലവിന്റെ പേര്:</label>
+          <input type="text" id="newExpName" placeholder="ഉദാ: ചായ, കറന്റ് ബില്ല്..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-amber-500" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">പഴയ ബാക്കി / ഓൾഡ് ബാലൻസ് (ബാധകമെങ്കിൽ):</label>
+          <input type="number" step="any" id="newExpOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-amber-500" />
+        </div>
+      </div>
+
+      <div id="newEmpFields" class="space-y-2 text-xs hidden">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ജീവനക്കാരന്റെ പേര്:</label>
+          <input type="text" id="newEmpName" placeholder="സ്റ്റാഫ് പേര്..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">മാസ ശമ്പളം:</label>
+            <input type="number" step="any" id="newEmpSalary" placeholder="0.00" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">ഓൾഡ് ബാലൻസ്/അഡ്വാൻസ്:</label>
+            <input type="number" step="any" id="newEmpAdvance" placeholder="0.00" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ജോയിനിങ് ഡേറ്റ് (Joining Date):</label>
+          <input type="date" id="newEmpJoinDate" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500 cursor-pointer" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewPartyModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewPartyMaster()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ് ചെയ്യുക</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: STOP / LEAVE EMPLOYEE SETTLEMENT MODAL -->
+  <div id="stopEmployeeModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 no-print backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-sm font-extrabold text-rose-900 flex items-center gap-1.5">
+          🛑 സ്റ്റാഫ് ലീവ് / സ്റ്റോപ്പ് മാനേജ് ചെയ്യുക
+        </h3>
+        <button onclick="closeStopEmployeeModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ജീവനക്കാരനെ തിരഞ്ഞെടുക്കുക:</label>
+          <select id="stopEmpSelect" onchange="onStopModalEmpSelected()" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-rose-500 cursor-pointer"></select>
+        </div>
+
+        <div class="bg-slate-50 p-2.5 rounded-xl border space-y-1">
+          <div class="flex justify-between text-slate-600">
+            <span>ജോയിനിങ് ഡേറ്റ്:</span>
+            <span id="stopEmpJoinDateInfo" class="font-bold text-slate-900">--</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>മാസ ശമ്പളം:</span>
+            <span id="stopEmpSalaryInfo" class="font-bold text-slate-900">₹ 0</span>
+          </div>
+          <div class="flex justify-between text-purple-700 font-extrabold pt-1 border-t">
+            <span>ഇപ്പോഴത്തെ ബാലൻസ്:</span>
+            <span id="stopEmpLiveBalInfo">₹ 0</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">സ്റ്റാറ്റസ് (Status):</label>
+          <select id="stopEmpStatusSelect" onchange="onStopStatusChange()" class="w-full p-2 rounded-xl border bg-white font-bold outline-none cursor-pointer">
+            <option value="active">🟢 ജോലിയിൽ തുടരുന്നു (Active)</option>
+            <option value="stopped">🔴 ജോലി നിർത്തി / ലീവിൽ പോയി (Stopped / Left)</option>
+          </select>
+        </div>
+
+        <div id="stopDateContainer" class="hidden">
+          <label class="block font-bold text-slate-700 mb-0.5">സ്റ്റോപ്പ് ചെയ്ത തീയതി (Stop Date):</label>
+          <input type="date" id="stopEmpDateInput" onchange="previewStopSettlement()" class="w-full p-2 rounded-xl border bg-white font-bold outline-none focus:border-rose-500 cursor-pointer" />
+          <p class="text-[10px] text-slate-500 mt-1">ജോയിനിങ് തീയതി മുതൽ സ്റ്റോപ്പ് തീയതി വരെയുള്ള ദിവസങ്ങൾ കൃത്യമായി കണക്കാക്കും.</p>
+        </div>
+
+        <div id="stopSettlementPreview" class="hidden bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-rose-900 space-y-1 font-bold">
+          <div class="flex justify-between text-[11px]">
+            <span>ആകെ അർഹമായ സാലറി:</span>
+            <span id="previewAccruedSal">₹ 0</span>
+          </div>
+          <div class="flex justify-between text-[11px]">
+            <span>വാങ്ങിയ തുക (Cash+Bank):</span>
+            <span id="previewPaidAmt">₹ 0</span>
+          </div>
+          <div class="flex justify-between text-xs font-black pt-1 border-t border-rose-300">
+            <span>ഫൈനൽ സെറ്റിൽമെന്റ് ബാലൻസ്:</span>
+            <span id="previewFinalBal">₹ 0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeStopEmployeeModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveEmployeeStopStatus()" class="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow cursor-pointer">സ്റ്റാറ്റസ് സേവ് ചെയ്യുക</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: CASH / BANK TRANSFER MODAL -->
+  <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-4 no-print backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border space-y-4">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-sm font-extrabold text-purple-900 flex items-center gap-1.5">
+          <i data-lucide="repeat" class="w-4 h-4 text-purple-600"></i> ക്യാഷ് / ബാങ്ക് മാറ്റം (Transfer)
+        </h3>
+        <button onclick="closeTransferModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <div class="bg-blue-50/80 p-3 rounded-2xl border border-blue-200 space-y-2">
+          <label class="block font-bold text-blue-900">ബാങ്കിലേക്ക് ഇടുക (Cash to Bank Deposit):</label>
+          <div class="flex gap-2">
+            <input type="number" step="any" id="depositAmount" placeholder="തുക" class="flex-1 p-2 rounded-xl border bg-white font-bold" />
+            <button onclick="saveDeposit()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow cursor-pointer">ഇടുക</button>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50/80 p-3 rounded-2xl border border-emerald-200 space-y-2">
+          <label class="block font-bold text-emerald-900">കയ്യിലേക്ക് എടുക്കുക (Bank to Cash Withdrawal):</label>
+          <div class="flex gap-2">
+            <input type="number" step="any" id="withdrawalAmount" placeholder="തുക" class="flex-1 p-2 rounded-xl border bg-white font-bold" />
+            <button onclick="saveWithdrawal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow cursor-pointer">എടുക്കുക</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: FULL REPORTS & MONTHLY STATEMENT MODAL -->
+  <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-4xl w-full bg-white p-4 sm:p-6 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[95vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b pb-2 no-print">
+        <div class="flex flex-wrap items-center gap-2">
+          <h3 class="text-sm font-bold text-slate-800">📊 ബിസിനസ്സ് റിപ്പോർട്ട് & സ്റ്റേറ്റ്മെന്റ്</h3>
+          <div class="flex bg-slate-100 p-0.5 rounded-xl text-xs font-bold border">
+            <button onclick="switchReportMode('daily')" id="repDailyBtn" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black">ഡെയ്‌ലി</button>
+            <button onclick="switchReportMode('monthly')" id="repMonthlyBtn" class="px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">മന്ത്ലി</button>
+            <button onclick="switchReportMode('statement')" id="repStatBtn" class="px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">📄 സ്റ്റേറ്റ്മെന്റ്</button>
+          </div>
+        </div>
+        <button onclick="closeReportModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div id="reportDateSelectorBar" class="bg-slate-50 p-2.5 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-2 text-xs no-print">
+        <div class="flex items-center gap-2">
+          <span id="repFilterLabel" class="font-extrabold text-slate-700">📅 തീയതി മാറ്റുക:</span>
+          <input type="date" id="repFilterDate" onchange="onReportDateChanged()" class="p-1.5 rounded-xl border bg-white font-bold outline-none cursor-pointer text-xs" />
+          <input type="month" id="repFilterMonth" onchange="onReportMonthChanged()" class="hidden p-1.5 rounded-xl border bg-white font-bold outline-none cursor-pointer text-xs" />
+        </div>
+        <span class="text-[11px] font-bold text-slate-500">തീയതി മാറ്റി റിപ്പോർട്ട് പരിശോധിക്കാം</span>
+      </div>
+
+      <!-- STATEMENT CONTROLS -->
+      <div id="statementControlBar" class="hidden bg-slate-50 p-2.5 rounded-2xl border border-indigo-200 grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs no-print">
+        <div>
+          <label class="block font-bold text-slate-600 mb-0.5">വിഭാഗം (Type):</label>
+          <select id="statPartyType" onchange="populateStatementPartyDatalist()" class="w-full p-2 rounded-xl border bg-white font-bold outline-none cursor-pointer">
+            <option value="customer">🛒 കസ്റ്റമർ (Customer)</option>
+            <option value="vendor">🚚 വെണ്ടർ (Vendor)</option>
+            <option value="employee">👥 ജീവനക്കാരൻ (Staff)</option>
+            <option value="agent">👤 റൂട്ട് ഏജന്റ് (Route Agent)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-0.5">ആളെ തിരഞ്ഞെടുക്കുക / ടൈപ്പ് ചെയ്യുക:</label>
+          <input 
+            list="statPartyDatalist" 
+            id="statPartyInput" 
+            onclick="this.select()"
+            onfocus="this.select()"
+            oninput="generateStatement()" 
+            onchange="generateStatement()" 
+            placeholder="പേര് ടൈപ്പ് ചെയ്യുക..." 
+            class="w-full p-2 rounded-xl border bg-white font-bold outline-none text-xs" 
+          />
+          <datalist id="statPartyDatalist"></datalist>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-0.5">മാസം (Statement Month):</label>
+          <input type="month" id="statMonth" onchange="generateStatement()" class="w-full p-1.5 rounded-xl border bg-white font-bold text-xs cursor-pointer" />
+        </div>
+        <div class="flex items-end">
+          <button onclick="generateStatement()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow cursor-pointer">
+            🔍 സ്റ്റേറ്റ്മെന്റ് എടുക്കുക
+          </button>
+        </div>
+      </div>
+
+      <!-- PRINTABLE REPORT CONTENT -->
+      <div id="reportPrintContainer" class="space-y-3 text-xs sm:text-sm">
+        <div class="text-center border-b pb-2 flex justify-between items-center">
+          <div>
+            <h2 id="reportPageShopName" class="text-sm sm:text-base font-black text-slate-900 uppercase">റൂഗാമ സൂപ്പർ മാർക്കറ്റ്</h2>
+            <p id="reportModeTitle" class="text-[11px] sm:text-xs font-bold text-slate-600">ഡെയ്‌ലി റിപ്പോർട്ട്</p>
+          </div>
+          <div class="text-right text-[11px] sm:text-xs text-slate-600 font-bold">
+            <p id="reportDateBadgeLabel">തീയതി: --</p>
+          </div>
+        </div>
+
+        <!-- 7 MINI SUMMARY CARDS -->
+        <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+          <div class="bg-emerald-50/90 p-2 rounded-lg border border-emerald-300 text-center">
+            <span class="text-[10px] font-bold text-emerald-800 block">സെയിൽസ്</span>
+            <h3 id="repTotalSale" class="text-xs sm:text-sm font-black text-emerald-700">0</h3>
+          </div>
+          <div class="bg-blue-50/90 p-2 rounded-lg border border-blue-300 text-center">
+            <span class="text-[10px] font-bold text-blue-800 uppercase block">പർച്ചേസ്</span>
+            <h3 id="repTotalPurchase" class="text-xs sm:text-sm font-black text-blue-700">0</h3>
+          </div>
+          <div class="bg-amber-50/90 p-2 rounded-lg border border-amber-300 text-center">
+            <span class="text-[10px] font-bold text-amber-800 uppercase block">എക്സ്പെൻസ്</span>
+            <h3 id="repTotalExpense" class="text-xs sm:text-sm font-black text-amber-700">0</h3>
+          </div>
+          <div class="bg-teal-50/90 p-2 rounded-lg border border-teal-300 text-center">
+            <span class="text-[10px] font-bold text-teal-800 uppercase block">കസ്റ്റമർ ബാക്കി</span>
+            <h3 id="repCustBal" class="text-[10.5px] font-extrabold text-teal-900 leading-tight">0</h3>
+          </div>
+          <div class="bg-rose-50/90 p-2 rounded-lg border border-rose-300 text-center">
+            <span class="text-[10px] font-bold text-rose-800 uppercase block">വെണ്ടർ ബാക്കി</span>
+            <h3 id="repVendorBal" class="text-[10.5px] font-extrabold text-rose-900 leading-tight">0</h3>
+          </div>
+          <div class="bg-purple-50/90 p-2 rounded-lg border border-purple-300 text-center">
+            <span class="text-[10px] font-bold text-purple-800 uppercase block">സാലറി ബാക്കി</span>
+            <h3 id="repSalaryBal" class="text-[10.5px] font-extrabold text-purple-900 leading-tight">0</h3>
+          </div>
+          <div class="bg-slate-100 p-2 rounded-lg border border-slate-300 text-center">
+            <span class="text-[10px] font-bold text-slate-700 uppercase block">ലിക്വിഡ് ഫണ്ട്</span>
+            <h3 id="repLiquidBal" class="text-[10.5px] font-extrabold text-slate-900 leading-tight">0</h3>
+          </div>
+        </div>
+
+        <!-- CONTINUOUS 2-COLUMN FLOW CONTAINER -->
+        <div class="report-continuous-flow border-t pt-2">
+          
+          <div class="report-block bg-slate-50 p-2.5 rounded-xl border border-emerald-200 space-y-2">
+            <h3 class="font-extrabold text-emerald-900 text-xs sm:text-sm flex items-center justify-between border-b pb-1">
+              <span>🛒 സെയിൽസ് ഇടപാടുകൾ</span>
+              <span id="salesGrandBadge" class="text-[11px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">ആകെ: 0</span>
+            </h3>
+            
+            <div class="space-y-1">
+              <span class="text-[10px] font-extrabold text-emerald-800 uppercase block">💵 ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
+              <div id="repCashSalesList" class="overflow-x-auto"></div>
+            </div>
+
+            <div class="space-y-1 pt-1 border-t border-emerald-200/60">
+              <span class="text-[10px] font-extrabold text-amber-800 uppercase block">🛒 ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
+              <div id="repCreditSalesList" class="overflow-x-auto"></div>
+            </div>
+          </div>
+
+          <div class="report-block bg-slate-50 p-2.5 rounded-xl border border-blue-200 space-y-2">
+            <h3 class="font-extrabold text-blue-900 text-xs sm:text-sm flex items-center justify-between border-b pb-1">
+              <span>🚚 പർച്ചേസ് ഇടപാടുകൾ</span>
+              <span id="purchaseGrandBadge" class="text-[11px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded">ആകെ: 0</span>
+            </h3>
+
+            <div class="space-y-1">
+              <span class="text-[10px] font-extrabold text-blue-800 uppercase block">💵 ക്യാഷ് പർച്ചേസ് (Cash Vendors)</span>
+              <div id="repCashPurchasesList" class="overflow-x-auto"></div>
+            </div>
+
+            <div class="space-y-1 pt-1 border-t border-blue-200/60">
+              <span class="text-[10px] font-extrabold text-indigo-800 uppercase block">🚚 ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
+              <div id="repCreditPurchasesList" class="overflow-x-auto"></div>
+            </div>
+          </div>
+
+          <div class="report-block bg-slate-50 p-2.5 rounded-xl border border-purple-200 space-y-1.5">
+            <h3 class="font-extrabold text-purple-950 text-xs sm:text-sm flex items-center justify-between border-b pb-1">
+              <span>👥 സാലറി നൽകിയത് (സ്റ്റാഫ് ആകെ തുക)</span>
+            </h3>
+            <div id="repSalariesList" class="overflow-x-auto"></div>
+          </div>
+
+          <div class="report-block bg-slate-50 p-2.5 rounded-xl border border-amber-200 space-y-1.5">
+            <h3 class="font-extrabold text-amber-950 text-xs sm:text-sm flex items-center justify-between border-b pb-1">
+              <span>⚡ ചിലവുകൾ (ഇനം തിരിച്ചുള്ള ആകെ)</span>
+            </h3>
+            <div id="repExpensesList" class="overflow-x-auto"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- STATEMENT PRINT CONTAINER -->
+      <div id="statementPrintContainer" class="hidden space-y-3 text-xs sm:text-sm">
+        <div class="text-center border-b pb-2 flex justify-between items-center">
+          <div>
+            <h2 id="statementShopName" class="text-sm sm:text-base font-black text-slate-900 uppercase">RUGAMA SUPERMARKET</h2>
+            <p id="statHeaderTitle" class="text-xs font-bold text-indigo-800">ACCOUNT STATEMENT</p>
+          </div>
+          <div class="text-right text-xs text-slate-600 font-bold">
+            <p id="statPeriodLabel">Statement Month</p>
+          </div>
+        </div>
+
+        <div id="statBannerGrid" class="bg-indigo-50 p-2.5 rounded-xl border border-indigo-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-bold text-slate-800">
+          <div>
+            <span class="text-[10px] text-slate-500 block uppercase font-bold">Old Opening Balance</span>
+            <span id="statOpeningBalText" class="text-slate-900 text-sm">0</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-500 block uppercase font-bold">Month Sales / Bills</span>
+            <span id="statMonthSalesText" class="text-amber-700 text-sm">0</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-500 block uppercase font-bold">Month Paid / Collected</span>
+            <span id="statMonthPaidText" class="text-emerald-700 text-sm">0</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-500 block uppercase font-bold">Net Balance Due</span>
+            <span id="statClosingBalText" class="text-indigo-900 text-sm font-extrabold">0</span>
+          </div>
+        </div>
+
+        <div id="statTableContainer" class="overflow-x-auto"></div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="pt-2 no-print flex gap-2 justify-center flex-wrap border-t">
+        <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
+          🖨️ PDF ആയി സേവ് / പ്രിന്റ്
+        </button>
+        <button onclick="shareActiveReportWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
+          🟢 വാട്‌സ്ആപ്പിലേക്ക് സെന്റ് ചെയ്യുക
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN MODAL -->
+  <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 no-print backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
+      <h3 id="pinModalTitle" class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
+      <p id="pinModalSubtitle" class="text-xs text-slate-500">തുടരാൻ പിൻ നൽകുക</p>
+      <input type="password" maxlength="8" id="pinInput" placeholder="••••" class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-slate-800" onkeydown="if(event.key === 'Enter') verifyPinAndExecute()" />
+      <div class="flex gap-2 pt-2">
+        <button onclick="closePinModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-xs font-semibold cursor-pointer">റദ്ദാക്കുക</button>
+        <button onclick="verifyPinAndExecute()" class="flex-1 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">സ്ഥിരീകരിക്കുക</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- JAVASCRIPT ENGINE (PART 1) -->
+  <!-- ========================================================== -->
+  <script>
+    let SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG) && window.SHOPS_CONFIG.length > 0)
+      ? window.SHOPS_CONFIG
+      : [];
+
+    let currentShopId = null;
+    let currentShop = null;
+    let supabaseClient = null;
+
+    let customersList = [];
+    let vendorsList = [];
+    let employeesList = [];
+    let expensesMasterList = [];
+    let transactionsList = [];
+    let agentsList = [];
+    let openingSettings = { openingCash: 0, openingBank: 0 };
+    
+    let pendingAction = null;
+    let pendingDeleteId = null;
+
+    let currentNewPartyType = 'expense';
+    let currentReportMode = 'daily';
+    let currentReportDataForWA = {};
+    let currentStatementDataForWA = null;
+
+    let idleTimer = null;
+    const IDLE_LIMIT = 5 * 60 * 1000;
+
+    function resetIdleTimer() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        location.reload();
+      }, IDLE_LIMIT);
+    }
+
+    // സൗദി ബിസിനസ് തീയതി (രാവിലെ 6 AM കട്ട്-ഓഫ്)
+    function getLocalDateString() {
+      if (window.getSaudiBusinessDate && typeof window.getSaudiBusinessDate === 'function') {
+        return window.getSaudiBusinessDate();
+      }
+      try {
+        const now = new Date();
+        const saudiTime = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
+        if (saudiTime.getHours() < 6) {
+          saudiTime.setDate(saudiTime.getDate() - 1);
+        }
+        const y = saudiTime.getFullYear();
+        const m = String(saudiTime.getMonth() + 1).padStart(2, '0');
+        const d = String(saudiTime.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      } catch(e) {
+        return new Date().toISOString().split('T')[0];
+      }
+    }
+
+    function setTodayDate() {
+      const dtInput = document.getElementById("filterDate");
+      if (dtInput) {
+        dtInput.value = getLocalDateString();
+      }
+      onBusinessDateChanged();
+    }
+
+    function onBusinessDateChanged() {
+      if (typeof renderDashboard === 'function') renderDashboard();
+      onUnifiedPartySelected();
+    }
+
+    // 1. ലോഗിൻ പരിശോധന & റോളുകൾ
+    function verifyLogin() {
+      const input = document.getElementById("loginPasswordInput");
+      if (!input) return;
+      const enteredPin = input.value.trim();
+
+      if (!enteredPin) return alert("ദയവായി പിൻ നൽകുക!");
+
+      // എ. മാസ്റ്റർ പിൻ പരിശോധിക്കുന്നു (Super Admin)
+      if (window.MASTER_PIN && enteredPin === String(window.MASTER_PIN)) {
+        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
+        sessionStorage.setItem("RUGAMA_USER_ROLE", "admin");
+        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+
+        document.getElementById("loginScreen").classList.add("hidden");
+        applyRolePermissions("admin");
+        initMultiShopSystem();
+        return;
+      }
+
+      // ബി. ഷോപ്പ് പിൻ പരിശോധിക്കുന്നു (Staff Mode)
+      const matchedShop = (SHOPS || []).find(s => String(s.pin) === enteredPin);
+      if (matchedShop) {
+        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
+        sessionStorage.setItem("RUGAMA_USER_ROLE", "shop");
+        sessionStorage.setItem("RUGAMA_ACTIVE_SHOP_ID", matchedShop.id);
+        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+
+        document.getElementById("loginScreen").classList.add("hidden");
+        applyRolePermissions("shop");
+        initMultiShopSystem(matchedShop.id);
+        return;
+      }
+
+      alert("പാസ്‌വേഡ് തെറ്റാണ്! ശരിയായ PIN നൽകുക.");
+      input.value = "";
+      input.focus();
+    }
+
+    function applyRolePermissions(role) {
+      const switcher = document.getElementById("shopSelectorWrapper");
+      const staticTitle = document.getElementById("shopStaticTitle");
+      if (role === 'admin') {
+        if (switcher) switcher.classList.remove("hidden");
+        if (staticTitle) staticTitle.classList.add("hidden");
+      } else {
+        if (switcher) switcher.classList.add("hidden");
+        if (staticTitle) staticTitle.classList.remove("hidden");
+      }
+    }
+
+    function logoutApp() {
+      sessionStorage.removeItem("RUGAMA_LOGGED_IN");
+      sessionStorage.removeItem("RUGAMA_USER_ROLE");
+      sessionStorage.removeItem("RUGAMA_ACTIVE_SHOP_ID");
+      sessionStorage.removeItem("RUGAMA_ACTIVE_PIN");
+
+      document.getElementById("loginScreen").classList.remove("hidden");
+      const inp = document.getElementById("loginPasswordInput");
+      if (inp) {
+        inp.value = "";
+        setTimeout(() => inp.focus(), 200);
+      }
+    }
+
+    // 2. മൾട്ടി-ഷോപ്പ് ഇനിഷ്യലൈസ് ചെയ്യൽ
+    function initMultiShopSystem(forceShopId = null) {
+      const sel = document.getElementById("shopSelector");
+      if (sel) sel.innerHTML = "";
+
+      if (!SHOPS || SHOPS.length === 0) {
+        alert("config.js ഫയലിൽ SHOPS_CONFIG കണ്ടെത്താനായില്ല!");
+        return;
+      }
+
+      SHOPS.forEach(shop => {
+        const opt = document.createElement("option");
+        opt.value = shop.id;
+        opt.textContent = shop.name;
+        if (sel) sel.appendChild(opt);
+      });
+
+      const role = sessionStorage.getItem("RUGAMA_USER_ROLE");
+      if (role === 'shop') {
+        currentShopId = forceShopId || sessionStorage.getItem("RUGAMA_ACTIVE_SHOP_ID") || SHOPS[0].id;
+      } else {
+        const savedShopId = localStorage.getItem("RUGAMA_SELECTED_SHOP_ID");
+        const matched = SHOPS.find(s => s.id === savedShopId);
+        currentShopId = matched ? matched.id : SHOPS[0].id;
+      }
+
+      if (sel) sel.value = currentShopId;
+      connectActiveShop();
+    }
+
+    function connectActiveShop() {
+      currentShop = SHOPS.find(s => s.id === currentShopId) || SHOPS[0];
+      if (!currentShop) return;
+
+      currentShopId = currentShop.id;
+      localStorage.setItem("RUGAMA_SELECTED_SHOP_ID", currentShopId);
+
+      safeSetText("shopStaticTitle", currentShop.name);
+      safeSetText("shopTagline", currentShop.tagline || 'ഡെസ്ക്ടോപ്പ് ക്വിക്ക് POS');
+      safeSetText("reportPageShopName", currentShop.name);
+      const stShop = document.getElementById("statementShopName");
+      if (stShop) stShop.innerText = currentShop.name.toUpperCase();
+
+      const header = document.getElementById("mainAppHeader");
+      if (header) {
+        header.className = `bg-gradient-to-r ${currentShop.themeGradient || 'from-slate-900 via-slate-800 to-slate-900'} text-white sticky top-0 z-40 shadow-md no-print transition-all duration-500 border-b border-white/10`;
+      }
+
+      const logoImg = document.getElementById("shopLogoImg");
+      const defIcon = document.getElementById("shopDefaultIcon");
+      if (currentShop.logo && logoImg) {
+        logoImg.src = currentShop.logo;
+        logoImg.classList.remove("hidden");
+        if (defIcon) defIcon.classList.add("hidden");
+      } else if (defIcon) {
+        if (logoImg) logoImg.classList.add("hidden");
+        defIcon.classList.remove("hidden");
+        defIcon.className = `w-5 h-5 ${currentShop.accentColor || 'text-emerald-400'}`;
+      }
+
+      if (window.supabase && currentShop.url && currentShop.key) {
+        supabaseClient = window.supabase.createClient(currentShop.url, currentShop.key);
+      }
+
+      loadCachedData();
+      fetchAllData();
+      resetSaleCustomerToDefault();
+    }
+
+    async function onShopChanged(newShopId) {
+      currentShopId = newShopId;
+      connectActiveShop();
+    }
+
+    // DOM HELPERS
+    function safeSetText(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.innerText = val;
+    }
+    function safeSetHtml(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = val;
+    }
+
+    function cleanDate(d) {
+      if (!d) return '';
+      return String(d).split('T')[0].split(' ')[0].trim();
+    }
+    function cleanPartyName(str) {
+      if (!str) return '';
+      return String(str).split(' (')[0].replace(/^Staff:\s*/i, '').replace(/^\[[^\]]+\]\s*/g, '').trim().toLowerCase();
+    }
+
+    function parseToDateObj(dStr) {
+      if (!dStr) return new Date("2026-01-01");
+      if (dStr instanceof Date) return dStr;
+      let s = String(dStr).split('T')[0].trim();
+      if (s.includes('/')) {
+        let parts = s.split('/');
+        if (parts[0].length === 4) {
+          return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        } else if (parts[2].length === 4) {
+          return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+        }
+      }
+      let parts = s.split('-').map(Number);
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    // OFFLINE QUEUE
+    function getOfflineQueue() {
+      try { return JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_OFFLINE_QUEUE`)) || []; } catch(e) { return []; }
+    }
+
+    function saveOfflineQueue(queue) {
+      localStorage.setItem(`RUGAMA_${currentShopId}_OFFLINE_QUEUE`, JSON.stringify(queue));
+      updateNetworkUI();
+    }
+
+    function updateNetworkUI() {
+      const badge = document.getElementById("syncStatusBadge");
+      const banner = document.getElementById("offlineSyncBanner");
+      const unsyncedCountText = document.getElementById("unsyncedCountText");
+      const queue = getOfflineQueue();
+
+      if (unsyncedCountText) unsyncedCountText.textContent = queue.length;
+
+      if (!navigator.onLine) {
+        if (badge) {
+          badge.className = "text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40";
+          badge.textContent = "○ ഓഫ്‌ലൈൻ";
+        }
+        if (banner) banner.classList.remove("hidden");
+      } else {
+        if (badge) {
+          badge.className = "text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+          badge.textContent = "● ഓൺലൈൻ";
+        }
+        if (queue.length > 0) {
+          if (banner) banner.classList.remove("hidden");
+        } else {
+          if (banner) banner.classList.add("hidden");
+        }
+      }
+    }
+
+    async function syncOfflineQueue(manual = false) {
+      if (!navigator.onLine || !supabaseClient) return;
+      const queue = getOfflineQueue();
+      if (queue.length === 0) return;
+
+      const remaining = [];
+      for (const item of queue) {
+        try {
+          const { error } = await supabaseClient.from('transactions').insert([item.payload]);
+          if (error) throw error;
+        } catch(err) {
+          console.error("Queue sync error:", err);
+          remaining.push(item);
+        }
+      }
+
+      saveOfflineQueue(remaining);
+      if (remaining.length === 0) {
+        await fetchAllData();
+        if (manual) alert("വിജയകരമായി ഡാറ്റ സിങ്ക് ചെയ്തു!");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const isLogged = sessionStorage.getItem("RUGAMA_LOGGED_IN") === "true";
+      const userRole = sessionStorage.getItem("RUGAMA_USER_ROLE");
+
+      if (isLogged) {
+        document.getElementById("loginScreen").classList.add("hidden");
+        applyRolePermissions(userRole);
+        initMultiShopSystem();
+      } else {
+        document.getElementById("loginScreen").classList.remove("hidden");
+        setTimeout(() => {
+          const inp = document.getElementById("loginPasswordInput");
+          if (inp) inp.focus();
+        }, 300);
+      }
+
+      if (window.lucide) lucide.createIcons();
+      setTodayDate();
+
+      renderSaleInputs('cash');
+      renderPurchaseInputs('cash');
+
+      const today = getLocalDateString();
+      if (document.getElementById("statMonth")) document.getElementById("statMonth").value = today.substring(0, 7);
+      if (document.getElementById("repFilterDate")) document.getElementById("repFilterDate").value = today;
+      if (document.getElementById("repFilterMonth")) document.getElementById("repFilterMonth").value = today.substring(0, 7);
+
+      window.addEventListener('online', () => { syncOfflineQueue(); fetchAllData(); updateNetworkUI(); });
+      window.addEventListener('offline', updateNetworkUI);
+
+      ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
+        window.addEventListener(evt, resetIdleTimer, true);
+      });
+      resetIdleTimer();
+    });
+
+    function resetSaleCustomerToDefault() {
+      const saleInp = document.getElementById("saleCustomerInput");
+      if (saleInp) {
+        saleInp.value = "SHOPE";
+        onCustomerSelected();
+      }
+    }
+
+    // MODAL OPENERS & CLOSERS
+    function openTransferModal() { document.getElementById("transferModal").classList.remove("hidden"); }
+    function closeTransferModal() { document.getElementById("transferModal").classList.add("hidden"); }
+
+    function openTodayPurchaseModal() {
+      const m = document.getElementById("todayPurchaseModal");
+      if (m) { m.classList.remove("hidden"); m.style.display = "flex"; }
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeTodayPurchaseModal() {
+      const m = document.getElementById("todayPurchaseModal");
+      if (m) { m.classList.add("hidden"); m.style.display = "none"; }
+    }
+
+    function openTodayExpenseModal() {
+      const m = document.getElementById("todayExpenseModal");
+      if (m) { m.classList.remove("hidden"); m.style.display = "flex"; }
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeTodayExpenseModal() {
+      const m = document.getElementById("todayExpenseModal");
+      if (m) { m.classList.add("hidden"); m.style.display = "none"; }
+    }
+
+    function openTodaySalesModal() {
+      const m = document.getElementById("todaySalesModal");
+      if (m) { m.classList.remove("hidden"); m.style.display = "flex"; }
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeTodaySalesModal() {
+      const m = document.getElementById("todaySalesModal");
+      if (m) { m.classList.add("hidden"); m.style.display = "none"; }
+    }
+
+    function openNewVendorModal() {
+      document.getElementById("newVendName").value = "";
+      document.getElementById("newVendOpening").value = "";
+      document.getElementById("newVendorModal").classList.remove("hidden");
+      document.getElementById("newVendName").focus();
+    }
+    function closeNewVendorModal() { document.getElementById("newVendorModal").classList.add("hidden"); }
+
+    function openNewCustomerModal() {
+      document.getElementById("newCustName").value = "";
+      document.getElementById("newCustOpening").value = "";
+      document.getElementById("newCustAgentCustom").value = "";
+      document.getElementById("newCustAgentCustom").classList.add("hidden");
+
+      const agentSel = document.getElementById("newCustAgentSelect");
+      if (agentSel) {
+        agentSel.innerHTML = '<option value="">-- ഏജന്റ് ഇല്ല (No Agent) --</option>';
+        (agentsList || []).forEach(ag => {
+          if (ag && ag.name) {
+            agentSel.innerHTML += `<option value="${ag.id}">${ag.name}</option>`;
+          }
+        });
+        agentSel.innerHTML += '<option value="__NEW__">➕ പുതിയ ഏജന്റ് ടൈപ്പ് ചെയ്യുക...</option>';
+        agentSel.value = "";
+      }
+
+      document.getElementById("newCustomerModal").classList.remove("hidden");
+      document.getElementById("newCustName").focus();
+    }
+    function closeNewCustomerModal() { document.getElementById("newCustomerModal").classList.add("hidden"); }
+
+    function onNewCustAgentChange() {
+      const sel = document.getElementById("newCustAgentSelect").value;
+      const customInp = document.getElementById("newCustAgentCustom");
+      if (sel === '__NEW__') {
+        customInp.classList.remove("hidden");
+        customInp.focus();
+      } else {
+        customInp.classList.add("hidden");
+      }
+    }
+
+    function openNewPartyModal() {
+      document.getElementById("newExpName").value = "";
+      document.getElementById("newExpOpening").value = "";
+      document.getElementById("newEmpName").value = "";
+      document.getElementById("newEmpSalary").value = "";
+      document.getElementById("newEmpAdvance").value = "";
+      document.getElementById("newEmpJoinDate").value = getLocalDateString();
+      switchNewPartyType('expense');
+      document.getElementById("newPartyModal").classList.remove("hidden");
+      document.getElementById("newExpName").focus();
+    }
+    function closeNewPartyModal() { document.getElementById("newPartyModal").classList.add("hidden"); }
+
+    function switchNewPartyType(type) {
+      currentNewPartyType = type;
+      const btnExp = document.getElementById("btnNewTypeExp");
+      const btnEmp = document.getElementById("btnNewTypeEmp");
+      const expBox = document.getElementById("newExpFields");
+      const empBox = document.getElementById("newEmpFields");
+
+      if (type === 'expense') {
+        btnExp.className = "flex-1 py-1.5 rounded-lg bg-amber-600 text-white shadow transition cursor-pointer";
+        btnEmp.className = "flex-1 py-1.5 rounded-lg text-slate-600 transition cursor-pointer";
+        expBox.classList.remove("hidden");
+        empBox.classList.add("hidden");
+      } else {
+        btnEmp.className = "flex-1 py-1.5 rounded-lg bg-purple-600 text-white shadow transition cursor-pointer";
+        btnExp.className = "flex-1 py-1.5 rounded-lg text-slate-600 transition cursor-pointer";
+        empBox.classList.remove("hidden");
+        expBox.classList.add("hidden");
+      }
+    }
+
+    // 3. സേവിംഗ് ഫംഗ്ഷനുകൾ (TRANSACTION SAVING)
+    async function executeTransactionInsert(payload, successMsg) {
+      if (navigator.onLine && supabaseClient) {
+        try {
+          const { error } = await supabaseClient.from('transactions').insert([payload]);
+          if (error) throw error;
+          alert(successMsg);
+          await fetchAllData();
+          return;
+        } catch (err) {
+          console.warn("Online save failed, routing to offline queue:", err);
+        }
+      }
+
+      const queue = getOfflineQueue();
+      queue.push({
+        offlineId: 'off_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        payload: payload
+      });
+      saveOfflineQueue(queue);
+
+      transactionsList.unshift(payload);
+      if (typeof renderDashboard === 'function') renderDashboard();
+      alert("⚠️ ഇന്റർനെറ്റ് ലഭ്യമല്ല! എൻട്രി ലോക്കലായി സേവ് ചെയ്തു. നെറ്റ് വരുമ്പോൾ ക്ലൗഡിലേക്ക് സിങ്ക് ആകും.");
+    }
+
+    async function saveSaleEntry() {
+      let rawName = document.getElementById("saleCustomerInput").value.trim();
+      if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
+      let name = rawName.split(' (')[0].trim();
+
+      let cust = (customersList || []).find(c => c && c.name && c.name.toLowerCase() === name.toLowerCase());
+      if (!cust) {
+        if (navigator.onLine && supabaseClient) {
+          await supabaseClient.from('customers').insert([{ name: name, type: 'cash', opening_balance: 0 }]);
+        }
+        customersList.push({ name: name, type: 'cash', opening_balance: 0 });
+      }
+
+      let cashAmt = parseFloat(document.getElementById("saleCash")?.value) || 0;
+      let bankAmt = parseFloat(document.getElementById("saleBank")?.value) || 0;
+      let creditAmt = parseFloat(document.getElementById("saleCredit")?.value) || 0;
+      let date = document.getElementById("filterDate").value;
+
+      if (cashAmt <= 0 && bankAmt <= 0 && creditAmt <= 0) return alert("തുക നൽകുക!");
+
+      let payload = {
+        date: date,
+        type: 'sale',
+        party_name: name,
+        cash_amount: cashAmt,
+        bank_amount: bankAmt,
+        credit_amount: creditAmt
+      };
+
+      await executeTransactionInsert(payload, "സെയിൽ സേവ് ചെയ്തു!");
+      resetSaleCustomerToDefault();
+    }
+
+    async function savePurchaseEntry() {
+      let rawName = document.getElementById("purchaseVendorInput").value.trim();
+      if (!rawName) return alert("വെണ്ടർ പേര് നൽകുക!");
+      let name = rawName.split(' (')[0].trim();
+
+      let vend = (vendorsList || []).find(v => v && v.name && v.name.toLowerCase() === name.toLowerCase());
+      if (!vend) {
+        if (navigator.onLine && supabaseClient) {
+          await supabaseClient.from('vendors').insert([{ name: name, type: 'cash', opening_balance: 0 }]);
+        }
+        vendorsList.push({ name: name, type: 'cash', opening_balance: 0 });
+      }
+
+      let cashAmt = parseFloat(document.getElementById("purCash")?.value) || 0;
+      let bankAmt = parseFloat(document.getElementById("purBank")?.value) || 0;
+      let creditAmt = parseFloat(document.getElementById("purCredit")?.value) || 0;
+      let date = document.getElementById("filterDate").value;
+
+      if (cashAmt <= 0 && bankAmt <= 0 && creditAmt <= 0) return alert("തുക നൽകുക!");
+
+      let payload = {
+        date: date,
+        type: 'purchase',
+        party_name: name,
+        cash_amount: -cashAmt,
+        bank_amount: -bankAmt,
+        credit_amount: creditAmt
+      };
+
+      await executeTransactionInsert(payload, "പർച്ചേസ് സേവ് ചെയ്തു!");
+      document.getElementById("purchaseVendorInput").value = "";
+      onVendorSelected();
+    }
+
+    async function saveUnifiedExpSalEntry() {
+      let rawVal = document.getElementById("unifiedPartyInput").value.trim();
+      if (!rawVal) return alert("ചിലവ് ഇനം അല്ലെങ്കിൽ ജീവനക്കാരന്റെ പേര് നൽകുക!");
+
+      const cashAmt = parseFloat(document.getElementById("expSalCashAmt").value) || 0;
+      const bankAmt = parseFloat(document.getElementById("expSalBankAmt").value) || 0;
+      const note = document.getElementById("expSalNote").value.trim();
+      const date = document.getElementById("filterDate").value;
+
+      if (cashAmt <= 0 && bankAmt <= 0) return alert("തുക നൽകുക!");
+
+      let cleanVal = cleanPartyName(rawVal);
+      const matchedEmp = (employeesList || []).find(em => em && cleanPartyName(em.name) === cleanVal);
+
+      if (matchedEmp) {
+        const empName = matchedEmp.name;
+        const finalNote = note || "സാലറി/അഡ്വാൻസ്";
+        const payload = {
+          date: date,
+          type: 'salary',
+          party_name: `Staff: ${empName} - ${finalNote}`,
+          cash_amount: -cashAmt,
+          bank_amount: -bankAmt,
+          credit_amount: 0
+        };
+        await executeTransactionInsert(payload, "സാലറി വിജയകരമായി സേവ് ചെയ്തു!");
+      } else {
+        const expName = rawVal.split(' (')[0].trim();
+        const finalNote = note || expName;
+        const payload = {
+          date: date,
+          type: 'expense',
+          party_name: `${expName} (${finalNote})`,
+          cash_amount: -cashAmt,
+          bank_amount: -bankAmt,
+          credit_amount: 0
+        };
+        await executeTransactionInsert(payload, "ചിലവ് വിജയകരമായി സേവ് ചെയ്തു!");
+      }
+
+      document.getElementById("expSalCashAmt").value = "";
+      document.getElementById("expSalBankAmt").value = "";
+      document.getElementById("expSalNote").value = "";
+      onUnifiedPartySelected();
+    }
+
+    async function saveDeposit() {
+      let amt = parseFloat(document.getElementById("depositAmount").value) || 0;
+      let date = document.getElementById("filterDate").value;
+      if (amt <= 0) return alert("തുക നൽകുക!");
+
+      let payload = {
+        date: date,
+        type: 'transfer',
+        party_name: 'Deposit (Cash to Bank)',
+        cash_amount: -amt,
+        bank_amount: amt,
+        credit_amount: 0
+      };
+
+      await executeTransactionInsert(payload, "ബാങ്കിലേക്ക് നിക്ഷേപിച്ചു!");
+      document.getElementById("depositAmount").value = "";
+      closeTransferModal();
+    }
+
+    async function saveWithdrawal() {
+      let amt = parseFloat(document.getElementById("withdrawalAmount").value) || 0;
+      let date = document.getElementById("filterDate").value;
+      if (amt <= 0) return alert("തുക നൽകുക!");
+
+      let payload = {
+        date: date,
+        type: 'transfer',
+        party_name: 'Withdrawal (Bank to Cash)',
+        cash_amount: amt,
+        bank_amount: -amt,
+        credit_amount: 0
+      };
+
+      await executeTransactionInsert(payload, "കയ്യിലേക്ക് പിൻവലിച്ചു!");
+      document.getElementById("withdrawalAmount").value = "";
+      closeTransferModal();
+    }
+
+    // 4. മാസ്റ്റർ ഡാറ്റ രജിസ്ട്രേഷൻ
+    async function saveNewVendorMaster() {
+      const name = document.getElementById("newVendName").value.trim();
+      const opening = parseFloat(document.getElementById("newVendOpening").value) || 0;
+      if (!name) return alert("വെണ്ടർ പേര് നൽകുക!");
+
+      const newRecord = { name: name, type: 'credit', opening_balance: opening };
+      if (navigator.onLine && supabaseClient) {
+        const { error } = await supabaseClient.from('vendors').insert([newRecord]);
+        if (error) return alert("സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
+      }
+      vendorsList.push(newRecord);
+      populateDropdowns();
+
+      document.getElementById("purchaseVendorInput").value = name;
+      onVendorSelected();
+      closeNewVendorModal();
+      alert("പുതിയ ക്രെഡിറ്റ് വെണ്ടറെ ചേർത്തു!");
+    }
+
+    async function saveNewCustomerMaster() {
+      const name = document.getElementById("newCustName").value.trim();
+      const selVal = document.getElementById("newCustAgentSelect").value;
+      let finalAgentId = null;
+
+      if (selVal === '__NEW__') {
+        const newAgName = document.getElementById("newCustAgentCustom").value.trim();
+        if (newAgName) {
+          if (navigator.onLine && supabaseClient) {
+            try {
+              const { data: newAgData } = await supabaseClient.from('agents').insert([{ name: newAgName }]).select();
+              if (newAgData && newAgData[0]) {
+                finalAgentId = newAgData[0].id;
+                agentsList.push(newAgData[0]);
+              }
+            } catch(e) {}
+          }
+          if (!finalAgentId) {
+            finalAgentId = "ag_" + Date.now();
+            agentsList.push({ id: finalAgentId, name: newAgName });
+          }
+        }
+      } else if (selVal) {
+        finalAgentId = selVal;
+      }
+
+      const opening = parseFloat(document.getElementById("newCustOpening").value) || 0;
+      if (!name) return alert("കസ്റ്റമർ പേര് നൽകുക!");
+
+      let insertPayload = {
+        name: name,
+        type: 'credit',
+        opening_balance: opening,
+        agent_id: finalAgentId
+      };
+
+      if (navigator.onLine && supabaseClient) {
+        let { error } = await supabaseClient.from('customers').insert([insertPayload]);
+        if (error && error.message && error.message.toLowerCase().includes("agent_id")) {
+          delete insertPayload.agent_id;
+          let resFallback = await supabaseClient.from('customers').insert([insertPayload]);
+          if (resFallback.error) return alert("സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + resFallback.error.message);
+        } else if (error) {
+          return alert("സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
+        }
+      }
+
+      customersList.push({
+        name: name,
+        type: 'credit',
+        opening_balance: opening,
+        agent_id: finalAgentId
+      });
+
+      populateDropdowns();
+      document.getElementById("saleCustomerInput").value = name;
+      onCustomerSelected();
+      closeNewCustomerModal();
+      alert("പുതിയ ക്രെഡിറ്റ് കസ്റ്റമറെ വിജയകരമായി ചേർത്തു!");
+    }
+
+    async function saveNewPartyMaster() {
+      if (currentNewPartyType === 'expense') {
+        const name = document.getElementById("newExpName").value.trim();
+        const opening = parseFloat(document.getElementById("newExpOpening").value) || 0;
+        if (!name) return alert("ചിലവിന്റെ പേര് നൽകുക!");
+
+        if (navigator.onLine && supabaseClient) {
+          const { error } = await supabaseClient.from('expenses_master').insert([{ name: name, opening_balance: opening }]);
+          if (error) return alert("സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
+        }
+
+        expensesMasterList.push({ name: name, opening_balance: opening });
+        populateDropdowns();
+        document.getElementById("unifiedPartyInput").value = name;
+        onUnifiedPartySelected();
+        closeNewPartyModal();
+        alert("പുതിയ ചിലവ് ഇനം വിജയകരമായി ചേർത്തു!");
+      } else {
+        const name = document.getElementById("newEmpName").value.trim();
+        const salary = parseFloat(document.getElementById("newEmpSalary").value) || 0;
+        const advance = parseFloat(document.getElementById("newEmpAdvance").value) || 0;
+        const joinDate = document.getElementById("newEmpJoinDate").value || getLocalDateString();
+        if (!name) return alert("ജീവനക്കാരന്റെ പേര് നൽകുക!");
+
+        let newEmpRecord = {
+          name: name,
+          monthly_salary: salary,
+          opening_advance: advance,
+          joining_date: joinDate,
+          status: 'active',
+          stop_date: null,
+          created_at: new Date().toISOString()
+        };
+
+        if (navigator.onLine && supabaseClient) {
+          const { data, error } = await supabaseClient.from('employees').insert([newEmpRecord]).select();
+          if (error) return alert("സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
+          if (data && data[0]) newEmpRecord.id = data[0].id;
+        } else {
+          newEmpRecord.id = 'emp_' + Date.now();
+        }
+
+        employeesList.push(newEmpRecord);
+        populateDropdowns();
+        document.getElementById("unifiedPartyInput").value = name;
+        onUnifiedPartySelected();
+        closeNewPartyModal();
+        alert("പുതിയ ജീവനക്കാരനെ വിജയകരമായി ചേർത്തു!");
+      }
+    }
+
+    // 5. പിൻ വെരിഫിക്കേഷൻ (PIN VERIFICATION FOR DELETE & ACTIONS)
+    function requestPin(id) {
+      pendingAction = 'delete';
+      pendingDeleteId = id;
+      document.getElementById("pinModalTitle").innerText = "സെക്യൂരിറ്റി പിൻ";
+      document.getElementById("pinModalSubtitle").innerText = "ഡിലീറ്റ് ചെയ്യാൻ ലോഗിൻ പിൻ നൽകുക";
+      document.getElementById("pinInput").value = "";
+      document.getElementById("pinModal").classList.remove("hidden");
+      document.getElementById("pinInput").focus();
+    }
+
+    function openStopEmployeeWithPin() {
+      pendingAction = 'stop_employee';
+      document.getElementById("pinModalTitle").innerText = "സെക്യൂരിറ്റി പിൻ";
+      document.getElementById("pinModalSubtitle").innerText = "തുടരാൻ ലോഗിൻ പിൻ നൽകുക";
+      document.getElementById("pinInput").value = "";
+      document.getElementById("pinModal").classList.remove("hidden");
+      document.getElementById("pinInput").focus();
+    }
+
+    function closePinModal() {
+      document.getElementById("pinModal").classList.add("hidden");
+      pendingAction = null;
+      pendingDeleteId = null;
+    }
+
+    async function verifyPinAndExecute() {
+      const pinVal = document.getElementById("pinInput").value.trim();
+      const sessionPin = sessionStorage.getItem("RUGAMA_ACTIVE_PIN");
+      const masterPin = String(window.MASTER_PIN);
+      const currentShopPin = currentShop ? String(currentShop.pin) : null;
+
+      const isValidPin = (pinVal === sessionPin) || (pinVal === masterPin) || (pinVal === currentShopPin);
+
+      if (isValidPin) {
+        if (pendingAction === 'stop_employee') {
+          closePinModal();
+          openStopEmployeeModal();
+          return;
+        }
+
+        if (pendingAction === 'delete') {
+          let id = pendingDeleteId;
+          closePinModal();
+          if (id) {
+            if (navigator.onLine && supabaseClient) {
+              let { error } = await supabaseClient.from('transactions').delete().eq('id', id);
+              if (error) {
+                alert("ഡിലീറ്റ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+              } else {
+                alert("ഡിലീറ്റ് ചെയ്തു!");
+                fetchAllData();
+              }
+            } else {
+              transactionsList = transactionsList.filter(t => t.id !== id);
+              if (typeof renderDashboard === 'function') renderDashboard();
+              alert("ഡിലീറ്റ് ചെയ്തു!");
+            }
+          }
+        }
+      } else {
+        alert("പിൻ തെറ്റാണ്! ശരിയായ പാസ്‌വേഡ് നൽകുക.");
+        document.getElementById("pinInput").value = "";
+      }
+    }
+
+    // PART 1 ENDS HERE -> ബാക്കി സാലറി എൻജിനും, ഡാഷ്‌ബോർഡും, റിപ്പോർട്ടുകളും PART 2-ൽ തുടരും
+    // ==========================================================
+    // DROPDOWNS & INPUT RENDERING
+    // ==========================================================
+    function renderSaleInputs(type) {
+      const container = document.getElementById("saleFieldsContainer");
+      if (type === 'credit') {
+        container.innerHTML = `
+          <div class="grid grid-cols-3 gap-1.5">
+            <div class="bg-emerald-50/80 p-1.5 rounded-xl border border-emerald-200">
+              <label class="block text-[9px] font-extrabold text-emerald-900 mb-0.5 text-center truncate">💵 ക്യാഷ് കളക്ഷൻ</label>
+              <input type="number" step="any" id="saleCash" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-emerald-500 text-emerald-700" />
+            </div>
+            <div class="bg-blue-50/80 p-1.5 rounded-xl border border-blue-200">
+              <label class="block text-[9px] font-extrabold text-blue-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് കളക്ഷൻ</label>
+              <input type="number" step="any" id="saleBank" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+            </div>
+            <div class="bg-amber-50/80 p-1.5 rounded-xl border border-amber-200">
+              <label class="block text-[9px] font-extrabold text-amber-900 mb-0.5 text-center truncate">🛒 ക്രെഡിറ്റ് സെയിൽ</label>
+              <input type="number" step="any" id="saleCredit" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="grid grid-cols-2 gap-1.5">
+            <div class="bg-emerald-50/80 p-1.5 rounded-xl border border-emerald-200">
+              <label class="block text-[10px] font-extrabold text-emerald-900 mb-0.5 text-center truncate">💵 ക്യാഷ് സെയിൽ</label>
+              <input type="number" step="any" id="saleCash" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-emerald-500 text-emerald-700" />
+            </div>
+            <div class="bg-blue-50/80 p-1.5 rounded-xl border border-blue-200">
+              <label class="block text-[10px] font-extrabold text-blue-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് സെയിൽ</label>
+              <input type="number" step="any" id="saleBank" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderPurchaseInputs(type) {
+      const container = document.getElementById("purchaseFieldsContainer");
+      if (type === 'credit') {
+        container.innerHTML = `
+          <div class="grid grid-cols-3 gap-1.5">
+            <div class="bg-blue-50/80 p-1.5 rounded-xl border border-blue-200">
+              <label class="block text-[9px] font-extrabold text-blue-900 mb-0.5 text-center truncate">💵 ക്യാഷ് നൽകിയത്</label>
+              <input type="number" step="any" id="purCash" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+            </div>
+            <div class="bg-indigo-50/80 p-1.5 rounded-xl border border-indigo-200">
+              <label class="block text-[9px] font-extrabold text-indigo-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് നൽകിയത്</label>
+              <input type="number" step="any" id="purBank" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-700" />
+            </div>
+            <div class="bg-amber-50/80 p-1.5 rounded-xl border border-amber-200">
+              <label class="block text-[9px] font-extrabold text-amber-900 mb-0.5 text-center truncate">🚚 ക്രെഡിറ്റ് പർച്ചേസ്</label>
+              <input type="number" step="any" id="purCredit" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="grid grid-cols-2 gap-1.5">
+            <div class="bg-blue-50/80 p-1.5 rounded-xl border border-blue-200">
+              <label class="block text-[10px] font-extrabold text-blue-900 mb-0.5 text-center truncate">💵 ക്യാഷ് പർച്ചേസ്</label>
+              <input type="number" step="any" id="purCash" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+            </div>
+            <div class="bg-indigo-50/80 p-1.5 rounded-xl border border-indigo-200">
+              <label class="block text-[10px] font-extrabold text-indigo-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് പർച്ചേസ്</label>
+              <input type="number" step="any" id="purBank" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-700" />
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function onCustomerSelected() {
+      let val = document.getElementById("saleCustomerInput").value.trim();
+      if (!val) {
+        document.getElementById("custOpeningInfo").innerText = "";
+        renderSaleInputs('cash');
+        return;
+      }
+      let cleanName = cleanPartyName(val);
+      let cust = (customersList || []).find(c => c && cleanPartyName(c.name) === cleanName);
+
+      if (cust) {
+        let isCredit = (cust.type || '').trim().toLowerCase() === 'credit';
+        if (isCredit) {
+          let liveBal = parseFloat(cust.opening_balance) || 0;
+          (transactionsList || []).forEach(t => {
+            if (t && cleanPartyName(t.party_name) === cleanName && t.type === 'sale') {
+              liveBal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
+            }
+          });
+          document.getElementById("custOpeningInfo").innerText = `ലൈവ് ബാലൻസ് (കിട്ടാനുള്ളത്): ₹ ${liveBal.toLocaleString('en-IN')}`;
+          renderSaleInputs('credit');
+        } else {
+          document.getElementById("custOpeningInfo").innerText = `ക്യാഷ് കസ്റ്റമർ (ബാക്കി ബാധകമല്ല)`;
+          renderSaleInputs('cash');
+        }
+      } else {
+        document.getElementById("custOpeningInfo").innerText = `പുതിയ കസ്റ്റമർ (ക്യാഷ് ആയി സേവ് ആകും)`;
+        renderSaleInputs('cash');
+      }
+    }
+
+    function onVendorSelected() {
+      let val = document.getElementById("purchaseVendorInput").value.trim();
+      if (!val) {
+        document.getElementById("vendorOpeningInfo").innerText = "";
+        renderPurchaseInputs('cash');
+        return;
+      }
+      let cleanName = cleanPartyName(val);
+      let vend = (vendorsList || []).find(v => v && cleanPartyName(v.name) === cleanName);
+
+      if (vend) {
+        let isCredit = (vend.type || '').trim().toLowerCase() === 'credit';
+        if (isCredit) {
+          let liveBal = parseFloat(vend.opening_balance) || 0;
+          (transactionsList || []).forEach(t => {
+            if (t && cleanPartyName(t.party_name) === cleanName && t.type === 'purchase') {
+              liveBal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
+            }
+          });
+          document.getElementById("vendorOpeningInfo").innerText = `ലൈവ് ബാലൻസ് (കൊടുക്കാനുള്ളത്): ₹ ${liveBal.toLocaleString('en-IN')}`;
+          renderPurchaseInputs('credit');
+        } else {
+          document.getElementById("vendorOpeningInfo").innerText = `ക്യാഷ് വെണ്ടർ (ബാക്കി ബാധകമല്ല)`;
+          renderPurchaseInputs('cash');
+        }
+      } else {
+        document.getElementById("vendorOpeningInfo").innerText = `പുതിയ വെണ്ടർ (ക്യാഷ് ആയി സേവ് ആകും)`;
+        renderPurchaseInputs('cash');
+      }
+    }
+
+    function populateDropdowns() {
+      const vendDL = document.getElementById("vendorListOptions");
+      if(vendDL) {
+        vendDL.innerHTML = "";
+        (vendorsList || []).forEach(v => { 
+          if(v && v.name) vendDL.innerHTML += `<option value="${v.name} (${v.type || 'cash'})">`; 
+        });
+      }
+
+      const custDL = document.getElementById("customerListOptions");
+      if(custDL) {
+        custDL.innerHTML = "";
+        (customersList || []).forEach(c => { 
+          if(c && c.name) custDL.innerHTML += `<option value="${c.name} (${c.type || 'cash'})">`; 
+        });
+      }
+
+      const uniDL = document.getElementById("unifiedPartyOptions");
+      if(uniDL) {
+        uniDL.innerHTML = "";
+        (expensesMasterList || []).forEach(e => {
+          if(e && e.name) uniDL.innerHTML += `<option value="${e.name}">`;
+        });
+        (employeesList || []).forEach(em => {
+          if(em && em.name) {
+            let tag = (em.status === 'stopped' || em.status === 'left') ? ' (Stopped)' : '';
+            uniDL.innerHTML += `<option value="${em.name}${tag}">`;
+          }
+        });
+      }
+    }
+
+    function onUnifiedPartySelected() {
+      let rawVal = document.getElementById("unifiedPartyInput")?.value.trim() || "";
+      const infoEl = document.getElementById("unifiedPartyInfo");
+      const badge = document.getElementById("currentTypeBadge");
+      const saveBtn = document.getElementById("btnSaveUnified");
+
+      if (!rawVal) {
+        if (infoEl) infoEl.innerText = "";
+        if (badge) {
+          badge.className = "text-[10px] font-extrabold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border";
+          badge.innerText = "തിരഞ്ഞെടുക്കുക";
+        }
+        if (saveBtn) {
+          saveBtn.className = "w-full py-2.5 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow cursor-pointer";
+          saveBtn.innerText = "+ സേവ് ചെയ്യുക";
+        }
+        return;
+      }
+
+      let cleanVal = cleanPartyName(rawVal);
+      const matchedEmp = (employeesList || []).find(em => em && cleanPartyName(em.name) === cleanVal);
+      const matchedExp = (expensesMasterList || []).find(e => e && cleanPartyName(e.name) === cleanVal);
+
+      if (matchedEmp) {
+        const emp = matchedEmp;
+        const isStopped = (emp.status === 'stopped' || emp.status === 'left');
+        badge.className = isStopped 
+          ? "text-[10px] font-extrabold bg-rose-100 text-rose-900 px-2 py-0.5 rounded-full border border-rose-300"
+          : "text-[10px] font-extrabold bg-purple-100 text-purple-900 px-2 py-0.5 rounded-full border border-purple-300";
+        badge.innerText = isStopped ? "🛑 സാലറി (Stopped)" : "👥 സാലറി (Salary)";
+        
+        saveBtn.className = "w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow cursor-pointer";
+        saveBtn.innerText = "+ സാലറി സേവ് ചെയ്യുക";
+
+        const busDate = document.getElementById("filterDate")?.value || getLocalDateString();
+        const liveBal = calculateEmployeePendingBalance(emp, busDate);
+        const joinDate = emp.joining_date || "2026-01-01";
+        
+        infoEl.className = isStopped ? "text-[11px] font-black text-rose-700 block truncate mt-1" : "text-[11px] font-black text-purple-700 block truncate mt-1";
+        infoEl.innerText = `ലൈവ് ബാലൻസ്: ₹ ${liveBal.toLocaleString('en-IN')} (ശമ്പളം: ${emp.monthly_salary || 0} | ജോയിനിങ്: ${joinDate}${isStopped ? ' | സ്റ്റോപ്പ്: ' + emp.stop_date : ''})`;
+      } else {
+        badge.className = "text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300";
+        badge.innerText = "⚡ ചിലവ് (Expense)";
+        saveBtn.className = "w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow cursor-pointer";
+        saveBtn.innerText = "+ ചിലവ് സേവ് ചെയ്യുക";
+
+        const exp = matchedExp || (expensesMasterList || []).find(e => e && e.name && rawVal.toLowerCase().includes(e.name.toLowerCase()));
+        if (exp) {
+          let expOpening = parseFloat(exp.opening_balance) || 0;
+          let expClean = cleanPartyName(exp.name);
+          let totalPaid = 0;
+
+          (transactionsList || []).forEach(t => {
+            if (t && t.type === 'expense' && cleanPartyName(t.party_name).includes(expClean)) {
+              totalPaid += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+            }
+          });
+
+          if (expOpening > 0) {
+            let pendingBal = expOpening - totalPaid;
+            if (pendingBal > 0) {
+              infoEl.className = "text-[11px] font-black text-amber-700 block truncate mt-1";
+              infoEl.innerText = `കൊടുക്കാനുള്ള ബാക്കി തുക: ₹ ${pendingBal.toLocaleString('en-IN')} (ആകെ ബില്ല്: ₹ ${expOpening.toLocaleString('en-IN')})`;
+            } else {
+              infoEl.className = "text-[11px] font-black text-emerald-700 block truncate mt-1";
+              infoEl.innerText = `മുഴുവൻ നൽകി (ബാക്കി: ₹ 0 | ആകെ ബില്ല്: ₹ ${expOpening.toLocaleString('en-IN')})`;
+            }
+          } else {
+            infoEl.className = "text-[11px] font-black text-amber-700 block truncate mt-1";
+            if (totalPaid > 0) {
+              infoEl.innerText = `ഇതുവരെ ചിലവായ ആകെ തുക: ₹ ${totalPaid.toLocaleString('en-IN')}`;
+            } else {
+              infoEl.innerText = `ചിലവ് ഇനം: ${exp.name}`;
+            }
+          }
+        } else {
+          infoEl.className = "text-[11px] font-black text-amber-700 block truncate mt-1";
+          infoEl.innerText = `പുതിയ ചിലവ് എൻട്രി: ${rawVal}`;
+        }
+      }
+    }
+
+    // ==========================================================
+    // DATA FETCHING & LOCAL CACHE
+    // ==========================================================
+    async function loadShopName() {
+      if (!supabaseClient) return;
+      try {
+        const { data } = await supabaseClient.from('app_settings').select('shop_name').eq('id', 1).single();
+        if (data && data.shop_name) {
+          safeSetText("headerShopName", data.shop_name);
+          safeSetText("reportPageShopName", data.shop_name);
+        }
+      } catch (e) {}
+    }
+
+    async function loadOpeningBalances() {
+      if (!supabaseClient) return;
+      try {
+        const { data } = await supabaseClient.from('app_settings').select('opening_cash, opening_bank').eq('id', 1).single();
+        if (data) {
+          openingSettings.openingCash = parseFloat(data.opening_cash) || 0;
+          openingSettings.openingBank = parseFloat(data.opening_bank) || 0;
+          if (typeof renderDashboard === 'function') renderDashboard();
+        }
+      } catch(e) {}
+    }
+
+    async function fetchAllData(manual = false) {
+      if (navigator.onLine && supabaseClient) {
+        try {
+          const [cRes, vRes, eRes, expRes, tRes, agRes, setRes] = await Promise.allSettled([
+            supabaseClient.from('customers').select('*').order('name', { ascending: true }),
+            supabaseClient.from('vendors').select('*').order('name', { ascending: true }),
+            supabaseClient.from('employees').select('*').order('name', { ascending: true }),
+            supabaseClient.from('expenses_master').select('*').order('name', { ascending: true }),
+            supabaseClient.from('transactions').select('*').order('date', { ascending: false }).limit(10000),
+            supabaseClient.from('agents').select('*').order('name', { ascending: true }),
+            supabaseClient.from('app_settings').select('*')
+          ]);
+
+          if (cRes.status === 'fulfilled' && cRes.value.data) {
+            customersList = cRes.value.data;
+            localStorage.setItem(`RUGAMA_${currentShopId}_CUSTOMERS`, JSON.stringify(customersList));
+          }
+          if (vRes.status === 'fulfilled' && vRes.value.data) {
+            vendorsList = vRes.value.data;
+            localStorage.setItem(`RUGAMA_${currentShopId}_VENDORS`, JSON.stringify(vendorsList));
+          }
+          if (eRes.status === 'fulfilled' && eRes.value.data) {
+            employeesList = eRes.value.data;
+            localStorage.setItem(`RUGAMA_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
+          }
+          if (expRes.status === 'fulfilled' && expRes.value.data) {
+            expensesMasterList = expRes.value.data;
+            localStorage.setItem(`RUGAMA_${currentShopId}_EXPENSES_MASTER`, JSON.stringify(expensesMasterList));
+          }
+          if (tRes.status === 'fulfilled' && tRes.value.data) {
+            transactionsList = tRes.value.data;
+            localStorage.setItem(`RUGAMA_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+          }
+          if (agRes.status === 'fulfilled' && agRes.value.data) {
+            agentsList = agRes.value.data;
+            localStorage.setItem(`RUGAMA_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
+          }
+          if (setRes.status === 'fulfilled' && setRes.value.data && setRes.value.data.length > 0) {
+            openingSettings.openingCash = parseFloat(setRes.value.data[0].opening_cash) || 0;
+            openingSettings.openingBank = parseFloat(setRes.value.data[0].opening_bank) || 0;
+          }
+        } catch (err) {
+          console.warn("Using offline cached data:", err);
+          loadCachedData();
+        }
+      } else {
+        loadCachedData();
+      }
+
+      populateDropdowns();
+      if (typeof renderDashboard === 'function') renderDashboard();
+      if (!document.getElementById("reportModal").classList.contains("hidden")) {
+        if (typeof renderReportData === 'function') renderReportData(currentReportMode);
+      }
+      updateNetworkUI();
+
+      if (manual) alert("ഡാറ്റ റിഫ്രഷ് ചെയ്തു!");
+    }
+
+    function loadCachedData() {
+      try {
+        customersList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_CUSTOMERS`)) || [];
+        vendorsList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_VENDORS`)) || [];
+        employeesList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_EMPLOYEES`)) || [];
+        expensesMasterList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_EXPENSES_MASTER`)) || [];
+        transactionsList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_TRANSACTIONS`)) || [];
+        agentsList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_AGENTS`)) || [];
+      } catch(e){}
+    }
+
+    // ==========================================================
+    // SALARY ACCRUAL ENGINE & STOP EMPLOYEE CONTROLS
+    // ==========================================================
+    function getCycleStartDate(joinDate, cycleIndex) {
+      let d = new Date(joinDate.getFullYear(), joinDate.getMonth() + cycleIndex, joinDate.getDate());
+      let expectedMonth = (joinDate.getMonth() + cycleIndex) % 12;
+      if (expectedMonth < 0) expectedMonth += 12;
+      while (d.getMonth() !== expectedMonth) {
+        d.setDate(d.getDate() - 1);
+      }
+      return d;
+    }
+
+    function calculateEmployeeAccruedSalary(emp, asOfDateStr) {
+      if (!emp) return 0;
+      const monthlySalary = parseFloat(emp.monthly_salary) || 0;
+      const baseAdv = parseFloat(emp.opening_advance || emp.opening_balance) || 0;
+      if (!monthlySalary) return baseAdv;
+
+      const joinD = parseToDateObj(emp.joining_date);
+      const refStr = asOfDateStr ? cleanDate(asOfDateStr) : (document.getElementById("filterDate")?.value || getLocalDateString());
+      let targetD = parseToDateObj(refStr);
+
+      const isStopped = (emp.status === 'stopped' || emp.status === 'left');
+      let stopD = null;
+      if (isStopped && emp.stop_date) {
+        stopD = parseToDateObj(emp.stop_date);
+        if (stopD < targetD) {
+          targetD = stopD;
+        }
+      }
+
+      if (targetD < joinD) return baseAdv;
+
+      let k = 0;
+      while (true) {
+        let nextCycleStart = getCycleStartDate(joinD, k + 1);
+        if (targetD >= nextCycleStart) {
+          k++;
+        } else {
+          break;
+        }
+      }
+
+      let totalSalary = baseAdv + (k * monthlySalary);
+
+      if (isStopped) {
+        let currentCycleStart = getCycleStartDate(joinD, k);
+        let nextCycleStart = getCycleStartDate(joinD, k + 1);
+
+        let currentCycleEnd = new Date(nextCycleStart);
+        currentCycleEnd.setDate(currentCycleEnd.getDate() - 1);
+
+        if (targetD >= currentCycleStart && targetD <= currentCycleEnd) {
+          if (targetD.getTime() === currentCycleEnd.getTime()) {
+            totalSalary += monthlySalary;
+          } else {
+            let diffMs = targetD.getTime() - currentCycleStart.getTime();
+            let daysWorked = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+            
+            let year = targetD.getFullYear();
+            let month = targetD.getMonth() + 1;
+            let daysInMonth = new Date(year, month, 0).getDate();
+
+            let dailyRate = monthlySalary / daysInMonth;
+            let proRataAmt = Math.round(dailyRate * daysWorked * 100) / 100;
+            totalSalary += proRataAmt;
+          }
+        }
+      }
+
+      return totalSalary;
+    }
+
+    function calculateEmployeePendingBalance(emp, asOfDateStr) {
+      if (!emp) return 0;
+      const refDate = asOfDateStr || (document.getElementById("filterDate")?.value || getLocalDateString());
+      const totalAccrued = calculateEmployeeAccruedSalary(emp, refDate);
+
+      let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
+      const offlineQueue = getOfflineQueue();
+      offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+
+      const empClean = cleanPartyName(emp.name);
+      let totalPaid = 0;
+
+      allTx.forEach(t => {
+        if (t && t.type === 'salary') {
+          let staffClean = cleanPartyName(t.party_name);
+          if (staffClean.includes(empClean)) {
+            totalPaid += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+          }
+        }
+      });
+
+      return totalAccrued - totalPaid;
+    }
+
+    function openStopEmployeeModal() {
+      const sel = document.getElementById("stopEmpSelect");
+      if (!sel) return;
+      sel.innerHTML = '<option value="">-- ജീവനക്കാരനെ തിരഞ്ഞെടുക്കുക --</option>';
+
+      (employeesList || []).forEach(emp => {
+        if (emp && emp.name) {
+          let isStop = (emp.status === 'stopped' || emp.status === 'left');
+          sel.innerHTML += `<option value="${emp.id || emp.name}">${emp.name} ${isStop ? '🛑 [Stopped]' : '🟢'}</option>`;
+        }
+      });
+
+      onStopModalEmpSelected();
+      document.getElementById("stopEmployeeModal").classList.remove("hidden");
+    }
+
+    function closeStopEmployeeModal() {
+      document.getElementById("stopEmployeeModal").classList.add("hidden");
+    }
+
+    function onStopModalEmpSelected() {
+      const val = document.getElementById("stopEmpSelect").value;
+      const emp = (employeesList || []).find(e => String(e.id || e.name) === String(val));
+      const joinEl = document.getElementById("stopEmpJoinDateInfo");
+      const salEl = document.getElementById("stopEmpSalaryInfo");
+      const statusSel = document.getElementById("stopEmpStatusSelect");
+      const stopDateInp = document.getElementById("stopEmpDateInput");
+
+      if (!emp) {
+        joinEl.innerText = "--";
+        salEl.innerText = "₹ 0";
+        safeSetText("stopEmpLiveBalInfo", "₹ 0");
+        statusSel.value = "active";
+        onStopStatusChange();
+        return;
+      }
+
+      joinEl.innerText = emp.joining_date || "2026-01-01";
+      salEl.innerText = `₹ ${(parseFloat(emp.monthly_salary) || 0).toLocaleString('en-IN')}`;
+
+      const isStopped = (emp.status === 'stopped' || emp.status === 'left');
+      statusSel.value = isStopped ? "stopped" : "active";
+      stopDateInp.value = emp.stop_date || (document.getElementById("filterDate")?.value || getLocalDateString());
+
+      onStopStatusChange();
+      previewStopSettlement();
+    }
+
+    function onStopStatusChange() {
+      const status = document.getElementById("stopEmpStatusSelect").value;
+      const dateCont = document.getElementById("stopDateContainer");
+      const previewCont = document.getElementById("stopSettlementPreview");
+
+      if (status === 'stopped') {
+        dateCont.classList.remove("hidden");
+        previewCont.classList.remove("hidden");
+        previewStopSettlement();
+      } else {
+        dateCont.classList.add("hidden");
+        previewCont.classList.add("hidden");
+        const val = document.getElementById("stopEmpSelect").value;
+        const emp = (employeesList || []).find(e => String(e.id || e.name) === String(val));
+        if (emp) {
+          const liveBal = calculateEmployeePendingBalance(emp);
+          safeSetText("stopEmpLiveBalInfo", `₹ ${liveBal.toLocaleString('en-IN')}`);
+        }
+      }
+    }
+
+    function previewStopSettlement() {
+      const val = document.getElementById("stopEmpSelect").value;
+      const emp = (employeesList || []).find(e => String(e.id || e.name) === String(val));
+      if (!emp) return;
+
+      const stopDate = document.getElementById("stopEmpDateInput").value || getLocalDateString();
+      const tempEmp = { ...emp, status: 'stopped', stop_date: stopDate };
+
+      const accrued = calculateEmployeeAccruedSalary(tempEmp, stopDate);
+
+      let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
+      const offlineQueue = getOfflineQueue();
+      offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+
+      const empClean = cleanPartyName(emp.name);
+      let paid = 0;
+      allTx.forEach(t => {
+        if (t && t.type === 'salary') {
+          let staffClean = cleanPartyName(t.party_name);
+          if (staffClean.includes(empClean)) {
+            paid += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+          }
+        }
+      });
+
+      const finalBal = accrued - paid;
+      safeSetText("previewAccruedSal", `₹ ${accrued.toLocaleString('en-IN')}`);
+      safeSetText("previewPaidAmt", `₹ ${paid.toLocaleString('en-IN')}`);
+      safeSetText("previewFinalBal", `₹ ${finalBal.toLocaleString('en-IN')}`);
+      safeSetText("stopEmpLiveBalInfo", `₹ ${finalBal.toLocaleString('en-IN')}`);
+    }
+
+    async function saveEmployeeStopStatus() {
+      const val = document.getElementById("stopEmpSelect").value;
+      const emp = (employeesList || []).find(e => String(e.id || e.name) === String(val));
+      if (!emp) return alert("ജീവനക്കാരനെ തിരഞ്ഞെടുക്കുക!");
+
+      const status = document.getElementById("stopEmpStatusSelect").value;
+      const stopDate = status === 'stopped' ? document.getElementById("stopEmpDateInput").value : null;
+
+      emp.status = status;
+      emp.stop_date = stopDate;
+
+      if (navigator.onLine && supabaseClient) {
+        try {
+          await supabaseClient.from('employees').update({
+            status: status,
+            stop_date: stopDate
+          }).eq('id', emp.id || 0);
+        } catch(e) {
+          console.warn("Status update fallback:", e);
+        }
+      }
+
+      localStorage.setItem(`RUGAMA_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
+      populateDropdowns();
+      onUnifiedPartySelected();
+      if (typeof renderDashboard === 'function') renderDashboard();
+      closeStopEmployeeModal();
+      alert("ജീവനക്കാരന്റെ സ്റ്റാറ്റസ് അപ്ഡേറ്റ് ചെയ്തു!");
+    }
+
+    // ==========================================================
+    // DASHBOARD RENDERING & MODAL LIST TABLES
+    // ==========================================================
+    function renderDashboard() {
+      let selectedDate = document.getElementById("filterDate")?.value || getLocalDateString();
+
+      let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
+      const offlineQueue = getOfflineQueue();
+      offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+
+      let totSale = 0, totPur = 0, totExp = 0;
+
+      let cashSale = 0, custCashReceipt = 0;
+      let bankSale = 0, custBankReceipt = 0;
+      let cashPur = 0, vendCashPay = 0;
+      let bankPur = 0, vendBankPay = 0;
+      let expCash = 0, expBank = 0;
+      let salCash = 0, salBank = 0;
+
+      let dashCashSales = [];
+      let dashCreditSales = [];
+      let dashCashPur = [];
+      let dashCreditPur = [];
+      let dashSalaries = [];
+      let dashExpenses = [];
+
+      allTx.forEach(t => {
+        if (!t) return;
+        if (cleanDate(t.date) === selectedDate) {
+          if (t.type === 'sale') {
+            let cCash = Math.abs(parseFloat(t.cash_amount) || 0);
+            let cBank = Math.abs(parseFloat(t.bank_amount) || 0);
+            let cCr = parseFloat(t.credit_amount) || 0;
+
+            let cleanN = cleanPartyName(t.party_name);
+            let cust = (customersList || []).find(c => c && cleanPartyName(c.name) === cleanN);
+            let isCreditCust = cust && (cust.type || '').toLowerCase() === 'credit';
+
+            if (isCreditCust) {
+              totSale += cCr;
+              custCashReceipt += cCash;
+              custBankReceipt += cBank;
+              dashCreditSales.push({ id: t.id, name: t.party_name, cash: cCash, bank: cBank, cr: cCr });
+            } else {
+              let lineSale = cCash + cBank + cCr;
+              totSale += lineSale;
+              cashSale += cCash;
+              bankSale += cBank;
+              dashCashSales.push({ id: t.id, name: t.party_name, cash: cCash, bank: cBank, total: lineSale });
+            }
+          } else if (t.type === 'purchase') {
+            let pCash = Math.abs(parseFloat(t.cash_amount) || 0);
+            let pBank = Math.abs(parseFloat(t.bank_amount) || 0);
+            let pCr = parseFloat(t.credit_amount) || 0;
+
+            let cleanN = cleanPartyName(t.party_name);
+            let vend = (vendorsList || []).find(v => v && cleanPartyName(v.name) === cleanN);
+            let isCreditVend = vend && (vend.type || '').toLowerCase() === 'credit';
+
+            if (isCreditVend) {
+              totPur += pCr;
+              vendCashPay += pCash;
+              vendBankPay += pBank;
+              dashCreditPur.push({ id: t.id, name: t.party_name, cash: pCash, bank: pBank, cr: pCr });
+            } else {
+              let linePur = pCash + pBank + pCr;
+              totPur += linePur;
+              cashPur += pCash;
+              bankPur += pBank;
+              dashCashPur.push({ id: t.id, name: t.party_name, cash: pCash, bank: pBank, total: linePur });
+            }
+          } else if (t.type === 'expense') {
+            let eC = Math.abs(t.cash_amount || 0);
+            let eB = Math.abs(t.bank_amount || 0);
+            expCash += eC;
+            expBank += eB;
+            totExp += (eC + eB);
+            
+            let rawExp = t.party_name || "Expense";
+            let cleanExp = rawExp.split(' (')[0].trim();
+            dashExpenses.push({ id: t.id, name: cleanExp, rawName: rawExp, cash: eC, bank: eB, total: (eC + eB) });
+          } else if (t.type === 'salary') {
+            let sC = Math.abs(t.cash_amount || 0);
+            let sB = Math.abs(t.bank_amount || 0);
+            salCash += sC;
+            salBank += sB;
+            totExp += (sC + sB);
+
+            let rawSal = t.party_name || "Staff";
+            let cleanStaff = rawSal.replace(/^Staff:\s*/i, "").split(' -')[0].trim();
+            dashSalaries.push({ id: t.id, name: cleanStaff, rawName: rawSal, cash: sC, bank: sB, total: (sC + sB) });
+          }
+        }
+      });
+
+      safeSetText("todayPurCardTotal", `₹ ${totPur.toLocaleString('en-IN')}`);
+      safeSetText("todayExpCardTotal", `₹ ${totExp.toLocaleString('en-IN')}`);
+      safeSetText("todaySaleCardTotal", `₹ ${totSale.toLocaleString('en-IN')}`);
+
+      // 1. POPUP TABLES: PURCHASES
+      let totCPCash = 0, totCPBank = 0, totCPTotal = 0;
+      let modalCashPurHtml = `
+        <table class="w-full text-xs text-center border-collapse border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <thead>
+            <tr class="bg-blue-100 text-blue-950 font-black border-b border-blue-200">
+              <th class="p-2 text-left">വെണ്ടർ പേര്</th>
+              <th class="p-2">ക്യാഷ്</th>
+              <th class="p-2">ബാങ്ക്</th>
+              <th class="p-2">ആകെ തുക</th>
+              <th class="p-2 text-right">🗑️</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-semibold">
+      `;
+      if (dashCashPur.length === 0) {
+        modalCashPurHtml += `<tr><td colspan="5" class="p-3 text-center text-slate-400 font-bold">ക്യാഷ് പർച്ചേസ് ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
+        dashCashPur.forEach(p => {
+          totCPCash += p.cash; totCPBank += p.bank; totCPTotal += p.total;
+          modalCashPurHtml += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-2 text-left font-bold text-slate-800">${p.name}</td>
+              <td class="p-2 text-blue-700">${p.cash}</td>
+              <td class="p-2 text-indigo-700">${p.bank}</td>
+              <td class="p-2 font-black text-slate-900">${p.total}</td>
+              <td class="p-2 text-right">
+                <button onclick="requestPin('${p.id}')" class="text-rose-600 hover:text-rose-800 font-bold px-1.5 py-0.5 rounded cursor-pointer transition">🗑️</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      modalCashPurHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-blue-50 text-blue-950 font-black border-t-2 border-blue-300">
+              <td class="p-2 text-left uppercase">ആകെ:</td>
+              <td class="p-2 text-blue-800">${totCPCash}</td>
+              <td class="p-2 text-indigo-800">${totCPBank}</td>
+              <td class="p-2 text-slate-950 font-black">₹${totCPTotal}</td>
+              <td class="p-2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("modalCashPurchasesList", modalCashPurHtml);
+
+      let totCrPCash = 0, totCrPBank = 0, totCrPCr = 0;
+      let modalCreditPurHtml = `
+        <table class="w-full text-xs text-center border-collapse border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <thead>
+            <tr class="bg-indigo-100 text-indigo-950 font-black border-b border-indigo-200">
+              <th class="p-2 text-left">വെണ്ടർ പേര്</th>
+              <th class="p-2">ക്യാഷ് നൽകിയത്</th>
+              <th class="p-2">ബാങ്ക് നൽകിയത്</th>
+              <th class="p-2">ക്രെഡിറ്റ് പർച്ചേസ്</th>
+              <th class="p-2 text-right">🗑️</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-semibold">
+      `;
+      if (dashCreditPur.length === 0) {
+        modalCreditPurHtml += `<tr><td colspan="5" class="p-3 text-center text-slate-400 font-bold">ക്രെഡിറ്റ് പർച്ചേസ് ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
+        dashCreditPur.forEach(p => {
+          totCrPCash += p.cash; totCrPBank += p.bank; totCrPCr += p.cr;
+          modalCreditPurHtml += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-2 text-left font-bold text-slate-800">${p.name}</td>
+              <td class="p-2 text-blue-700">${p.cash}</td>
+              <td class="p-2 text-indigo-700">${p.bank}</td>
+              <td class="p-2 text-amber-700 font-black">${p.cr}</td>
+              <td class="p-2 text-right">
+                <button onclick="requestPin('${p.id}')" class="text-rose-600 hover:text-rose-800 font-bold px-1.5 py-0.5 rounded cursor-pointer transition">🗑️</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      modalCreditPurHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-indigo-50 text-indigo-950 font-black border-t-2 border-indigo-300">
+              <td class="p-2 text-left uppercase">ആകെ:</td>
+              <td class="p-2 text-blue-800">${totCrPCash}</td>
+              <td class="p-2 text-indigo-800">${totCrPBank}</td>
+              <td class="p-2 text-amber-900 font-black">₹${totCrPCr}</td>
+              <td class="p-2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("modalCreditPurchasesList", modalCreditPurHtml);
+
+      // 2. POPUP TABLES: EXPENSES & SALARIES
+      let totSalCash = 0, totSalBank = 0, totSalGrand = 0;
+      let modalSalariesHtml = `
+        <table class="w-full text-xs text-center border-collapse border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <thead>
+            <tr class="bg-purple-100 text-purple-950 font-black border-b border-purple-200">
+              <th class="p-2 text-left">സ്റ്റാഫ് പേര്</th>
+              <th class="p-2">ക്യാഷ് നൽകിയത്</th>
+              <th class="p-2">ബാങ്ക് നൽകിയത്</th>
+              <th class="p-2">ആകെ</th>
+              <th class="p-2 text-right">🗑️</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-semibold">
+      `;
+      if (dashSalaries.length === 0) {
+        modalSalariesHtml += `<tr><td colspan="5" class="p-3 text-center text-slate-400 font-bold">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
+        dashSalaries.forEach(s => {
+          totSalCash += s.cash; totSalBank += s.bank; totSalGrand += s.total;
+          modalSalariesHtml += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-2 text-left font-bold text-slate-800">${s.name}</td>
+              <td class="p-2 text-amber-700">${s.cash}</td>
+              <td class="p-2 text-blue-700">${s.bank}</td>
+              <td class="p-2 font-black text-purple-900">${s.total}</td>
+              <td class="p-2 text-right">
+                <button onclick="requestPin('${s.id}')" class="text-rose-600 hover:text-rose-800 font-bold px-1.5 py-0.5 rounded cursor-pointer transition">🗑️</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      modalSalariesHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-purple-50 text-purple-950 font-black border-t-2 border-purple-300">
+              <td class="p-2 text-left uppercase">ആകെ:</td>
+              <td class="p-2 text-amber-800">${totSalCash}</td>
+              <td class="p-2 text-blue-800">${totSalBank}</td>
+              <td class="p-2 text-purple-950 font-black">₹${totSalGrand}</td>
+              <td class="p-2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("modalSalariesList", modalSalariesHtml);
+
+      let totExpCash = 0, totExpBank = 0, totExpGrand = 0;
+      let modalExpensesHtml = `
+        <table class="w-full text-xs text-center border-collapse border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <thead>
+            <tr class="bg-amber-100 text-amber-950 font-black border-b border-amber-200">
+              <th class="p-2 text-left">ചിലവ് ഇനം</th>
+              <th class="p-2">ക്യാഷ് നൽകിയത്</th>
+              <th class="p-2">ബാങ്ക് നൽകിയത്</th>
+              <th class="p-2">ആകെ</th>
+              <th class="p-2 text-right">🗑️</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-semibold">
+      `;
+      if (dashExpenses.length === 0) {
+        modalExpensesHtml += `<tr><td colspan="5" class="p-3 text-center text-slate-400 font-bold">ചിലവുകൾ ഇല്ല</td></tr>`;
+      } else {
+        dashExpenses.forEach(e => {
+          totExpCash += e.cash; totExpBank += e.bank; totExpGrand += e.total;
+          modalExpensesHtml += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-2 text-left font-bold text-slate-800">${e.name}</td>
+              <td class="p-2 text-amber-700">${e.cash}</td>
+              <td class="p-2 text-blue-700">${e.bank}</td>
+              <td class="p-2 font-black text-slate-900">${e.total}</td>
+              <td class="p-2 text-right">
+                <button onclick="requestPin('${e.id}')" class="text-rose-600 hover:text-rose-800 font-bold px-1.5 py-0.5 rounded cursor-pointer transition">🗑️</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      modalExpensesHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-amber-50 text-amber-950 font-black border-t-2 border-amber-300">
+              <td class="p-2 text-left uppercase">ആകെ:</td>
+              <td class="p-2 text-amber-800">${totExpCash}</td>
+              <td class="p-2 text-blue-800">${totExpBank}</td>
+              <td class="p-2 text-amber-950 font-black">₹${totExpGrand}</td>
+              <td class="p-2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("modalExpensesList", modalExpensesHtml);
+
+      // 3. POPUP TABLES: SALES
+      let totCSCash = 0, totCSBank = 0, totCSGrand = 0;
+      let modalCashSalesHtml = `
+        <table class="w-full text-xs text-center border-collapse border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <thead>
+            <tr class="bg-emerald-100 text-emerald-950 font-black border-b border-emerald-200">
+              <th class="p-2 text-left">കസ്റ്റമർ പേര്</th>
+              <th class="p-2">ക്യാഷ് സെയിൽ</th>
+              <th class="p-2">ബാങ്ക് സെയിൽ</th>
+              <th class="p-2">ആകെ തുക</th>
+              <th class="p-2 text-right">🗑️</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-semibold">
+      `;
+      if (dashCashSales.length === 0) {
+        modalCashSalesHtml += `<tr><td colspan="5" class="p-3 text-center text-slate-400 font-bold">ക്യാഷ് സെയിൽസ് ഇല്ല</td></tr>`;
+      } else {
+        dashCashSales.forEach(s => {
+          totCSCash += s.cash; totCSBank += s.bank; totCSGrand += s.total;
+          modalCashSalesHtml += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-2 text-left font-bold text-slate-800">${s.name}</td>
+              <td class="p-2 text-emerald-700">${s.cash}</td>
+              <td class="p-2 text-blue-700">${s.bank}</td>
+              <td class="p-2 font-black text-slate-900">${s.total}</td>
+              <td class="p-2 text-right">
+                <button onclick="requestPin('${s.id}')" class="text-rose-600 hover:text-rose-800 font-bold px-1.5 py-0.5 rounded cursor-pointer transition">🗑️</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      modalCashSalesHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-emerald-50 text-emerald-950 font-black border-t-2 border-emerald-300">
+              <td class="p-2 text-left uppercase">ആകെ:</td>
+              <td class="p-2 text-emerald-800">${totCSCash}</td>
+              <td class="p-2 text-blue-800">${totCSBank}</td>
+              <td class="p-2 text-slate-950 font-black">₹${totCSGrand}</td>
+              <td class="p-2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("modalCashSalesList", modalCashSalesHtml);
+
+      let totCrSCash = 0, totCrSBank = 0, totCrSGrand = 0;
+      let modalCreditSalesHtml = `
+        <table class="w-full text-xs text-center border-collapse border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <thead>
+            <tr class="bg-amber-100 text-amber-950 font-black border-b border-amber-200">
+              <th class="p-2 text-left">കസ്റ്റമർ പേര്</th>
+              <th class="p-2">ക്യാഷ് കളക്ഷൻ</th>
+              <th class="p-2">ബാങ്ക് കളക്ഷൻ</th>
+              <th class="p-2">ക്രെഡിറ്റ് സെയിൽ</th>
+              <th class="p-2 text-right">🗑️</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-semibold">
+      `;
+      if (dashCreditSales.length === 0) {
+        modalCreditSalesHtml += `<tr><td colspan="5" class="p-3 text-center text-slate-400 font-bold">ക്രെഡിറ്റ് ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
+        dashCreditSales.forEach(s => {
+          totCrSCash += s.cash; totCrSBank += s.bank; totCrSGrand += s.cr;
+          modalCreditSalesHtml += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-2 text-left font-bold text-slate-800">${s.name}</td>
+              <td class="p-2 text-emerald-700">${s.cash}</td>
+              <td class="p-2 text-blue-700">${s.bank}</td>
+              <td class="p-2 text-amber-700 font-black">${s.cr}</td>
+              <td class="p-2 text-right">
+                <button onclick="requestPin('${s.id}')" class="text-rose-600 hover:text-rose-800 font-bold px-1.5 py-0.5 rounded cursor-pointer transition">🗑️</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      modalCreditSalesHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-amber-50 text-amber-950 font-black border-t-2 border-amber-300">
+              <td class="p-2 text-left uppercase">ആകെ:</td>
+              <td class="p-2 text-emerald-800">${totCrSCash}</td>
+              <td class="p-2 text-blue-800">${totCrSBank}</td>
+              <td class="p-2 text-amber-900 font-black">₹${totCrSGrand}</td>
+              <td class="p-2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("modalCreditSalesList", modalCreditSalesHtml);
+
+      // Top Bar Summary
+      safeSetText("topPurSummary", totPur.toLocaleString('en-IN'));
+      safeSetText("topExpSummary", totExp.toLocaleString('en-IN'));
+      safeSetText("topSaleSummary", totSale.toLocaleString('en-IN'));
+
+      // 3 Combined Metric Cards
+      let totIncomeCash = cashSale + custCashReceipt;
+      let totIncomeBank = bankSale + custBankReceipt;
+      safeSetHtml("cardIncomeCombinedFormula", `
+        <div class="space-y-0.5 pt-1">
+          <div class="flex justify-between text-xs font-bold text-slate-600"><span>Cash:</span> <span>${totIncomeCash.toLocaleString('en-IN')}</span></div>
+          <div class="flex justify-between text-xs font-bold text-slate-600"><span>Bank:</span> <span>${totIncomeBank.toLocaleString('en-IN')}</span></div>
+          <div class="flex justify-between text-sm font-black text-emerald-700 pt-1 border-t border-emerald-200"><span>Total:</span> <span>${(totIncomeCash + totIncomeBank).toLocaleString('en-IN')}</span></div>
+        </div>
+      `);
+
+      let totPurCash = cashPur + vendCashPay;
+      let totPurBank = bankPur + vendBankPay;
+      safeSetHtml("cardPurchaseCombinedFormula", `
+        <div class="space-y-0.5 pt-1">
+          <div class="flex justify-between text-xs font-bold text-slate-600"><span>Cash:</span> <span>${totPurCash.toLocaleString('en-IN')}</span></div>
+          <div class="flex justify-between text-xs font-bold text-slate-600"><span>Bank:</span> <span>${totPurBank.toLocaleString('en-IN')}</span></div>
+          <div class="flex justify-between text-sm font-black text-blue-700 pt-1 border-t border-blue-200"><span>Total:</span> <span>${(totPurCash + totPurBank).toLocaleString('en-IN')}</span></div>
+        </div>
+      `);
+
+      let totExpSalCash = expCash + salCash;
+      let totExpSalBank = expBank + salBank;
+      safeSetHtml("cardExpSalCombinedFormula", `
+        <div class="space-y-0.5 pt-1">
+          <div class="flex justify-between text-xs font-bold text-slate-600"><span>Cash:</span> <span>${totExpSalCash.toLocaleString('en-IN')}</span></div>
+          <div class="flex justify-between text-xs font-bold text-slate-600"><span>Bank:</span> <span>${totExpSalBank.toLocaleString('en-IN')}</span></div>
+          <div class="flex justify-between text-sm font-black text-amber-700 pt-1 border-t border-amber-200"><span>Total:</span> <span>${(totExpSalCash + totExpSalBank).toLocaleString('en-IN')}</span></div>
+        </div>
+      `);
+
+      // Liquid Funds
+      let curCash = openingSettings.openingCash;
+      let curBank = openingSettings.openingBank;
+      allTx.forEach(t => {
+        if (!t) return;
+        curCash += (parseFloat(t.cash_amount) || 0);
+        curBank += (parseFloat(t.bank_amount) || 0);
+      });
+
+      safeSetText("cardLiquidTotal", `${(curCash + curBank).toLocaleString('en-IN')}`);
+      safeSetText("cardCashInHand", `💵 കയ്യിലുള്ള ക്യാഷ്: ${curCash.toLocaleString('en-IN')}`);
+      safeSetText("cardBankBalance", `🏦 ബാങ്ക് ബാലൻസ്: ${curBank.toLocaleString('en-IN')}`);
+    }
+
+    // ==========================================================
+    // REPORT MODAL ENGINE & NAVIGATION
+    // ==========================================================
+    function openReportModal() {
+      const modal = document.getElementById("reportModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.style.display = "flex";
+      }
+
+      const dashDate = document.getElementById("filterDate")?.value || getLocalDateString();
+      if (document.getElementById("repFilterDate")) document.getElementById("repFilterDate").value = dashDate;
+      if (document.getElementById("repFilterMonth")) document.getElementById("repFilterMonth").value = dashDate.substring(0, 7);
+
+      switchReportMode(currentReportMode || 'daily');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeReportModal() {
+      const modal = document.getElementById("reportModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+      }
+    }
+
+    function switchReportMode(mode) {
+      currentReportMode = mode;
+      const repDailyBtn = document.getElementById("repDailyBtn");
+      const repMonthlyBtn = document.getElementById("repMonthlyBtn");
+      const repStatBtn = document.getElementById("repStatBtn");
+      const statementControlBar = document.getElementById("statementControlBar");
+      const statementPrintContainer = document.getElementById("statementPrintContainer");
+      const reportPrintContainer = document.getElementById("reportPrintContainer");
+      const reportDateSelectorBar = document.getElementById("reportDateSelectorBar");
+      const repFilterDate = document.getElementById("repFilterDate");
+      const repFilterMonth = document.getElementById("repFilterMonth");
+      const repFilterLabel = document.getElementById("repFilterLabel");
+
+      if (repDailyBtn) repDailyBtn.className = "px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
+      if (repMonthlyBtn) repMonthlyBtn.className = "px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
+      if (repStatBtn) repStatBtn.className = "px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
+
+      if (mode === 'daily') {
+        if (repDailyBtn) repDailyBtn.className = "px-2.5 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black";
+        if (reportDateSelectorBar) reportDateSelectorBar.classList.remove("hidden");
+        if (repFilterDate) repFilterDate.classList.remove("hidden");
+        if (repFilterMonth) repFilterMonth.classList.add("hidden");
+        if (repFilterLabel) repFilterLabel.innerText = "📅 തീയതി മാറ്റുക:";
+        if (statementControlBar) statementControlBar.classList.add("hidden");
+        if (statementPrintContainer) statementPrintContainer.classList.add("hidden");
+        if (reportPrintContainer) reportPrintContainer.classList.remove("hidden");
+        renderReportData('daily');
+      } else if (mode === 'monthly') {
+        if (repMonthlyBtn) repMonthlyBtn.className = "px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow transition cursor-pointer font-black";
+        if (reportDateSelectorBar) reportDateSelectorBar.classList.remove("hidden");
+        if (repFilterDate) repFilterDate.classList.add("hidden");
+        if (repFilterMonth) repFilterMonth.classList.remove("hidden");
+        if (repFilterLabel) repFilterLabel.innerText = "📅 മാസം മാറ്റുക:";
+        if (statementControlBar) statementControlBar.classList.add("hidden");
+        if (statementPrintContainer) statementPrintContainer.classList.add("hidden");
+        if (reportPrintContainer) reportPrintContainer.classList.remove("hidden");
+        renderReportData('monthly');
+      } else if (mode === 'statement') {
+        if (repStatBtn) repStatBtn.className = "px-2.5 py-1 rounded-lg bg-indigo-600 text-white shadow transition cursor-pointer font-black";
+        if (reportDateSelectorBar) reportDateSelectorBar.classList.add("hidden");
+        if (statementControlBar) statementControlBar.classList.remove("hidden");
+        if (statementPrintContainer) statementPrintContainer.classList.remove("hidden");
+        if (reportPrintContainer) reportPrintContainer.classList.add("hidden");
+        populateStatementPartyDatalist();
+        generateStatement();
+      }
+    }
+
+    function onReportDateChanged() {
+      const selected = document.getElementById("repFilterDate")?.value;
+      if (selected && document.getElementById("filterDate")) {
+        document.getElementById("filterDate").value = selected;
+        renderDashboard();
+      }
+      renderReportData('daily');
+    }
+
+    function onReportMonthChanged() {
+      renderReportData('monthly');
+    }
+
+    // ==========================================================
+    // REPORT DATA RENDERER (DAILY & MONTHLY)
+    // ==========================================================
+    function renderReportData(mode) {
+      let targetDate = document.getElementById("repFilterDate")?.value || document.getElementById("filterDate")?.value || getLocalDateString();
+      let targetMonth = document.getElementById("repFilterMonth")?.value || targetDate.substring(0, 7);
+
+      let titleText = "";
+      let dateBadgeText = "";
+      let dateCondition;
+
+      if (mode === 'daily') {
+        dateCondition = (dStr) => cleanDate(dStr) === targetDate;
+        titleText = "ഡെയ്‌ലി റിപ്പോർട്ട് (Daily Report)";
+        dateBadgeText = `തീയതി: ${targetDate}`;
+      } else {
+        dateCondition = (dStr) => cleanDate(dStr).startsWith(targetMonth);
+        titleText = `മന്ത്ലി റിപ്പോർട്ട് (${targetMonth})`;
+        dateBadgeText = `മാസം: ${targetMonth}`;
+      }
+
+      safeSetText("reportModeTitle", titleText);
+      safeSetText("reportDateBadgeLabel", dateBadgeText);
+
+      let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
+      const offlineQueue = getOfflineQueue();
+      offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+
+      let totSale = 0, totPur = 0, totExp = 0, totSal = 0;
+      let cashSalesMap = {};
+      let creditSalesMap = {};
+      let cashPurMap = {};
+      let creditPurMap = {};
+      let salariesMap = {};
+      let expensesMap = {};
+
+      let custCashReceipt = 0, custBankReceipt = 0;
+      let vendCashPay = 0, vendBankPay = 0;
+
+      allTx.forEach(t => {
+        if (!t) return;
+        if (dateCondition(t.date)) {
+          if (t.type === 'sale') {
+            let cCash = Math.abs(parseFloat(t.cash_amount) || 0);
+            let cBank = Math.abs(parseFloat(t.bank_amount) || 0);
+            let cCr = parseFloat(t.credit_amount) || 0;
+            let rawName = t.party_name || "Unknown";
+            let cleanN = cleanPartyName(rawName);
+
+            let cust = (customersList || []).find(c => c && cleanPartyName(c.name) === cleanN);
+            let isCreditCust = cust && (cust.type || '').toLowerCase() === 'credit';
+
+            if (isCreditCust) {
+              totSale += cCr;
+              custCashReceipt += cCash;
+              custBankReceipt += cBank;
+              if (!creditSalesMap[rawName]) creditSalesMap[rawName] = { name: rawName, cash: 0, bank: 0, cr: 0 };
+              creditSalesMap[rawName].cash += cCash;
+              creditSalesMap[rawName].bank += cBank;
+              creditSalesMap[rawName].cr += cCr;
+            } else {
+              let lineTotal = cCash + cBank + cCr;
+              totSale += lineTotal;
+              if (!cashSalesMap[rawName]) cashSalesMap[rawName] = { name: rawName, cash: 0, bank: 0, total: 0 };
+              cashSalesMap[rawName].cash += cCash;
+              cashSalesMap[rawName].bank += cBank;
+              cashSalesMap[rawName].total += lineTotal;
+            }
+          } else if (t.type === 'purchase') {
+            let pCash = Math.abs(parseFloat(t.cash_amount) || 0);
+            let pBank = Math.abs(parseFloat(t.bank_amount) || 0);
+            let pCr = parseFloat(t.credit_amount) || 0;
+            let rawName = t.party_name || "Unknown";
+            let cleanN = cleanPartyName(rawName);
+
+            let vend = (vendorsList || []).find(v => v && cleanPartyName(v.name) === cleanN);
+            let isCreditVend = vend && (vend.type || '').toLowerCase() === 'credit';
+
+            if (isCreditVend) {
+              totPur += pCr;
+              vendCashPay += pCash;
+              vendBankPay += pBank;
+              if (!creditPurMap[rawName]) creditPurMap[rawName] = { name: rawName, cash: 0, bank: 0, cr: 0 };
+              creditPurMap[rawName].cash += pCash;
+              creditPurMap[rawName].bank += pBank;
+              creditPurMap[rawName].cr += pCr;
+            } else {
+              let lineTotal = pCash + pBank + pCr;
+              totPur += lineTotal;
+              if (!cashPurMap[rawName]) cashPurMap[rawName] = { name: rawName, cash: 0, bank: 0, total: 0 };
+              cashPurMap[rawName].cash += pCash;
+              cashPurMap[rawName].bank += pBank;
+              cashPurMap[rawName].total += lineTotal;
+            }
+          } else if (t.type === 'expense') {
+            let eC = Math.abs(parseFloat(t.cash_amount) || 0);
+            let eB = Math.abs(parseFloat(t.bank_amount) || 0);
+            let lineTotal = eC + eB;
+            totExp += lineTotal;
+
+            let rawExp = t.party_name || "Expense";
+            let cleanExp = rawExp.split(' (')[0].trim();
+            if (!expensesMap[cleanExp]) expensesMap[cleanExp] = { name: cleanExp, cash: 0, bank: 0, total: 0 };
+            expensesMap[cleanExp].cash += eC;
+            expensesMap[cleanExp].bank += eB;
+            expensesMap[cleanExp].total += lineTotal;
+          } else if (t.type === 'salary') {
+            let sC = Math.abs(parseFloat(t.cash_amount) || 0);
+            let sB = Math.abs(parseFloat(t.bank_amount) || 0);
+            let lineTotal = sC + sB;
+            totSal += lineTotal;
+
+            let rawSal = t.party_name || "Staff";
+            let cleanStaff = rawSal.replace(/^Staff:\s*/i, "").split(' -')[0].trim();
+            if (!salariesMap[cleanStaff]) salariesMap[cleanStaff] = { name: cleanStaff, cash: 0, bank: 0, total: 0 };
+            salariesMap[cleanStaff].cash += sC;
+            salariesMap[cleanStaff].bank += sB;
+            salariesMap[cleanStaff].total += lineTotal;
+          }
+        }
+      });
+
+      let totalCustOutstanding = 0;
+      (customersList || []).forEach(cust => {
+        if (cust && (cust.type || '').toLowerCase() === 'credit') {
+          let bal = parseFloat(cust.opening_balance) || 0;
+          let cName = cleanPartyName(cust.name);
+          allTx.forEach(t => {
+            if (t && t.type === 'sale' && cleanPartyName(t.party_name) === cName) {
+              bal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
+            }
+          });
+          totalCustOutstanding += bal;
+        }
+      });
+
+      let totalVendOutstanding = 0;
+      (vendorsList || []).forEach(vend => {
+        if (vend && (vend.type || '').toLowerCase() === 'credit') {
+          let bal = parseFloat(vend.opening_balance) || 0;
+          let vName = cleanPartyName(vend.name);
+          allTx.forEach(t => {
+            if (t && t.type === 'purchase' && cleanPartyName(t.party_name) === vName) {
+              bal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
+            }
+          });
+          totalVendOutstanding += bal;
+        }
+      });
+
+      let totalEmpPending = 0;
+      (employeesList || []).forEach(emp => {
+        totalEmpPending += calculateEmployeePendingBalance(emp, targetDate);
+      });
+
+      let curCash = openingSettings.openingCash;
+      let curBank = openingSettings.openingBank;
+      allTx.forEach(t => {
+        if (!t) return;
+        curCash += (parseFloat(t.cash_amount) || 0);
+        curBank += (parseFloat(t.bank_amount) || 0);
+      });
+      let totalLiquid = curCash + curBank;
+
+      safeSetText("repTotalSale", totSale.toLocaleString('en-IN'));
+      safeSetText("repTotalPurchase", totPur.toLocaleString('en-IN'));
+      safeSetText("repTotalExpense", (totExp + totSal).toLocaleString('en-IN'));
+      safeSetText("repCustBal", totalCustOutstanding.toLocaleString('en-IN'));
+      safeSetText("repVendorBal", totalVendOutstanding.toLocaleString('en-IN'));
+      safeSetText("repSalaryBal", totalEmpPending.toLocaleString('en-IN'));
+      safeSetText("repLiquidBal", totalLiquid.toLocaleString('en-IN'));
+
+      safeSetText("salesGrandBadge", `ആകെ: ₹${totSale.toLocaleString('en-IN')}`);
+      safeSetText("purchaseGrandBadge", `ആകെ: ₹${totPur.toLocaleString('en-IN')}`);
+
+      // 1. Cash Sales Table
+      const cashSalesArr = Object.values(cashSalesMap);
+      let rCSCash = 0, rCSBank = 0, rCSTotal = 0;
+      let cashSalesHtml = `
+        <table class="w-full text-[10px] text-center border-collapse">
+          <thead>
+            <tr class="bg-emerald-100 text-slate-800 font-bold border-b">
+              <th class="p-1 text-left">പേര്</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ആകെ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+      `;
+      if (cashSalesArr.length === 0) {
+        cashSalesHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
+        cashSalesArr.forEach(s => {
+          rCSCash += s.cash; rCSBank += s.bank; rCSTotal += s.total;
+          cashSalesHtml += `
+            <tr>
+              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${s.name}">${s.name}</td>
+              <td class="p-1 text-emerald-700">${s.cash}</td>
+              <td class="p-1 text-blue-700">${s.bank}</td>
+              <td class="p-1 text-right font-bold text-slate-900">${s.total}</td>
+            </tr>
+          `;
+        });
+      }
+      cashSalesHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-emerald-50 text-emerald-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rCSCash}</td>
+              <td class="p-1">${rCSBank}</td>
+              <td class="p-1 text-right">₹${rCSTotal}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("repCashSalesList", cashSalesHtml);
+
+      // 2. Credit Sales Table
+      const creditSalesArr = Object.values(creditSalesMap);
+      let rCrSCash = 0, rCrSBank = 0, rCrSCr = 0;
+      let creditSalesHtml = `
+        <table class="w-full text-[10px] text-center border-collapse">
+          <thead>
+            <tr class="bg-amber-100 text-slate-800 font-bold border-b">
+              <th class="p-1 text-left">പേര്</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ക്രെഡിറ്റ്</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+      `;
+      if (creditSalesArr.length === 0) {
+        creditSalesHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
+        creditSalesArr.forEach(s => {
+          rCrSCash += s.cash; rCrSBank += s.bank; rCrSCr += s.cr;
+          creditSalesHtml += `
+            <tr>
+              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${s.name}">${s.name}</td>
+              <td class="p-1 text-emerald-700">${s.cash}</td>
+              <td class="p-1 text-blue-700">${s.bank}</td>
+              <td class="p-1 text-right font-bold text-amber-700">${s.cr}</td>
+            </tr>
+          `;
+        });
+      }
+      creditSalesHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-amber-50 text-amber-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rCrSCash}</td>
+              <td class="p-1">${rCrSBank}</td>
+              <td class="p-1 text-right text-amber-900">₹${rCrSCr}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("repCreditSalesList", creditSalesHtml);
+
+      // 3. Cash Purchases Table
+      const cashPurArr = Object.values(cashPurMap);
+      let rCPCash = 0, rCPBank = 0, rCPTotal = 0;
+      let cashPurHtml = `
+        <table class="w-full text-[10px] text-center border-collapse">
+          <thead>
+            <tr class="bg-blue-100 text-slate-800 font-bold border-b">
+              <th class="p-1 text-left">വെണ്ടർ</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ആകെ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+      `;
+      if (cashPurArr.length === 0) {
+        cashPurHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
+        cashPurArr.forEach(p => {
+          rCPCash += p.cash; rCPBank += p.bank; rCPTotal += p.total;
+          cashPurHtml += `
+            <tr>
+              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${p.name}">${p.name}</td>
+              <td class="p-1 text-blue-700">${p.cash}</td>
+              <td class="p-1 text-indigo-700">${p.bank}</td>
+              <td class="p-1 text-right font-bold text-slate-900">${p.total}</td>
+            </tr>
+          `;
+        });
+      }
+      cashPurHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-blue-50 text-blue-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rCPCash}</td>
+              <td class="p-1">${rCPBank}</td>
+              <td class="p-1 text-right">₹${rCPTotal}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("repCashPurchasesList", cashPurHtml);
+
+      // 4. Credit Purchases Table
+      const creditPurArr = Object.values(creditPurMap);
+      let rCrPCash = 0, rCrPBank = 0, rCrPCr = 0;
+      let creditPurHtml = `
+        <table class="w-full text-[10px] text-center border-collapse">
+          <thead>
+            <tr class="bg-indigo-100 text-slate-800 font-bold border-b">
+              <th class="p-1 text-left">വെണ്ടർ</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ക്രെഡിറ്റ്</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+      `;
+      if (creditPurArr.length === 0) {
+        creditPurHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
+        creditPurArr.forEach(p => {
+          rCrPCash += p.cash; rCrPBank += p.bank; rCrPCr += p.cr;
+          creditPurHtml += `
+            <tr>
+              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${p.name}">${p.name}</td>
+              <td class="p-1 text-blue-700">${p.cash}</td>
+              <td class="p-1 text-indigo-700">${p.bank}</td>
+              <td class="p-1 text-right font-bold text-amber-700">${p.cr}</td>
+            </tr>
+          `;
+        });
+      }
+      creditPurHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-indigo-50 text-indigo-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rCrPCash}</td>
+              <td class="p-1">${rCrPBank}</td>
+              <td class="p-1 text-right text-indigo-900">₹${rCrPCr}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("repCreditPurchasesList", creditPurHtml);
+
+      // 5. Salaries Table
+      const salArr = Object.values(salariesMap);
+      let rSalCash = 0, rSalBank = 0, rSalTotal = 0;
+      let salHtml = `
+        <table class="w-full text-[10px] text-center border-collapse">
+          <thead>
+            <tr class="bg-purple-100 text-slate-800 font-bold border-b">
+              <th class="p-1 text-left">സ്റ്റാഫ്</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ആകെ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+      `;
+      if (salArr.length === 0) {
+        salHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
+        salArr.forEach(s => {
+          rSalCash += s.cash; rSalBank += s.bank; rSalTotal += s.total;
+          salHtml += `
+            <tr>
+              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${s.name}">${s.name}</td>
+              <td class="p-1 text-purple-700">${s.cash}</td>
+              <td class="p-1 text-blue-700">${s.bank}</td>
+              <td class="p-1 text-right font-bold text-slate-900">${s.total}</td>
+            </tr>
+          `;
+        });
+      }
+      salHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-purple-50 text-purple-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rSalCash}</td>
+              <td class="p-1">${rSalBank}</td>
+              <td class="p-1 text-right">₹${rSalTotal}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("repSalariesList", salHtml);
+
+      // 6. Expenses Table
+      const expArr = Object.values(expensesMap);
+      let rExpCash = 0, rExpBank = 0, rExpTotal = 0;
+      let expHtml = `
+        <table class="w-full text-[10px] text-center border-collapse">
+          <thead>
+            <tr class="bg-amber-100 text-slate-800 font-bold border-b">
+              <th class="p-1 text-left">ഇനം</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ആകെ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+      `;
+      if (expArr.length === 0) {
+        expHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ചിലവുകൾ ഇല്ല</td></tr>`;
+      } else {
+        expArr.forEach(e => {
+          rExpCash += e.cash; rExpBank += e.bank; rExpTotal += e.total;
+          expHtml += `
+            <tr>
+              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${e.name}">${e.name}</td>
+              <td class="p-1 text-amber-700">${e.cash}</td>
+              <td class="p-1 text-blue-700">${e.bank}</td>
+              <td class="p-1 text-right font-bold text-slate-900">${e.total}</td>
+            </tr>
+          `;
+        });
+      }
+      expHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-amber-50 text-amber-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rExpCash}</td>
+              <td class="p-1">${rExpBank}</td>
+              <td class="p-1 text-right">₹${rExpTotal}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      safeSetHtml("repExpensesList", expHtml);
+
+      currentReportDataForWA = {
+        shopName: currentShop.name,
+        title: titleText,
+        dateLabel: dateBadgeText,
+        sale: totSale.toLocaleString('en-IN'),
+        purchase: totPur.toLocaleString('en-IN'),
+        expense: (totExp + totSal).toLocaleString('en-IN'),
+        cash: curCash.toLocaleString('en-IN'),
+        bank: curBank.toLocaleString('en-IN'),
+        custPaid: (custCashReceipt + custBankReceipt).toLocaleString('en-IN'),
+        custBal: totalCustOutstanding.toLocaleString('en-IN'),
+        vendorPaid: (vendCashPay + vendBankPay).toLocaleString('en-IN'),
+        vendorBal: totalVendOutstanding.toLocaleString('en-IN'),
+        empBal: totalEmpPending.toLocaleString('en-IN')
+      };
+    }
+
+    // ==========================================================
+    // STATEMENT DROPDOWN POPULATION & GENERATION ENGINE
+    // ==========================================================
+    function populateStatementPartyDatalist() {
+      const type = document.getElementById("statPartyType").value;
+      const dl = document.getElementById("statPartyDatalist");
+      const inp = document.getElementById("statPartyInput");
+      dl.innerHTML = "";
+      if (inp) inp.value = "";
+
+      let firstParty = "";
+      if (type === 'customer') {
+        customersList.forEach(c => {
+          if (c && c.name) {
+            dl.innerHTML += `<option value="${c.name}">`;
+            if (!firstParty) firstParty = c.name;
+          }
+        });
+        if (inp && firstParty) inp.value = firstParty;
+      } else if (type === 'vendor') {
+        dl.innerHTML += `<option value="ALL VENDORS">`;
+        vendorsList.forEach(v => {
+          if (v && v.name) dl.innerHTML += `<option value="${v.name}">`;
+        });
+        if (inp) inp.value = "ALL VENDORS";
+      } else if (type === 'employee') {
+        employeesList.forEach(em => {
+          if (em && em.name) {
+            let label = em.status === 'stopped' ? `${em.name} (Stopped)` : em.name;
+            dl.innerHTML += `<option value="${label}">`;
+            if (!firstParty) firstParty = label;
+          }
+        });
+        if (inp && firstParty) inp.value = firstParty;
+      } else if (type === 'agent') {
+        let allAgentNames = new Set();
+        (agentsList || []).forEach(a => { if (a && a.name) allAgentNames.add(a.name.trim()); });
+        (customersList || []).forEach(c => { 
+          if (c && c.agent_id) {
+            const ag = agentsList.find(a => String(a.id) === String(c.agent_id));
+            if (ag && ag.name) allAgentNames.add(ag.name.trim());
+          }
+        });
+
+        allAgentNames.forEach(ag => {
+          dl.innerHTML += `<option value="${ag}">`;
+          if (!firstParty) firstParty = ag;
+        });
+        if (inp && firstParty) inp.value = firstParty;
+      }
+
+      generateStatement();
+    }
+
+    function generateStatement() {
+      const type = document.getElementById("statPartyType").value;
+      const partyVal = (document.getElementById("statPartyInput")?.value || "").trim();
+      const monthVal = (document.getElementById("statMonth")?.value || "").trim();
+
+      if (!partyVal || !monthVal) return;
+
+      const fromDate = `${monthVal}-01`;
+      const toDate = `${monthVal}-31`;
+
+      let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
+      const offlineQueue = getOfflineQueue();
+      offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+      allTx.sort((a, b) => (cleanDate(a.date) || '').localeCompare(cleanDate(b.date) || ''));
+
+      let partyName = partyVal;
+      let openingBal = 0;
+      let runningBal = 0;
+      let totalSalesOrBills = 0;
+      let totalPaidOrCollected = 0;
+      let statementRows = [];
+      let isAgentMode = (type === 'agent');
+      let isAllVendorsMode = (type === 'vendor' && (partyVal.toUpperCase() === 'ALL VENDORS' || partyVal.toUpperCase() === 'ALL'));
+      let agentCustomersSummary = [];
+      let vendorsConsolidatedSummary = [];
+
+      if (type === 'customer') {
+        const custClean = cleanPartyName(partyVal);
+        const cust = customersList.find(c => c && cleanPartyName(c.name) === custClean);
+        partyName = cust ? cust.name : partyVal;
+        openingBal = parseFloat(cust?.opening_balance) || 0;
+
+        allTx.forEach(t => {
+          let tDate = cleanDate(t.date);
+          if (t && cleanPartyName(t.party_name) === custClean && t.type === 'sale') {
+            if (tDate < fromDate) {
+              openingBal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
+            }
+          }
+        });
+
+        runningBal = openingBal;
+
+        allTx.forEach(t => {
+          let tDate = cleanDate(t.date);
+          if (t && cleanPartyName(t.party_name) === custClean && t.type === 'sale') {
+            if (tDate >= fromDate && tDate <= toDate) {
+              const debit = parseFloat(t.credit_amount) || 0;
+              const credit = (parseFloat(t.cash_amount) || 0) + (parseFloat(t.bank_amount) || 0);
+              totalSalesOrBills += debit;
+              totalPaidOrCollected += credit;
+              runningBal += debit - credit;
+
+              statementRows.push({
+                date: tDate,
+                desc: debit > 0 ? 'Credit Sale Bill' : 'Collection Receipt',
+                cash: parseFloat(t.cash_amount) || 0,
+                bank: parseFloat(t.bank_amount) || 0,
+                bill: debit,
+                bal: runningBal
+              });
+            }
+          }
+        });
+      } else if (type === 'vendor' && !isAllVendorsMode) {
+        const vendClean = cleanPartyName(partyVal);
+        const vend = vendorsList.find(v => v && cleanPartyName(v.name) === vendClean);
+        partyName = vend ? vend.name : partyVal;
+        openingBal = parseFloat(vend?.opening_balance) || 0;
+
+        allTx.forEach(t => {
+          let tDate = cleanDate(t.date);
+          if (t && cleanPartyName(t.party_name) === vendClean && t.type === 'purchase') {
+            if (tDate < fromDate) {
+              openingBal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
+            }
+          }
+        });
+
+        runningBal = openingBal;
+
+        allTx.forEach(t => {
+          let tDate = cleanDate(t.date);
+          if (t && cleanPartyName(t.party_name) === vendClean && t.type === 'purchase') {
+            if (tDate >= fromDate && tDate <= toDate) {
+              const debit = parseFloat(t.credit_amount) || 0;
+              const paid = Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+              totalSalesOrBills += debit;
+              totalPaidOrCollected += paid;
+              runningBal += debit - paid;
+
+              statementRows.push({
+                date: tDate,
+                desc: debit > 0 ? 'Credit Purchase' : 'Payment Disbursed',
+                cash: Math.abs(parseFloat(t.cash_amount) || 0),
+                bank: Math.abs(parseFloat(t.bank_amount) || 0),
+                bill: debit,
+                bal: runningBal
+              });
+            }
+          }
+        });
+      } else if (isAllVendorsMode) {
+        partyName = `Total Vendors Monthly Statement`;
+        let totalVendOpening = 0;
+        let totalVendPurchases = 0;
+        let totalVendPaid = 0;
+        let totalVendClosing = 0;
+
+        const creditVendors = vendorsList.filter(v => v && (v.type === 'credit' || !v.type));
+
+        creditVendors.forEach(vend => {
+          let vendOpeningBal = parseFloat(vend.opening_balance) || 0;
+          let periodCredit = 0;
+          let periodCash = 0;
+          let periodBank = 0;
+          let vName = cleanPartyName(vend.name);
+
+          allTx.forEach(t => {
+            if (t && cleanPartyName(t.party_name) === vName && t.type === 'purchase') {
+              const tDate = cleanDate(t.date);
+              const cr = parseFloat(t.credit_amount) || 0;
+              const ca = Math.abs(parseFloat(t.cash_amount) || 0);
+              const ba = Math.abs(parseFloat(t.bank_amount) || 0);
+
+              if (tDate < fromDate) {
+                vendOpeningBal += (cr - ca - ba);
+              } else if (tDate.startsWith(monthVal)) {
+                periodCredit += cr;
+                periodCash += ca;
+                periodBank += ba;
+              }
+            }
+          });
+
+          const periodPaid = periodCash + periodBank;
+          const vendClosingBal = vendOpeningBal + periodCredit - periodPaid;
+
+          const hasMin10 = (
+            Math.abs(vendOpeningBal) >= 10 ||
+            periodCredit >= 10 ||
+            periodPaid >= 10 ||
+            Math.abs(vendClosingBal) >= 10
+          );
+          if (!hasMin10) return;
+
+          totalVendOpening += vendOpeningBal;
+          totalVendPurchases += periodCredit;
+          totalVendPaid += periodPaid;
+          totalVendClosing += vendClosingBal;
+
+          vendorsConsolidatedSummary.push({
+            name: vend.name,
+            opening: vendOpeningBal,
+            purchases: periodCredit,
+            cash: periodCash,
+            bank: periodBank,
+            paid: periodPaid,
+            closing: vendClosingBal
+          });
+        });
+
+        vendorsConsolidatedSummary.sort((a, b) => b.closing - a.closing);
+
+        openingBal = totalVendOpening;
+        totalSalesOrBills = totalVendPurchases;
+        totalPaidOrCollected = totalVendPaid;
+        runningBal = totalVendClosing;
+
+      } else if (type === 'employee') {
+        const cleanEmpName = cleanPartyName(partyVal);
+        const emp = employeesList.find(e => e && cleanPartyName(e.name) === cleanEmpName);
+        partyName = emp ? emp.name : partyVal;
+
+        if (emp) {
+          const selYear = parseInt(monthVal.split('-')[0]);
+          const selMonth = parseInt(monthVal.split('-')[1]) - 1;
+
+          const priorMonthEnd = new Date(selYear, selMonth, 0);
+          const y = priorMonthEnd.getFullYear();
+          const m = String(priorMonthEnd.getMonth() + 1).padStart(2, '0');
+          const d = String(priorMonthEnd.getDate()).padStart(2, '0');
+          const priorDateStr = `${y}-${m}-${d}`;
+
+          openingBal = calculateEmployeePendingBalance(emp, priorDateStr);
+          runningBal = openingBal;
+
+          const monthlySalary = parseFloat(emp.monthly_salary) || 0;
+          const joinD = parseToDateObj(emp.joining_date);
+
+          const isStopped = (emp.status === 'stopped' || emp.status === 'left');
+          const stopStr = (isStopped && emp.stop_date) ? cleanDate(emp.stop_date) : null;
+
+          for (let k = 1; k <= 120; k++) {
+            let cycleDateObj = getCycleStartDate(joinD, k);
+            let cy = cycleDateObj.getFullYear();
+            let cm = String(cycleDateObj.getMonth() + 1).padStart(2, '0');
+            let cd = String(cycleDateObj.getDate()).padStart(2, '0');
+            let cycleDateStr = `${cy}-${cm}-${cd}`;
+
+            if (cycleDateStr.startsWith(monthVal)) {
+              if (stopStr && cycleDateStr > stopStr) continue;
+
+              totalSalesOrBills += monthlySalary;
+              statementRows.push({
+                date: cycleDateStr,
+                desc: `മാസ ശമ്പളം (Monthly Salary Accrued - Cycle ${k})`,
+                cash: 0,
+                bank: 0,
+                bill: monthlySalary,
+                isAccrual: true
+              });
+            }
+          }
+
+          if (isStopped && stopStr && stopStr.startsWith(monthVal)) {
+            let totalToStop = calculateEmployeeAccruedSalary(emp, stopStr);
+            let totalBeforeMonth = calculateEmployeeAccruedSalary(emp, priorDateStr);
+
+            let addedInCycleBills = statementRows.filter(r => r.isAccrual).reduce((sum, r) => sum + r.bill, 0);
+            let proRataDue = totalToStop - totalBeforeMonth - addedInCycleBills;
+
+            if (proRataDue > 0) {
+              totalSalesOrBills += proRataDue;
+              statementRows.push({
+                date: stopStr,
+                desc: `സ്റ്റോപ്പ് സെറ്റിൽമെന്റ് ശമ്പളം (Pro-rata Days Salary)`,
+                cash: 0,
+                bank: 0,
+                bill: proRataDue,
+                isAccrual: true
+              });
+            }
+          }
+
+          allTx.forEach(t => {
+            if (t && t.type === 'salary' && cleanPartyName(t.party_name).includes(cleanEmpName)) {
+              let tDate = cleanDate(t.date);
+              if (tDate >= fromDate && tDate <= toDate) {
+                const paid = Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+                totalPaidOrCollected += paid;
+
+                statementRows.push({
+                  date: tDate,
+                  desc: t.party_name.replace(/^Staff:\s*/i, ""),
+                  cash: Math.abs(parseFloat(t.cash_amount) || 0),
+                  bank: Math.abs(parseFloat(t.bank_amount) || 0),
+                  bill: 0,
+                  isAccrual: false
+                });
+              }
+            }
+          });
+
+          statementRows.sort((a, b) => a.date.localeCompare(b.date));
+          statementRows.forEach(r => {
+            const debit = r.bill || 0;
+            const credit = (r.cash || 0) + (r.bank || 0);
+            runningBal += debit - credit;
+            r.bal = runningBal;
+          });
+        }
+      } else if (type === 'agent') {
+        partyName = `Route Agent: ${partyVal}`;
+        const matchedAgent = (agentsList || []).find(a => a && a.name && a.name.trim().toLowerCase() === partyVal.toLowerCase());
+        const agentId = matchedAgent ? String(matchedAgent.id) : null;
+
+        const agentCustomers = customersList.filter(c => {
+          if (!c) return false;
+          if (agentId && String(c.agent_id) === agentId) return true;
+          const ag = (c.agent_name || c.agent || '').trim().toLowerCase();
+          if (ag && matchedAgent && ag === matchedAgent.name.toLowerCase()) return true;
+          return false;
+        });
+
+        let totalAgentOpening = 0;
+        let totalAgentSales = 0;
+        let totalAgentPaid = 0;
+        let totalAgentClosing = 0;
+
+        agentCustomers.forEach(cust => {
+          let custOpeningBal = parseFloat(cust.opening_balance) || 0;
+          let periodCredit = 0;
+          let periodCash = 0;
+          let periodBank = 0;
+          let cName = cleanPartyName(cust.name);
+
+          allTx.forEach(t => {
+            if (t && t.type === 'sale' && cleanPartyName(t.party_name) === cName) {
+              const tDate = cleanDate(t.date);
+              const cr = parseFloat(t.credit_amount) || 0;
+              const ca = Math.abs(parseFloat(t.cash_amount) || 0);
+              const ba = Math.abs(parseFloat(t.bank_amount) || 0);
+
+              if (tDate < fromDate) {
+                custOpeningBal += (cr - ca - ba);
+              } else if (tDate.startsWith(monthVal)) {
+                periodCredit += cr;
+                periodCash += ca;
+                periodBank += ba;
+              }
+            }
+          });
+
+          const periodPaid = periodCash + periodBank;
+          const custClosingBal = custOpeningBal + periodCredit - periodPaid;
+
+          const hasMin10 = (
+            Math.abs(custOpeningBal) >= 10 ||
+            periodCredit >= 10 ||
+            periodPaid >= 10 ||
+            Math.abs(custClosingBal) >= 10
+          );
+          if (!hasMin10) return;
+
+          totalAgentOpening += custOpeningBal;
+          totalAgentSales += periodCredit;
+          totalAgentPaid += periodPaid;
+          totalAgentClosing += custClosingBal;
+
+          agentCustomersSummary.push({
+            name: cust.name,
+            opening: custOpeningBal,
+            sales: periodCredit,
+            cash: periodCash,
+            bank: periodBank,
+            paid: periodPaid,
+            closing: custClosingBal
+          });
+        });
+
+        agentCustomersSummary.sort((a, b) => b.closing - a.closing);
+
+        openingBal = totalAgentOpening;
+        totalSalesOrBills = totalAgentSales;
+        totalPaidOrCollected = totalAgentPaid;
+        runningBal = totalAgentClosing;
+      }
+
+      safeSetText("statHeaderTitle", `${partyName.toUpperCase()} - MONTHLY STATEMENT`);
+      safeSetText("statPeriodLabel", `Period: ${monthVal}`);
+      safeSetText("statOpeningBalText", `${openingBal.toLocaleString('en-IN')}`);
+      safeSetText("statMonthSalesText", `${totalSalesOrBills.toLocaleString('en-IN')}`);
+      safeSetText("statMonthPaidText", `${totalPaidOrCollected.toLocaleString('en-IN')}`);
+      safeSetText("statClosingBalText", `${runningBal.toLocaleString('en-IN')}`);
+
+      let tableHtml = "";
+
+      if (isAgentMode) {
+        tableHtml = `
+          <table class="w-full text-xs border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+            <thead>
+              <tr class="bg-indigo-900 text-white font-extrabold text-center border-b">
+                <th class="p-2 w-8">No</th>
+                <th class="p-2 w-2/6 text-left">Customer Name</th>
+                <th class="p-2 w-1/6">Old Opening (₹)</th>
+                <th class="p-2 w-1/6">Credit Sales (₹)</th>
+                <th class="p-2 w-1/6">Paid / Coll (₹)</th>
+                <th class="p-2 w-1/6 bg-indigo-950">Balance Due (₹)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+        `;
+        if (agentCustomersSummary.length === 0) {
+          tableHtml += `<tr><td colspan="6" class="p-4 text-center text-slate-400 font-bold">No customers found with activity / balance >= ₹10 on this route</td></tr>`;
+        } else {
+          agentCustomersSummary.forEach((r, idx) => {
+            tableHtml += `
+              <tr class="text-center font-bold hover:bg-slate-50">
+                <td class="p-2 text-slate-500">${idx + 1}</td>
+                <td class="p-2 text-left text-slate-900 truncate" title="${r.name}">${r.name}</td>
+                <td class="p-2 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-amber-700">${r.sales.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
+                <td class="p-2 font-black text-indigo-900 bg-indigo-50/50">${r.closing.toLocaleString('en-IN')}</td>
+              </tr>
+            `;
+          });
+        }
+        tableHtml += `
+            </tbody>
+            <tfoot>
+              <tr class="bg-indigo-100 text-indigo-950 font-black text-center border-t-2 border-indigo-200">
+                <td colspan="2" class="p-2 text-left uppercase">TOTAL AGENT ROUTE:</td>
+                <td class="p-2">${openingBal.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-amber-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-indigo-900 bg-indigo-200">${runningBal.toLocaleString('en-IN')}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else if (isAllVendorsMode) {
+        tableHtml = `
+          <table class="w-full text-xs border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+            <thead>
+              <tr class="bg-blue-900 text-white font-extrabold text-center border-b">
+                <th class="p-2 w-8">No</th>
+                <th class="p-2 w-2/6 text-left">Vendor Name</th>
+                <th class="p-2 w-1/6">Old Opening (₹)</th>
+                <th class="p-2 w-1/6">Credit Pur (₹)</th>
+                <th class="p-2 w-1/6">Paid / Pay (₹)</th>
+                <th class="p-2 w-1/6 bg-blue-950">Payable Due (₹)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+        `;
+        if (vendorsConsolidatedSummary.length === 0) {
+          tableHtml += `<tr><td colspan="6" class="p-4 text-center text-slate-400 font-bold">No credit vendors found with activity / balance >= ₹10</td></tr>`;
+        } else {
+          vendorsConsolidatedSummary.forEach((r, idx) => {
+            tableHtml += `
+              <tr class="text-center font-bold hover:bg-slate-50">
+                <td class="p-2 text-slate-500">${idx + 1}</td>
+                <td class="p-2 text-left text-slate-900 truncate" title="${r.name}">${r.name}</td>
+                <td class="p-2 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-blue-700">${r.purchases.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
+                <td class="p-2 font-black text-rose-700 bg-rose-50/50">${r.closing.toLocaleString('en-IN')}</td>
+              </tr>
+            `;
+          });
+        }
+        tableHtml += `
+            </tbody>
+            <tfoot>
+              <tr class="bg-blue-100 text-blue-950 font-black text-center border-t-2 border-blue-200">
+                <td colspan="2" class="p-2 text-left uppercase">TOTAL ALL VENDORS:</td>
+                <td class="p-2">${openingBal.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-blue-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
+                <td class="p-2 text-rose-800 bg-rose-200">${runningBal.toLocaleString('en-IN')}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else {
+        tableHtml = `
+          <table class="w-full text-xs border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+            <thead>
+              <tr class="bg-indigo-900 text-white font-extrabold text-center border-b">
+                <th class="p-2 w-1/5 text-left">Date</th>
+                <th class="p-2 w-2/5 text-left">Description</th>
+                <th class="p-2 w-1/5">Paid (Cash/Bank)</th>
+                <th class="p-2 w-1/5">Bill / Salary</th>
+                <th class="p-2 w-1/5">Balance</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+        `;
+        if (statementRows.length === 0) {
+          tableHtml += `<tr><td colspan="5" class="p-4 text-center text-slate-400 font-bold">No transactions recorded for this month</td></tr>`;
+        } else {
+          statementRows.forEach(r => {
+            let payStr = (r.cash + r.bank > 0) ? (r.cash > 0 && r.bank > 0 ? `C:${r.cash} B:${r.bank}` : `${r.cash + r.bank}`) : '-';
+            let billStr = (r.bill > 0) ? `${r.bill}` : '-';
+            tableHtml += `
+              <tr class="text-center font-bold hover:bg-slate-50">
+                <td class="p-2 text-left text-slate-600 whitespace-nowrap">${r.date}</td>
+                <td class="p-2 text-left text-slate-900 truncate whitespace-nowrap" title="${r.desc}">${r.desc}</td>
+                <td class="p-2 text-emerald-700 whitespace-nowrap">${payStr}</td>
+                <td class="p-2 text-amber-700 whitespace-nowrap font-bold">${billStr}</td>
+                <td class="p-2 font-black text-slate-900 whitespace-nowrap">${r.bal.toLocaleString('en-IN')}</td>
+              </tr>
+            `;
+          });
+        }
+        tableHtml += `
+            </tbody>
+            <tfoot>
+              <tr class="bg-indigo-100 text-indigo-950 font-black text-center border-t-2 border-indigo-200">
+                <td colspan="4" class="p-2 text-left uppercase">NET CLOSING BALANCE</td>
+                <td class="p-2 text-indigo-900 font-black">${runningBal.toLocaleString('en-IN')}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      }
+
+      safeSetHtml("statTableContainer", tableHtml);
+
+      currentStatementDataForWA = {
+        partyName: partyName,
+        type: type,
+        month: monthVal,
+        openingBal: openingBal,
+        totalSales: totalSalesOrBills,
+        totalPaid: totalPaidOrCollected,
+        closingBal: runningBal,
+        rows: statementRows,
+        agentSummary: agentCustomersSummary,
+        vendorSummary: vendorsConsolidatedSummary,
+        isAllVendors: isAllVendorsMode
+      };
+    }
+
+    // ==========================================================
+    // WHATSAPP SHARE ENGINE
+    // ==========================================================
+    function shareActiveReportWhatsApp() {
+      if (currentReportMode === 'statement') {
+        if (!currentStatementDataForWA) return alert("Generate statement before sharing!");
+        const d = currentStatementDataForWA;
+        let waText = "";
+
+        if (d.type === 'agent') {
+          waText = `📊 *${currentShop.name.toUpperCase()} - AGENT ROUTE STATEMENT*\n` +
+                   `👤 *Agent:* ${d.partyName}\n` +
+                   `📅 *Month:* ${d.month}\n` +
+                   `--------------------------------\n` +
+                   `🔹 *Total Old Opening Balance:* ₹${d.openingBal}\n` +
+                   `🛒 *Total Month Sales:* ₹${d.totalSales}\n` +
+                   `💵 *Total Month Collected:* ₹${d.totalPaid}\n` +
+                   `🔴 *Net Balance Due:* ₹${d.closingBal}\n` +
+                   `--------------------------------\n` +
+                   `*CUSTOMER BREAKDOWN (>= ₹10):*\n`;
+
+          (d.agentSummary || []).forEach(c => {
+            waText += `▪ *${c.name}*: Open: ${c.opening} | Bills: ${c.sales} | Paid: ${c.paid} | Due: ${c.closing}\n`;
+          });
+
+          waText += `--------------------------------\n` +
+                    `🔴 *Total Outstanding to Collect:* ₹${d.closingBal}`;
+        } else if (d.isAllVendors) {
+          waText = `📊 *${currentShop.name.toUpperCase()} - TOTAL VENDORS STATEMENT*\n` +
+                   `📅 *Month:* ${d.month}\n` +
+                   `--------------------------------\n` +
+                   `🔹 *Total Old Opening:* ₹${d.openingBal}\n` +
+                   `🚚 *Total Month Purchases:* ₹${d.totalSales}\n` +
+                   `💵 *Total Month Paid:* ₹${d.totalPaid}\n` +
+                   `🔴 *Total Net Balance Payable:* ₹${d.closingBal}\n` +
+                   `--------------------------------\n` +
+                   `*VENDOR BREAKDOWN (>= ₹10):*\n`;
+
+          (d.vendorSummary || []).forEach(v => {
+            waText += `▪ *${v.name}*: Open: ${v.opening} | Pur: ${v.purchases} | Paid: ${v.paid} | Due: ${v.closing}\n`;
+          });
+
+          waText += `--------------------------------\n` +
+                    `🔴 *Total Payable to Vendors:* ₹${d.closingBal}`;
+        } else {
+          waText = `📊 *${currentShop.name.toUpperCase()} - ACCOUNT STATEMENT*\n` +
+                   `👤 *Account:* ${d.partyName} (${d.type.toUpperCase()})\n` +
+                   `📅 *Month:* ${d.month}\n` +
+                   `--------------------------------\n` +
+                   `🔹 *Opening Balance:* ₹${d.openingBal}\n` +
+                   `🛒 *Month Bills/Salary:* ₹${d.totalSales}\n` +
+                   `💵 *Month Payments:* ₹${d.totalPaid}\n` +
+                   `--------------------------------\n`;
+
+          (d.rows || []).forEach(r => {
+            let act = r.bill > 0 ? `Bill: ${r.bill}` : `Paid: ${r.cash + r.bank}`;
+            waText += `▪ ${r.date} - ${r.desc} (${act}) => Bal: ${r.bal}\n`;
+          });
+
+          waText += `--------------------------------\n` +
+                    `🔴 *Closing Balance:* ₹${d.closingBal}`;
+        }
+
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(waText), '_blank');
+      } else {
+        let d = currentReportDataForWA;
+        let waText = `📊 *${d.shopName} - ${d.title}*\n` +
+                     `📅 ${d.dateLabel}\n` +
+                     `--------------------------------\n` +
+                     `🛒 *ആകെ സെയിൽസ്:* ${d.sale}\n` +
+                     `🚚 *ആകെ പർച്ചേസ്:* ${d.purchase}\n` +
+                     `⚡ *ആകെ ചിലവുകൾ (സാലറി ഉൾപ്പെടെ):* ${d.expense}\n` +
+                     `--------------------------------\n` +
+                     `💵 *ലിക്വിഡ് (Cash+Bank):* Cash: ${d.cash} | Bank: ${d.bank}\n` +
+                     `--------------------------------\n` +
+                     `📌 *ബാക്കികൾ & കളക്ഷൻ:*\n` +
+                     `  🔺 കസ്റ്റമർ (തന്നത്: ${d.custPaid} | കിട്ടാനുള്ളത്: ${d.custBal})\n` +
+                     `  🔻 വെണ്ടർ (കൊടുത്തത്: ${d.vendorPaid} | കൊടുക്കാനുള്ളത്: ${d.vendorBal})\n` +
+                     `  👥 സ്റ്റാഫ് ശമ്പള ബാക്കി: ${d.empBal}`;
+
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(waText), '_blank');
+      }
+    }
+  </script>
+</body>
+</html>
