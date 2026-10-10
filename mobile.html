@@ -163,20 +163,21 @@
         <p class="text-xs text-slate-500 mt-1">ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ നൽകുക</p>
       </div>
 
-      <form onsubmit="event.preventDefault(); verifyLogin();" class="space-y-4">
+     <form onsubmit="event.preventDefault(); verifyLogin();" class="space-y-4">
         <input 
           type="password" 
           inputmode="numeric" 
-          pattern="[0-9]*" 
           maxlength="8" 
           id="loginPasswordInput" 
           placeholder="••••" 
           autocomplete="current-password" 
           autofocus 
+          onkeydown="if(event.key === 'Enter') { event.preventDefault(); verifyLogin(); }"
           class="text-center text-2xl tracking-[0.4em] font-black w-44 py-3 border-2 rounded-2xl mx-auto block outline-none focus:border-emerald-600 bg-slate-50" 
         />
         <button 
-          type="submit" 
+          type="button" 
+          onclick="verifyLogin()" 
           class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-md touch-btn flex items-center justify-center gap-1.5 cursor-pointer">
           <i data-lucide="log-in" class="w-4 h-4"></i> ലോഗിൻ ചെയ്യുക
         </button>
@@ -1339,59 +1340,65 @@
       if (window.lucide) lucide.createIcons();
     });
 
-    function verifyLogin() {
-      const input = document.getElementById("loginPasswordInput");
-      if (!input) return;
-      const enteredPin = input.value.trim();
+ function verifyLogin() {
+      try {
+        const input = document.getElementById("loginPasswordInput");
+        if (!input) return;
+        const enteredPin = input.value.trim();
 
-      if (!enteredPin) return alert("പിൻ നൽകുക!");
+        if (!enteredPin) return alert("പിൻ നൽകുക!");
 
-      if (window.MASTER_PIN && enteredPin === String(window.MASTER_PIN)) {
+        const masterPin = (typeof MASTER_PIN !== 'undefined') ? String(MASTER_PIN) : (window.MASTER_PIN ? String(window.MASTER_PIN) : null);
+        const shopsArr = (typeof SHOPS !== 'undefined' && Array.isArray(SHOPS) && SHOPS.length > 0) 
+          ? SHOPS 
+          : ((window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : []);
+
+        const isMaster = (masterPin && enteredPin === masterPin);
+        const matchedShop = (shopsArr || []).find(s => String(s.pin) === enteredPin);
+
+        if (!isMaster && !matchedShop) {
+          alert("പാസ്‌വേഡ് തെറ്റാണ്!");
+          input.value = "";
+          input.focus();
+          return;
+        }
+
+        // സെഷൻ വിവരങ്ങൾ സേവ് ചെയ്യുക
         sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
-        sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
         sessionStorage.setItem("ALNASSR_ACTIVE_PIN", enteredPin);
 
-        document.getElementById("loginScreen").classList.add("hidden");
-        applyRolePermissions("admin");
-        initMultiShopSystem();
+        if (isMaster) {
+          sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
+        } else {
+          sessionStorage.setItem("ALNASSR_USER_ROLE", "shop");
+          sessionStorage.setItem("ALNASSR_ACTIVE_SHOP_ID", matchedShop.id);
+        }
+
+        // ലോഗിൻ സ്ക്രീൻ പൂർണ്ണമായി നീക്കം ചെയ്യുക
+        const loginEl = document.getElementById("loginScreen");
+        if (loginEl) {
+          loginEl.style.display = "none";
+          loginEl.classList.add("hidden");
+          loginEl.classList.remove("flex");
+        }
+
+        // സിസ്റ്റം ലോഡ് ചെയ്യുക
+        if (isMaster) {
+          applyRolePermissions("admin");
+          initMultiShopSystem();
+        } else {
+          applyRolePermissions("shop");
+          initMultiShopSystem(matchedShop.id);
+        }
+
         setTimeout(() => {
           if (window.lucide) lucide.createIcons();
           renderQuickTotalsAndRecent();
         }, 50);
-        return;
-      }
 
-      const matched = (SHOPS || []).find(s => String(s.pin) === enteredPin);
-      if (matched) {
-        sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
-        sessionStorage.setItem("ALNASSR_USER_ROLE", "shop");
-        sessionStorage.setItem("ALNASSR_ACTIVE_SHOP_ID", matched.id);
-        sessionStorage.setItem("ALNASSR_ACTIVE_PIN", enteredPin);
-
-        document.getElementById("loginScreen").classList.add("hidden");
-        applyRolePermissions("shop");
-        initMultiShopSystem(matched.id);
-        setTimeout(() => {
-          if (window.lucide) lucide.createIcons();
-          renderQuickTotalsAndRecent();
-        }, 50);
-        return;
-      }
-
-      alert("പാസ്‌വേഡ് തെറ്റാണ്!");
-      input.value = "";
-      input.focus();
-    }
-
-    function applyRolePermissions(role) {
-      const switcher = document.getElementById("shopSelectorWrapper");
-      const staticTitle = document.getElementById("shopStaticTitle");
-      if (role === 'admin') {
-        if (switcher) switcher.classList.remove("hidden");
-        if (staticTitle) staticTitle.classList.add("hidden");
-      } else {
-        if (switcher) switcher.classList.add("hidden");
-        if (staticTitle) staticTitle.classList.remove("hidden");
+      } catch (err) {
+        console.error("Login Error:", err);
+        alert("ലോഗിൻ പിശക്: " + err.message);
       }
     }
 
