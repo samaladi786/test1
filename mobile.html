@@ -217,17 +217,14 @@
       </div>
 
       <div class="flex items-center gap-1.5 shrink-0">
-        <!-- CASH / BANK TRANSFER BUTTON -->
         <button onclick="openTransferModal()" title="ക്യാഷ് / ബാങ്ക് മാറ്റം" class="px-2 py-1.5 bg-purple-700 hover:bg-purple-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
           <i data-lucide="repeat" class="w-3.5 h-3.5"></i> മാറ്റം
         </button>
 
-        <!-- EXTERNAL REPORT PORTAL LINK -->
         <a href="https://samaladi786.github.io/report" target="_blank" title="റിപ്പോർട്ട് പോർട്ടൽ" class="px-2.5 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
           <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> പോർട്ടൽ
         </a>
 
-        <!-- REPORTS MODAL BUTTON -->
         <button onclick="openReportModal()" title="റിപ്പോർട്ടുകൾ & സ്റ്റേറ്റ്മെന്റ്" class="px-2.5 py-1.5 bg-violet-700 hover:bg-violet-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
           <i data-lucide="file-text" class="w-3.5 h-3.5"></i> റിപ്പോർട്ട്
         </button>
@@ -236,7 +233,6 @@
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
         </button>
 
-        <!-- DESKTOP PORTAL LINK (ADMIN PIN PROTECTED) -->
         <button onclick="goToDesktopPortal()" title="ഡെസ്ക്ടോപ്പ് പോർട്ടൽ (Admin Only)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
           <i data-lucide="monitor" class="w-4 h-4"></i>
         </button>
@@ -288,13 +284,13 @@
     ⚠️ <span id="offlineSyncMsg">നെറ്റ് ഇല്ലാതെ എടുത്ത എൻട്രികൾ ഉണ്ട്. സിങ്ക് ചെയ്യാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക.</span>
   </div>
 
-  <!-- 3. MAIN WORKSPACE CONTAINER (RESPONSIVE: 1 COL ON MOBILE, 3 COLS ON PC) -->
+  <!-- 3. MAIN WORKSPACE CONTAINER -->
   <main class="w-full max-w-md lg:max-w-7xl mx-auto px-3 pt-2.5 flex-1 flex flex-col justify-between space-y-3">
 
     <!-- DESKTOP GRID CONTAINER: PURCHASE (COL 1) | EXPENSE (COL 2) | SALES (COL 3) -->
     <div class="desktop-layout-grid space-y-3 lg:space-y-0">
       
-      <!-- TAB 2: PURCHASE ENTRY (ORDER 1 ON DESKTOP) -->
+      <!-- TAB 2: PURCHASE ENTRY -->
       <div id="view-purchase" class="tab-view hidden space-y-2.5">
         <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3 h-full flex flex-col justify-between">
           <div class="space-y-3">
@@ -331,7 +327,6 @@
               <span id="vendorOpeningInfo" class="text-xs font-black text-blue-700 block mt-1 truncate"></span>
             </div>
 
-            <!-- DYNAMIC PURCHASE AMOUNTS CONTAINER -->
             <div id="purAmountsContainer" class="pt-0.5"></div>
           </div>
 
@@ -341,7 +336,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: EXPENSE & SALARY ENTRY (ORDER 2 ON DESKTOP) -->
+      <!-- TAB 3: EXPENSE & SALARY ENTRY -->
       <div id="view-expense" class="tab-view hidden space-y-2.5">
         <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3 h-full flex flex-col justify-between">
           <div class="space-y-3">
@@ -411,7 +406,7 @@
         </div>
       </div>
 
-      <!-- TAB 1: SALE ENTRY (ORDER 3 ON DESKTOP) -->
+      <!-- TAB 1: SALE ENTRY -->
       <div id="view-sale" class="tab-view space-y-2.5">
         <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3 h-full flex flex-col justify-between">
           <div class="space-y-3">
@@ -450,7 +445,6 @@
               <span id="custOpeningInfo" class="text-xs font-black text-emerald-700 block mt-1 truncate"></span>
             </div>
 
-            <!-- DYNAMIC SALE AMOUNTS CONTAINER -->
             <div id="saleAmountsContainer" class="pt-0.5"></div>
           </div>
 
@@ -490,7 +484,7 @@
         </div>
       </div>
 
-      <!-- LIVE LIQUID FUNDS CARD (WITH QUICK TRANSFER BUTTON) -->
+      <!-- LIVE LIQUID FUNDS CARD -->
       <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-2.5 border border-slate-700 text-white flex items-center justify-between text-xs font-bold shadow-md">
         <div class="space-y-0.5">
           <span class="text-[9px] text-slate-400 font-extrabold uppercase flex items-center gap-1">
@@ -510,7 +504,7 @@
 
   </main>
 
-  <!-- 4. FIXED BOTTOM NAVIGATION BAR (HIDDEN ON DESKTOP) -->
+  <!-- 4. FIXED BOTTOM NAVIGATION BAR -->
   <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 z-40 shadow-lg flex items-center justify-around">
     <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-xs touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-emerald-50">
@@ -534,9 +528,7 @@
     </button>
   </nav>
 
-  <!-- ======================================================== -->
   <!-- MODAL: CASH / BANK TRANSFER -->
-  <!-- ======================================================== -->
   <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
@@ -566,9 +558,7 @@
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- MODAL: STAFF DEPOSIT (RECEIVE CASH/BANK FROM EMPLOYEE) -->
-  <!-- ======================================================== -->
+  <!-- MODAL: STAFF DEPOSIT -->
   <div id="staffDepositModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -725,7 +715,7 @@
     </div>
   </div>
 
-  <!-- MODAL: NEW EMPLOYEE MODAL (EXPENSE TAB) -->
+  <!-- MODAL: NEW EMPLOYEE MODAL -->
   <div id="newEmployeeModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -811,244 +801,6 @@
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- MODAL: REPORTS & STATEMENTS (A4 BOLD WITH SIGNATURES & STICKY HEADER) -->
-  <!-- ======================================================== -->
-  <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-4xl w-full bg-white p-3 sm:p-5 shadow-2xl rounded-3xl border space-y-2.5 my-auto max-h-[96vh] overflow-y-auto relative">
-      
-      <!-- STICKY TOP MODAL CONTROLS -->
-      <div class="sticky top-0 bg-white/95 backdrop-blur-sm border-b pb-2 pt-1 z-30 flex items-center justify-between no-print">
-        <div class="flex flex-wrap items-center gap-1.5">
-          <h3 class="text-xs sm:text-sm font-bold text-slate-800">📊 ബിസിനസ്സ് റിപ്പോർട്ട് & സ്റ്റേറ്റ്മെന്റ്</h3>
-          <div class="flex bg-slate-100 p-0.5 rounded-xl text-[10px] font-bold border">
-            <button onclick="switchReportMode('daily')" id="repDailyBtn" class="px-2 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black">ഡെയ്‌ലി</button>
-            <button onclick="switchReportMode('monthly')" id="repMonthlyBtn" class="px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">മന്ത്ലി</button>
-            <button onclick="switchReportMode('statement')" id="repStatBtn" class="px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">📄 സ്റ്റേറ്റ്മെന്റ്</button>
-          </div>
-        </div>
-        <button onclick="closeReportModal()" title="ക്ലോസ് ചെയ്യുക" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-sm flex items-center justify-center cursor-pointer shadow-sm">✕</button>
-      </div>
-
-      <!-- FILTER BAR -->
-      <div id="reportDateSelectorBar" class="bg-slate-50 p-2 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-1.5 text-xs no-print">
-        <div class="flex items-center gap-1.5">
-          <span id="repFilterLabel" class="font-extrabold text-slate-700 text-[11px]">📅 തീയതി മാറ്റുക:</span>
-          <input type="date" id="repFilterDate" onchange="onReportDateChanged()" class="p-1 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]" />
-          <input type="month" id="repFilterMonth" onchange="onReportMonthChanged()" class="hidden p-1 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]" />
-        </div>
-        <span class="text-[9px] font-bold text-slate-500">തീയതി മാറ്റി റിപ്പോർട്ട് പരിശോധിക്കാം</span>
-      </div>
-
-      <!-- STATEMENT CONTROLS -->
-      <div id="statementControlBar" class="hidden bg-slate-50 p-2 rounded-2xl border border-indigo-200 grid grid-cols-1 sm:grid-cols-4 gap-1.5 text-xs no-print">
-        <div>
-          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">വിഭാഗം (Type):</label>
-          <select id="statPartyType" onchange="populateStatementPartyDatalist()" class="w-full p-1.5 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]">
-            <option value="customer">🛒 കസ്റ്റമർ (Credit Only)</option>
-            <option value="vendor">🚚 വെണ്ടർ (Vendor)</option>
-            <option value="employee">👥 ജീവനക്കാരൻ (Staff)</option>
-            <option value="agent">👤 റൂട്ട് ഏജന്റ് (Route Agent)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">ആളെ തിരഞ്ഞെടുക്കുക:</label>
-          <input 
-            list="statPartyDatalist" 
-            id="statPartyInput" 
-            onclick="this.select()" 
-            onfocus="this.select()" 
-            oninput="generateStatement()" 
-            onchange="generateStatement()" 
-            placeholder="പേര് ടൈപ്പ് ചെയ്യുക..." 
-            class="w-full p-1.5 rounded-xl border bg-white font-bold outline-none text-[11px] uppercase-input" 
-          />
-          <datalist id="statPartyDatalist"></datalist>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">മാസം:</label>
-          <input type="month" id="statMonth" onchange="generateStatement()" class="w-full p-1 rounded-xl border bg-white font-bold text-[11px] cursor-pointer" />
-        </div>
-        <div class="flex items-end">
-          <button onclick="generateStatement()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow cursor-pointer text-[11px]">
-            🔍 സ്റ്റേറ്റ്മെന്റ്
-          </button>
-        </div>
-      </div>
-
-      <!-- PRINTABLE REPORT CONTENT -->
-      <div id="reportPrintContainer" class="space-y-2 text-xs sm:text-sm">
-        <div class="text-center border-b pb-1.5 flex justify-between items-center">
-          <div>
-            <h2 id="reportPageShopName" class="text-xs sm:text-sm font-black text-slate-900 uppercase">ALNASSR</h2>
-            <p id="reportModeTitle" class="text-[9px] sm:text-[10px] font-bold text-slate-600">ഡെയ്‌ലി റിപ്പോർട്ട്</p>
-          </div>
-          <div class="text-right text-[9px] sm:text-[10px] text-slate-600 font-bold">
-            <p id="reportDateBadgeLabel">തീയതി: --</p>
-          </div>
-        </div>
-
-        <!-- ENHANCED BOLD SUMMARY CARDS -->
-        <div class="grid grid-cols-4 sm:grid-cols-8 gap-1 font-bold">
-          <div class="bg-slate-200/90 p-1.5 rounded-lg border border-slate-400 text-center">
-            <span class="text-[8.5px] font-black text-slate-800 block uppercase">തുടക്ക ഫണ്ട്</span>
-            <h3 id="repOpeningLiquidBal" class="text-xs font-black text-slate-900">0</h3>
-          </div>
-          <div class="bg-emerald-50/90 p-1.5 rounded-lg border border-emerald-300 text-center">
-            <span class="text-[8.5px] font-black text-emerald-800 block uppercase">സെയിൽസ്</span>
-            <h3 id="repTotalSale" class="text-xs font-black text-emerald-700">0</h3>
-          </div>
-          <div class="bg-blue-50/90 p-1.5 rounded-lg border border-blue-300 text-center">
-            <span class="text-[8.5px] font-black text-blue-800 uppercase block">പർച്ചേസ്</span>
-            <h3 id="repTotalPurchase" class="text-xs font-black text-blue-700">0</h3>
-          </div>
-          <div class="bg-amber-50/90 p-1.5 rounded-lg border border-amber-300 text-center">
-            <span class="text-[8.5px] font-black text-amber-800 uppercase block">എക്സ്പെൻസ്</span>
-            <h3 id="repTotalExpense" class="text-xs font-black text-amber-700">0</h3>
-          </div>
-          <div class="bg-teal-50/90 p-1.5 rounded-lg border border-teal-300 text-center">
-            <span class="text-[8.5px] font-black text-teal-800 uppercase block">കസ്റ്റമർ ബാക്കി</span>
-            <h3 id="repCustBal" class="text-[10px] font-black text-teal-900 leading-tight">0</h3>
-          </div>
-          <div class="bg-rose-50/90 p-1.5 rounded-lg border border-rose-300 text-center">
-            <span class="text-[8.5px] font-black text-rose-800 uppercase block">വെണ്ടർ ബാക്കി</span>
-            <h3 id="repVendorBal" class="text-[10px] font-black text-rose-900 leading-tight">0</h3>
-          </div>
-          <div class="bg-purple-50/90 p-1.5 rounded-lg border border-purple-300 text-center">
-            <span class="text-[8.5px] font-black text-purple-800 uppercase block">സാലറി ബാക്കി</span>
-            <h3 id="repSalaryBal" class="text-[10px] font-black text-purple-900 leading-tight">0</h3>
-          </div>
-          <div class="bg-slate-100 p-1.5 rounded-lg border border-slate-300 text-center">
-            <span class="text-[8.5px] font-black text-slate-800 uppercase block">ലിക്വിഡ് ഫണ്ട്</span>
-            <h3 id="repLiquidBal" class="text-[10px] font-black text-slate-900 leading-tight">0</h3>
-          </div>
-        </div>
-
-        <!-- CONTINUOUS 2-COLUMN FLOW CONTAINER -->
-        <div class="report-continuous-flow border-t pt-1.5">
-          <!-- BLOCK 1: SALES -->
-          <div class="report-block bg-slate-50 p-2 rounded-xl border border-emerald-200 space-y-1">
-            <h3 class="font-extrabold text-emerald-900 text-[11px] flex items-center justify-between border-b pb-0.5">
-              <span>🛒 സെയിൽസ് ഇടപാടുകൾ</span>
-              <span id="salesGrandBadge" class="text-[9.5px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
-            </h3>
-            <div class="space-y-0.5">
-              <span class="text-[9px] font-extrabold text-emerald-800 uppercase block">💵 ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
-              <div id="repCashSalesList" class="overflow-x-auto"></div>
-            </div>
-            <div class="space-y-0.5 pt-1 border-t border-emerald-200/60">
-              <span class="text-[9px] font-extrabold text-amber-800 uppercase block">🛒 ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
-              <div id="repCreditSalesList" class="overflow-x-auto"></div>
-            </div>
-          </div>
-
-          <!-- BLOCK 2: PURCHASES -->
-          <div class="report-block bg-slate-50 p-2 rounded-xl border border-blue-200 space-y-1">
-            <h3 class="font-extrabold text-blue-900 text-[11px] flex items-center justify-between border-b pb-0.5">
-              <span>🚚 പർച്ചേസ് ഇടപാടുകൾ</span>
-              <span id="purchaseGrandBadge" class="text-[9.5px] font-black bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
-            </h3>
-            <div class="space-y-0.5">
-              <span class="text-[9px] font-extrabold text-blue-800 uppercase block">💵 ക്യാഷ് പർച്ചേസ് (Cash Vendors)</span>
-              <div id="repCashPurchasesList" class="overflow-x-auto"></div>
-            </div>
-            <div class="space-y-0.5 pt-1 border-t border-blue-200/60">
-              <span class="text-[9px] font-extrabold text-indigo-800 uppercase block">🚚 ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
-              <div id="repCreditPurchasesList" class="overflow-x-auto"></div>
-            </div>
-          </div>
-
-          <!-- BLOCK 3: SALARY -->
-          <div class="report-block bg-slate-50 p-2 rounded-xl border border-purple-200 space-y-1">
-            <h3 class="font-extrabold text-purple-950 text-[11px] flex items-center justify-between border-b pb-0.5">
-              <span>👥 സാലറി നൽകിയത് (സ്റ്റാഫ് ആകെ)</span>
-            </h3>
-            <div id="repSalariesList" class="overflow-x-auto"></div>
-          </div>
-
-          <!-- BLOCK 4: EXPENSES -->
-          <div class="report-block bg-slate-50 p-2 rounded-xl border border-amber-200 space-y-1">
-            <h3 class="font-extrabold text-amber-950 text-[11px] flex items-center justify-between border-b pb-0.5">
-              <span>⚡ ചിലവുകൾ (ഇനം തിരിച്ചുള്ള ആകെ)</span>
-            </h3>
-            <div id="repExpensesList" class="overflow-x-auto"></div>
-          </div>
-        </div>
-
-        <!-- MANUAL SIGNATURE BOX AT REPORT BOTTOM -->
-        <div class="pt-5 mt-4 border-t-2 border-slate-900 flex justify-between items-end text-[10.5px] font-black">
-          <div class="text-left space-y-6">
-            <div>...................................................................<br>ഷോപ്പ് ഇൻ-ചാർജ് ഒപ്പ് (Shop In-Charge Sign)</div>
-            <div>തീയതി (Date): ............................................</div>
-          </div>
-          <div class="text-right space-y-6">
-            <div>...................................................................<br>മാനേജർ ഒപ്പ് (Manager Sign)</div>
-            <div>തീയതി (Date): ............................................</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- STATEMENT PRINT CONTAINER -->
-      <div id="statementPrintContainer" class="hidden space-y-2 text-xs sm:text-sm">
-        <div class="text-center border-b pb-1 flex justify-between items-center">
-          <div>
-            <h2 id="statementShopName" class="text-xs sm:text-sm font-black text-slate-900 uppercase">ALNASSR</h2>
-            <p id="statHeaderTitle" class="text-[10px] font-bold text-indigo-800">ACCOUNT STATEMENT</p>
-          </div>
-          <div class="text-right text-[10px] text-slate-600 font-bold">
-            <p id="statPeriodLabel">Statement Month</p>
-          </div>
-        </div>
-
-        <div id="statBannerGrid" class="bg-indigo-50 p-1.5 rounded-xl border border-indigo-200 grid grid-cols-2 sm:grid-cols-4 gap-1 text-xs font-bold text-slate-800">
-          <div>
-            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Old Opening</span>
-            <span id="statOpeningBalText" class="text-slate-900 text-xs">0</span>
-          </div>
-          <div>
-            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Month Sales/Bills</span>
-            <span id="statMonthSalesText" class="text-amber-700 text-xs">0</span>
-          </div>
-          <div>
-            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Month Paid/Coll</span>
-            <span id="statMonthPaidText" class="text-emerald-700 text-xs">0</span>
-          </div>
-          <div>
-            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Net Balance Due</span>
-            <span id="statClosingBalText" class="text-indigo-900 text-xs font-black">0</span>
-          </div>
-        </div>
-
-        <div id="statTableContainer" class="overflow-x-auto"></div>
-
-        <!-- MANUAL SIGNATURE BOX AT STATEMENT BOTTOM -->
-        <div class="pt-5 mt-4 border-t-2 border-slate-900 flex justify-between items-end text-[10.5px] font-black">
-          <div class="text-left space-y-6">
-            <div>...................................................................<br>കസ്റ്റമർ / വെണ്ടർ ഒപ്പ് (Party Signature)</div>
-            <div>തീയതി (Date): ............................................</div>
-          </div>
-          <div class="text-right space-y-6">
-            <div>...................................................................<br>മാനേജർ ഒപ്പ് (Manager Sign)</div>
-            <div>തീയതി (Date): ............................................</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ACTION BUTTONS AT BOTTOM (INCLUDES DIRECT CLOSE BUTTON) -->
-      <div class="pt-2 no-print flex gap-2 justify-center flex-wrap border-t">
-        <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
-          🖨️ PDF ആയി സേവ് / പ്രിന്റ്
-        </button>
-        <button onclick="shareActiveReportWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
-          🟢 വാട്‌സ്ആപ്പിലേക്ക് സെന്റ് ചെയ്യുക
-        </button>
-        <button onclick="closeReportModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
-          ✕ ക്ലോസ് ചെയ്യുക
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
     let SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : [];
@@ -1071,6 +823,13 @@
     let currentReportMode = 'daily';
     let currentReportDataForWA = {};
     let currentStatementDataForWA = null;
+
+    // PREVENT BACK-FORWARD CACHE (BFCACHE) POLLUTION
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    });
 
     // PWA INSTALL LOGIC
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -1260,18 +1019,10 @@
       }
     }
 
+    // AUTOMATIC IN-MEMORY & CACHE PURGE ON LOGOUT (NO CTRL+F5 NEEDED)
     function logoutApp() {
-      sessionStorage.removeItem("ALNASSR_LOGGED_IN");
-      sessionStorage.removeItem("ALNASSR_USER_ROLE");
-      sessionStorage.removeItem("ALNASSR_ACTIVE_SHOP_ID");
-      sessionStorage.removeItem("ALNASSR_ACTIVE_PIN");
-
-      document.getElementById("loginScreen").classList.remove("hidden");
-      const inp = document.getElementById("loginPasswordInput");
-      if (inp) {
-        inp.value = "";
-        setTimeout(() => inp.focus(), 200);
-      }
+      sessionStorage.clear();
+      window.location.replace(window.location.pathname);
     }
 
     // DESKTOP PORTAL PROTECTION
@@ -1671,6 +1422,7 @@
       return totalSalary;
     }
 
+    // ACCURATELY FILTER ADVANCES UP TO asOfDateStr
     function calculateEmployeePendingBalance(emp, asOfDateStr) {
       if (!emp) return 0;
       const refDate = asOfDateStr || (document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate());
