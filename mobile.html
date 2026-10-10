@@ -49,14 +49,24 @@
       .desktop-layout-grid .tab-view {
         display: block !important;
       }
-      #view-purchase { order: 1 !important; }
-      #view-expense { order: 2 !important; }
-      #view-sale { order: 3 !important; }
-      nav.fixed { display: none !important; }
-      body { padding-bottom: 2rem !important; }
+      #view-purchase {
+        order: 1 !important;
+      }
+      #view-expense {
+        order: 2 !important;
+      }
+      #view-sale {
+        order: 3 !important;
+      }
+      nav.fixed {
+        display: none !important;
+      }
+      body {
+        padding-bottom: 2rem !important;
+      }
     }
 
-    /* CONTINUOUS 2-COLUMN FLOW FOR PRINT */
+    /* CONTINUOUS 2-COLUMN FLOW */
     .report-continuous-flow {
       column-count: 2;
       column-gap: 12px;
@@ -76,7 +86,7 @@
         size: A4 portrait;
         margin: 4mm 6mm;
       }
-      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #masterModal, #editMasterModal, #staffDepositModal, #transferModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
+      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #staffDepositModal, #transferModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
         display: none !important;
       }
       body {
@@ -188,48 +198,42 @@
   <header id="mobileAppHeader" class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-3 py-2.5 transition-all duration-300">
     <div class="flex items-center justify-between gap-2">
       
-      <!-- LEFT: SHOP LOGO & SHOP SELECTOR DROPDOWN -->
-      <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
+      <div class="flex items-center gap-2 overflow-hidden flex-1">
         <div id="shopLogoBox" class="w-9 h-9 rounded-xl bg-white/10 p-0.5 flex items-center justify-center border border-white/20 shrink-0 overflow-hidden shadow-sm">
           <img id="shopLogoImg" src="icon-192.png" alt="Shop Logo" class="w-full h-full object-contain rounded-lg" onerror="this.style.display='none'; document.getElementById('shopDefaultIcon').classList.remove('hidden');" />
           <i id="shopDefaultIcon" data-lucide="store" class="w-5 h-5 text-emerald-400 hidden"></i>
         </div>
         
-        <div class="truncate flex-1 min-w-0">
+        <div class="truncate">
           <div id="shopSelectorWrapper" class="hidden">
-            <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-slate-700 outline-none cursor-pointer max-w-[170px] truncate">
+            <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-0.5 rounded-lg border border-slate-700 outline-none cursor-pointer">
             </select>
           </div>
-          <h1 id="shopStaticTitle" class="text-xs font-black truncate text-white">ALNASSR POS</h1>
+          <h1 id="shopStaticTitle" class="text-xs font-black truncate">ALNASSR POS</h1>
           <div class="flex items-center gap-1 text-[10px] text-slate-300">
             <span id="networkStatusBadge" class="font-extrabold text-emerald-400">🟢 ഓൺലൈൻ</span>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: ACTION CONTROLS -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <!-- DESKTOP MASTER BUTTON (VISIBLE ONLY ON PC) -->
-        <button onclick="openMasterModal()" title="മാസ്റ്റർ ഐറ്റങ്ങൾ (Customer, Vendor, Staff, Agent)" class="hidden lg:flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-bold touch-btn cursor-pointer">
-          <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-400"></i>
-          <span>മാസ്റ്റർ</span>
+        <button onclick="openTransferModal()" title="ക്യാഷ് / ബാങ്ക് മാറ്റം" class="px-2 py-1.5 bg-purple-700 hover:bg-purple-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
+          <i data-lucide="repeat" class="w-3.5 h-3.5"></i> മാറ്റം
         </button>
 
         <a href="https://samaladi786.github.io/report" target="_blank" title="റിപ്പോർട്ട് പോർട്ടൽ" class="px-2.5 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
-          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">പോർട്ടൽ</span>
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> പോർട്ടൽ
         </a>
 
         <button onclick="openReportModal()" title="റിപ്പോർട്ടുകൾ & സ്റ്റേറ്റ്മെന്റ്" class="px-2.5 py-1.5 bg-violet-700 hover:bg-violet-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
-          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-          <span>റിപ്പോർട്ട്</span>
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i> റിപ്പോർട്ട്
         </button>
 
         <button id="pwaInstallBtn" onclick="triggerPwaInstall()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-2 py-1.5 rounded-xl text-[10px] touch-btn flex items-center gap-1 shadow">
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
         </button>
 
-        <button onclick="goToDesktopPortal()" title="ഡെസ്ക്ടോപ്പ് വ്യൂ (Admin PIN)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
+        <button onclick="goToDesktopPortal()" title="ഡെസ്ക്ടോപ്പ് പോർട്ടൽ (Admin Only)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
           <i data-lucide="monitor" class="w-4 h-4"></i>
         </button>
         <button onclick="fetchAllData(true)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
@@ -312,7 +316,7 @@
                   onfocus="this.select()" 
                   oninput="this.value = this.value.toUpperCase(); onVendorSelected();" 
                   onchange="onVendorSelected()" 
-                  placeholder="വെണ്ടർ പേര്..." 
+                  placeholder="വെണ്ടർ പേര് ടൈപ്പ് ചെയ്യുക..." 
                   class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 uppercase-input" 
                 />
                 <button type="button" onclick="clearVendorInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
@@ -430,7 +434,7 @@
                   oninput="this.value = this.value.toUpperCase(); onCustomerSelected();" 
                   onchange="onCustomerSelected()" 
                   value="SHOPE" 
-                  placeholder="കസ്റ്റമർ പേര്..." 
+                  placeholder="കസ്റ്റമർ പേര് ടൈപ്പ് ചെയ്യുക..." 
                   class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 uppercase-input" 
                 />
                 <button type="button" onclick="clearCustomerInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
@@ -452,10 +456,18 @@
 
     </div>
 
-    <!-- BOTTOM SECTION: CLICKABLE CARDS (ORDER: 1. PURCHASE ➔ 2. CHILAV ➔ 3. SALES) -->
+    <!-- BOTTOM SECTION: CLICKABLE CARDS -->
     <div class="space-y-2 pt-2">
       <div class="grid grid-cols-3 gap-1.5 text-center">
-        <!-- 1. PURCHASE CARD -->
+        <!-- 1. SALES CARD -->
+        <div onclick="openTodaySalesModal()" class="bg-emerald-900/90 hover:bg-emerald-800 text-white rounded-2xl p-2 border border-emerald-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
+          <span class="text-[9px] text-emerald-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
+            സെയിൽസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
+          </span>
+          <span id="quickSaleTotal" class="text-xs font-black">0</span>
+        </div>
+
+        <!-- 2. PURCHASE CARD -->
         <div onclick="openTodayPurchaseModal()" class="bg-blue-900/90 hover:bg-blue-800 text-white rounded-2xl p-2 border border-blue-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
           <span class="text-[9px] text-blue-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
             പർച്ചേസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
@@ -463,20 +475,12 @@
           <span id="quickPurTotal" class="text-xs font-black">0</span>
         </div>
 
-        <!-- 2. EXPENSE CARD -->
+        <!-- 3. EXPENSE CARD -->
         <div onclick="openTodayExpenseModal()" class="bg-amber-900/90 hover:bg-amber-800 text-white rounded-2xl p-2 border border-amber-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
           <span class="text-[9px] text-amber-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
             ചിലവ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
           </span>
           <span id="quickExpTotal" class="text-xs font-black">0</span>
-        </div>
-
-        <!-- 3. SALES CARD -->
-        <div onclick="openTodaySalesModal()" class="bg-emerald-900/90 hover:bg-emerald-800 text-white rounded-2xl p-2 border border-emerald-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
-          <span class="text-[9px] text-emerald-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
-            സെയിൽസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
-          </span>
-          <span id="quickSaleTotal" class="text-xs font-black">0</span>
         </div>
       </div>
 
@@ -500,400 +504,180 @@
 
   </main>
 
-  <!-- 4. FIXED BOTTOM NAVIGATION BAR (MOBILE ONLY) -->
-  <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 z-40 shadow-lg flex items-center justify-around">
-    <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-[11px] touch-btn cursor-pointer">
+  <!-- 4. FIXED BOTTOM NAVIGATION BAR -->
+  <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 z-40 shadow-lg flex items-center justify-around">
+    <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-xs touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-emerald-50">
         <i data-lucide="shopping-cart" class="w-5 h-5"></i>
       </div>
       <span>സെയിൽസ്</span>
     </button>
 
-    <button onclick="switchMobileTab('purchase')" id="mTab-purchase" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
+    <button onclick="switchMobileTab('purchase')" id="mTab-purchase" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-xs touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-slate-50">
         <i data-lucide="shopping-bag" class="w-5 h-5"></i>
       </div>
       <span>പർച്ചേസ്</span>
     </button>
 
-    <button onclick="switchMobileTab('expense')" id="mTab-expense" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
+    <button onclick="switchMobileTab('expense')" id="mTab-expense" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-xs touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-slate-50">
         <i data-lucide="receipt" class="w-5 h-5"></i>
       </div>
       <span>ചിലവ് & സാലറി</span>
     </button>
-
-    <button onclick="openMasterModal()" id="mTab-master" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
-      <div class="p-1.5 rounded-xl bg-slate-50">
-        <i data-lucide="database" class="w-5 h-5"></i>
-      </div>
-      <span>മാസ്റ്റർ</span>
-    </button>
   </nav>
-  <!-- ======================================================== -->
-  <!-- PART 2: ALL MODALS & POPUPS (REPORT, MASTER, BREAKDOWNS) -->
-  <!-- ======================================================== -->
 
-  <!-- 1. REPORTS & STATEMENTS MODAL -->
-  <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-4xl w-full bg-white p-3 sm:p-5 shadow-2xl rounded-3xl border space-y-2.5 my-auto max-h-[96vh] overflow-y-auto relative">
-      
-      <!-- STICKY TOP CONTROLS -->
-      <div class="sticky top-0 bg-white/95 backdrop-blur-sm border-b pb-2 pt-1 z-30 flex items-center justify-between no-print">
-        <div class="flex flex-wrap items-center gap-1.5">
-          <h3 class="text-xs sm:text-sm font-bold text-slate-800">📊 ബിസിനസ്സ് റിപ്പോർട്ട് & സ്റ്റേറ്റ്മെന്റ്</h3>
-          <div class="flex bg-slate-100 p-0.5 rounded-xl text-[10px] font-bold border">
-            <button onclick="switchReportMode('daily')" id="repDailyBtn" class="px-2 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black">ഡെയ്‌ലി</button>
-            <button onclick="switchReportMode('monthly')" id="repMonthlyBtn" class="px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">മന്ത്ലി</button>
-            <button onclick="switchReportMode('statement')" id="repStatBtn" class="px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">📄 സ്റ്റേറ്റ്മെന്റ്</button>
-          </div>
-        </div>
-        <button onclick="closeReportModal()" title="ക്ലോസ് ചെയ്യുക" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-sm flex items-center justify-center cursor-pointer shadow-sm">✕</button>
+  <!-- MODAL: CASH / BANK TRANSFER -->
+  <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-4">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-purple-900 flex items-center gap-1.5">
+          <i data-lucide="repeat" class="w-4 h-4 text-purple-600"></i> ക്യാഷ് / ബാങ്ക് മാറ്റം (Transfer)
+        </h3>
+        <button onclick="closeTransferModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
 
-      <!-- FILTER BAR -->
-      <div id="reportDateSelectorBar" class="bg-slate-50 p-2 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-1.5 text-xs no-print">
-        <div class="flex items-center gap-1.5">
-          <span id="repFilterLabel" class="font-extrabold text-slate-700 text-[11px]">📅 തീയതി മാറ്റുക:</span>
-          <input type="date" id="repFilterDate" onchange="onReportDateChanged()" class="p-1 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]" />
-          <input type="month" id="repFilterMonth" onchange="onReportMonthChanged()" class="hidden p-1 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]" />
-        </div>
-        <span class="text-[9px] font-bold text-slate-500">തീയതി മാറ്റി റിപ്പോർട്ട് പരിശോധിക്കാം</span>
-      </div>
-
-      <!-- STATEMENT CONTROLS -->
-      <div id="statementControlBar" class="hidden bg-slate-50 p-2 rounded-2xl border border-indigo-200 grid grid-cols-1 sm:grid-cols-4 gap-1.5 text-xs no-print">
-        <div>
-          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">വിഭാഗം (Type):</label>
-          <select id="statPartyType" onchange="populateStatementPartyDatalist()" class="w-full p-1.5 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]">
-            <option value="customer">🛒 കസ്റ്റമർ (Credit Only)</option>
-            <option value="vendor">🚚 വെണ്ടർ (Vendor)</option>
-            <option value="employee">👥 ജീവനക്കാരൻ (Staff)</option>
-            <option value="agent">👤 റൂട്ട് ഏജന്റ് (Route Agent)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">ആളെ തിരഞ്ഞെടുക്കുക:</label>
-          <input 
-            list="statPartyDatalist" 
-            id="statPartyInput" 
-            onclick="this.select()" 
-            onfocus="this.select()" 
-            oninput="generateStatement()" 
-            onchange="generateStatement()" 
-            placeholder="പേര് ടൈപ്പ് ചെയ്യുക..." 
-            class="w-full p-1.5 rounded-xl border bg-white font-bold outline-none text-[11px] uppercase-input" 
-          />
-          <datalist id="statPartyDatalist"></datalist>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">മാസം:</label>
-          <input type="month" id="statMonth" onchange="generateStatement()" class="w-full p-1 rounded-xl border bg-white font-bold text-[11px] cursor-pointer" />
-        </div>
-        <div class="flex items-end">
-          <button onclick="generateStatement()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow cursor-pointer text-[11px]">
-            🔍 സ്റ്റേറ്റ്മെന്റ്
-          </button>
-        </div>
-      </div>
-
-      <!-- PRINTABLE REPORT CONTAINER -->
-      <div id="reportPrintContainer" class="space-y-2 text-xs sm:text-sm">
-        <div class="text-center border-b pb-1.5 flex justify-between items-center">
-          <div>
-            <h2 id="reportPageShopName" class="text-xs sm:text-sm font-black text-slate-900 uppercase">ALNASSR</h2>
-            <p id="reportModeTitle" class="text-[9px] sm:text-[10px] font-bold text-slate-600">ഡെയ്‌ലി റിപ്പോർട്ട്</p>
-          </div>
-          <div class="text-right text-[9px] sm:text-[10px] text-slate-600 font-bold">
-            <p id="reportDateBadgeLabel">തീയതി: --</p>
+      <div class="space-y-3 text-xs">
+        <div class="bg-blue-50/80 p-3 rounded-2xl border border-blue-200 space-y-1.5">
+          <label class="block font-black text-blue-900 text-[11px]">ബാങ്കിലേക്ക് ഇടുക (Cash to Bank):</label>
+          <div class="flex gap-2">
+            <input type="number" step="any" inputmode="decimal" id="depositAmount" placeholder="തുക" class="flex-1 p-2 rounded-xl border bg-white font-black text-center text-blue-700 outline-none" />
+            <button onclick="saveDeposit()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow touch-btn cursor-pointer">ഇടുക</button>
           </div>
         </div>
 
-        <!-- 8 SUMMARY CARDS -->
-        <div class="grid grid-cols-4 sm:grid-cols-8 gap-1 font-bold">
-          <div class="bg-slate-200/90 p-1.5 rounded-lg border border-slate-400 text-center">
-            <span class="text-[8.5px] font-black text-slate-800 block uppercase">തുടക്ക ഫണ്ട്</span>
-            <h3 id="repOpeningLiquidBal" class="text-xs font-black text-slate-900">0</h3>
-          </div>
-          <div class="bg-emerald-50/90 p-1.5 rounded-lg border border-emerald-300 text-center">
-            <span class="text-[8.5px] font-black text-emerald-800 block uppercase">സെയിൽസ്</span>
-            <h3 id="repTotalSale" class="text-xs font-black text-emerald-700">0</h3>
-          </div>
-          <div class="bg-blue-50/90 p-1.5 rounded-lg border border-blue-300 text-center">
-            <span class="text-[8.5px] font-black text-blue-800 uppercase block">പർച്ചേസ്</span>
-            <h3 id="repTotalPurchase" class="text-xs font-black text-blue-700">0</h3>
-          </div>
-          <div class="bg-amber-50/90 p-1.5 rounded-lg border border-amber-300 text-center">
-            <span class="text-[8.5px] font-black text-amber-800 uppercase block">എക്സ്പെൻസ്</span>
-            <h3 id="repTotalExpense" class="text-xs font-black text-amber-700">0</h3>
-          </div>
-          <div class="bg-teal-50/90 p-1.5 rounded-lg border border-teal-300 text-center">
-            <span class="text-[8.5px] font-black text-teal-800 uppercase block">കസ്റ്റമർ ബാക്കി</span>
-            <h3 id="repCustBal" class="text-[10px] font-black text-teal-900 leading-tight">0</h3>
-          </div>
-          <div class="bg-rose-50/90 p-1.5 rounded-lg border border-rose-300 text-center">
-            <span class="text-[8.5px] font-black text-rose-800 uppercase block">വെണ്ടർ ബാക്കി</span>
-            <h3 id="repVendorBal" class="text-[10px] font-black text-rose-900 leading-tight">0</h3>
-          </div>
-          <div class="bg-purple-50/90 p-1.5 rounded-lg border border-purple-300 text-center">
-            <span class="text-[8.5px] font-black text-purple-800 uppercase block">സാലറി ബാക്കി</span>
-            <h3 id="repSalaryBal" class="text-[10px] font-black text-purple-900 leading-tight">0</h3>
-          </div>
-          <div class="bg-slate-100 p-1.5 rounded-lg border border-slate-300 text-center">
-            <span class="text-[8.5px] font-black text-slate-800 block uppercase">ലിക്വിഡ് ഫണ്ട്</span>
-            <h3 id="repLiquidBal" class="text-[10px] font-black text-slate-900 leading-tight">0</h3>
+        <div class="bg-emerald-50/80 p-3 rounded-2xl border border-emerald-200 space-y-1.5">
+          <label class="block font-black text-emerald-900 text-[11px]">കയ്യിലേക്ക് എടുക്കുക (Bank to Cash):</label>
+          <div class="flex gap-2">
+            <input type="number" step="any" inputmode="decimal" id="withdrawalAmount" placeholder="തുക" class="flex-1 p-2 rounded-xl border bg-white font-black text-center text-emerald-700 outline-none" />
+            <button onclick="saveWithdrawal()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow touch-btn cursor-pointer">എടുക്കുക</button>
           </div>
         </div>
-
-        <!-- 2-COLUMN FLOW TABLES -->
-        <div class="report-continuous-flow border-t pt-1.5">
-          <div class="report-block bg-slate-50 p-2 rounded-xl border border-emerald-200 space-y-1">
-            <h3 class="font-extrabold text-emerald-900 text-[11px] flex items-center justify-between border-b pb-0.5">
-              <span>🛒 സെയിൽസ് ഇടപാടുകൾ</span>
-              <span id="salesGrandBadge" class="text-[9.5px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
-            </h3>
-            <div class="space-y-0.5">
-              <span class="text-[9px] font-extrabold text-emerald-800 uppercase block">💵 ക്യാഷ് കസ്റ്റമർമാർ</span>
-              <div id="repCashSalesList" class="overflow-x-auto"></div>
-            </div>
-            <div class="space-y-0.5 pt-1 border-t border-emerald-200/60">
-              <span class="text-[9px] font-extrabold text-amber-800 uppercase block">🛒 ക്രെഡിറ്റ് കസ്റ്റമർമാർ</span>
-              <div id="repCreditSalesList" class="overflow-x-auto"></div>
-            </div>
-          </div>
-
-          <div class="report-block bg-slate-50 p-2 rounded-xl border border-blue-200 space-y-1">
-            <h3 class="font-extrabold text-blue-900 text-[11px] flex items-center justify-between border-b pb-0.5">
-              <span>🚚 പർച്ചേസ് ഇടപാടുകൾ</span>
-              <span id="purchaseGrandBadge" class="text-[9.5px] font-black bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
-            </h3>
-            <div class="space-y-0.5">
-              <span class="text-[9px] font-extrabold text-blue-800 uppercase block">💵 ക്യാഷ് പർച്ചേസ്</span>
-              <div id="repCashPurchasesList" class="overflow-x-auto"></div>
-            </div>
-            <div class="space-y-0.5 pt-1 border-t border-blue-200/60">
-              <span class="text-[9px] font-extrabold text-indigo-800 uppercase block">🚚 ക്രെഡിറ്റ് വെണ്ടർമാർ</span>
-              <div id="repCreditPurchasesList" class="overflow-x-auto"></div>
-            </div>
-          </div>
-
-          <div class="report-block bg-slate-50 p-2 rounded-xl border border-purple-200 space-y-1">
-            <h3 class="font-extrabold text-purple-950 text-[11px] flex items-center justify-between border-b pb-0.5">
-              <span>👥 സാലറി നൽകിയത്</span>
-            </h3>
-            <div id="repSalariesList" class="overflow-x-auto"></div>
-          </div>
-
-          <div class="report-block bg-slate-50 p-2 rounded-xl border border-amber-200 space-y-1">
-            <h3 class="font-extrabold text-amber-950 text-[11px] flex items-center justify-between border-b pb-0.5">
-              <span>⚡ ചിലവുകൾ</span>
-            </h3>
-            <div id="repExpensesList" class="overflow-x-auto"></div>
-          </div>
-        </div>
-
-        <!-- PRINT SIGNATURE BLOCK -->
-        <div class="pt-5 mt-4 border-t-2 border-slate-900 flex justify-between items-end text-[10.5px] font-black">
-          <div class="text-left space-y-6">
-            <div>...................................................................<br>ഷോപ്പ് ഇൻ-ചാർജ് ഒപ്പ്</div>
-            <div>തീയതി: ............................................</div>
-          </div>
-          <div class="text-right space-y-6">
-            <div>...................................................................<br>മാനേജർ ഒപ്പ്</div>
-            <div>തീയതി: ............................................</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- STATEMENT PRINT CONTAINER -->
-      <div id="statementPrintContainer" class="hidden space-y-2 text-xs sm:text-sm">
-        <div class="text-center border-b pb-1 flex justify-between items-center">
-          <div>
-            <h2 id="statementShopName" class="text-xs sm:text-sm font-black text-slate-900 uppercase">ALNASSR</h2>
-            <p id="statHeaderTitle" class="text-[10px] font-bold text-indigo-800">ACCOUNT STATEMENT</p>
-          </div>
-          <div class="text-right text-[10px] text-slate-600 font-bold">
-            <p id="statPeriodLabel">Statement Month</p>
-          </div>
-        </div>
-
-        <div id="statBannerGrid" class="bg-indigo-50 p-1.5 rounded-xl border border-indigo-200 grid grid-cols-2 sm:grid-cols-4 gap-1 text-xs font-bold text-slate-800">
-          <div>
-            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Old Opening</span>
-            <span id="statOpeningBalText" class="text-slate-900 text-xs">0</span>
-          </div>
-          <div>
-            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Month Sales/Bills</span>
-            <span id="statMonthSalesText" class="text-amber-700 text-xs">0</span>
-          </div>
-          <div>
-            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Month Paid/Coll</span>
-            <span id="statMonthPaidText" class="text-emerald-700 text-xs">0</span>
-          </div>
-          <div>
-            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Net Balance Due</span>
-            <span id="statClosingBalText" class="text-indigo-900 text-xs font-black">0</span>
-          </div>
-        </div>
-
-        <div id="statTableContainer" class="overflow-x-auto"></div>
-
-        <div class="pt-5 mt-4 border-t-2 border-slate-900 flex justify-between items-end text-[10.5px] font-black">
-          <div class="text-left space-y-6">
-            <div>...................................................................<br>കസ്റ്റമർ / വെണ്ടർ ഒപ്പ്</div>
-            <div>തീയതി: ............................................</div>
-          </div>
-          <div class="text-right space-y-6">
-            <div>...................................................................<br>മാനേജർ ഒപ്പ്</div>
-            <div>തീയതി: ............................................</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MODAL BOTTOM ACTIONS -->
-      <div class="pt-2 no-print flex gap-2 justify-center flex-wrap border-t">
-        <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
-          🖨️ PDF ആയി സേവ് / പ്രിന്റ്
-        </button>
-        <button onclick="shareActiveReportWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
-          🟢 വാട്‌സ്ആപ്പിലേക്ക് സെന്റ് ചെയ്യുക
-        </button>
-        <button onclick="closeReportModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
-          ✕ ക്ലോസ് ചെയ്യുക
-        </button>
       </div>
     </div>
   </div>
 
-  <!-- 2. MASTER RECORDS MODAL -->
-  <div id="masterModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-3xl w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[94vh] overflow-y-auto relative">
-      
-      <div class="sticky top-0 bg-white border-b pb-2 pt-1 z-30 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black">
-            <i data-lucide="database" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="text-sm font-black text-slate-900">മാസ്റ്റർ വിവരങ്ങൾ (Master Records)</h3>
-            <p class="text-[10px] text-slate-500 font-bold">ചേർക്കുക, എഡിറ്റ് ചെയ്യുക, ഡിലീറ്റ് ചെയ്യുക</p>
-          </div>
-        </div>
-        <button onclick="closeMasterModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-sm flex items-center justify-center cursor-pointer shadow-sm">✕</button>
-      </div>
-
-      <!-- MASTER TABS -->
-      <div class="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold border gap-1 overflow-x-auto">
-        <button onclick="switchMasterTab('customer')" id="mTabBtn-customer" class="flex-1 py-1.5 px-2 rounded-xl bg-emerald-600 text-white shadow font-black whitespace-nowrap cursor-pointer">🛒 കസ്റ്റമർ</button>
-        <button onclick="switchMasterTab('vendor')" id="mTabBtn-vendor" class="flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer">🚚 വെണ്ടർ</button>
-        <button onclick="switchMasterTab('employee')" id="mTabBtn-employee" class="flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer">👥 സ്റ്റാഫ്</button>
-        <button onclick="switchMasterTab('agent')" id="mTabBtn-agent" class="flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer">👤 ഏജന്റ്</button>
-        <button onclick="switchMasterTab('expense')" id="mTabBtn-expense" class="flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer">⚡ ചിലവ് ഇനം</button>
-      </div>
-
-      <div class="flex items-center justify-between gap-2">
-        <div class="relative flex-1">
-          <input 
-            type="text" 
-            id="masterSearchInput" 
-            oninput="renderActiveMasterList()" 
-            placeholder="പേര് തിരയുക..." 
-            class="w-full text-xs font-bold p-2 pl-8 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-emerald-500" 
-          />
-          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
-        </div>
-        <button onclick="triggerMasterAdd()" id="btnMasterAddCurrent" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow touch-btn cursor-pointer whitespace-nowrap flex items-center gap-1">
-          + പുതിയത് ചേർക്കുക
-        </button>
-      </div>
-
-      <div id="masterListContainer" class="overflow-x-auto min-h-[220px] max-h-[55vh] border rounded-2xl p-2 bg-slate-50/50"></div>
-
-      <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeMasterModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold cursor-pointer">
-          തിരികെ പോകുക
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. EDIT MASTER ITEM MODAL (SUPPORTS CASH/CREDIT TOGGLE & AGENT) -->
-  <div id="editMasterModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+  <!-- MODAL: STAFF DEPOSIT -->
+  <div id="staffDepositModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 id="editMasterModalTitle" class="text-xs font-black text-slate-900">✏️ വിവരങ്ങൾ തിരുത്തുക</h3>
-        <button onclick="closeEditMasterModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
+          📥 സ്റ്റാഫ് കടയിലേക്ക് പണം തന്നത്
+        </h3>
+        <button onclick="closeStaffDepositModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
 
-      <input type="hidden" id="editMasterType" />
-      <input type="hidden" id="editMasterOriginalId" />
+      <p class="text-[10px] text-slate-500 leading-tight">
+        ഇത് കടയുടെ ഫണ്ടിൽ <b>വരവായി (Inflow)</b> കയറുകയും, ജീവനക്കാരന് കൊടുക്കാനുള്ള കണക്കിൽ തനിയെ ശരിയാവുകയും ചെയ്യും.
+      </p>
 
       <div class="space-y-2 text-xs">
         <div>
-          <label class="block font-bold text-slate-700 mb-0.5">പേര്:</label>
-          <input type="text" id="editMasterName" oninput="this.value = this.value.toUpperCase();" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold uppercase-input outline-none focus:ring-2 focus:ring-emerald-500" />
+          <label class="block font-bold text-slate-700 mb-0.5">ജീവനക്കാരന്റെ പേര്:</label>
+          <input type="text" id="staffDepositEmpName" readonly class="w-full p-2.5 rounded-xl border bg-slate-100 font-black text-slate-800 outline-none uppercase-input" />
         </div>
-
-        <!-- CASH / CREDIT SELECTOR -->
-        <div id="editMasterPartyTypeBox" class="hidden">
-          <label class="block font-bold text-slate-700 mb-0.5">ഇടപാട് തരം (Account Type):</label>
-          <select id="editMasterPartyType" class="w-full p-2.5 rounded-xl border bg-slate-50 font-black outline-none focus:ring-2 focus:ring-emerald-500">
-            <option value="credit">ക്രെഡിറ്റ് (Credit)</option>
-            <option value="cash">ക്യാഷ് (Cash)</option>
-          </select>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-emerald-50 p-2 rounded-xl border border-emerald-200">
+            <label class="block text-[10px] font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് തന്നത്</label>
+            <input type="number" step="any" inputmode="decimal" id="staffDepositCash" placeholder="0.00" class="w-full p-2 rounded-lg border bg-white font-black text-center text-emerald-700 outline-none" />
+          </div>
+          <div class="bg-blue-50 p-2 rounded-xl border border-blue-200">
+            <label class="block text-[10px] font-black text-blue-900 mb-0.5 text-center">🏦 ബാങ്കിൽ തന്നത്</label>
+            <input type="number" step="any" inputmode="decimal" id="staffDepositBank" placeholder="0.00" class="w-full p-2 rounded-lg border bg-white font-black text-center text-blue-700 outline-none" />
+          </div>
         </div>
-
-        <div id="editMasterAgentBox" class="hidden">
-          <label class="block font-bold text-slate-700 mb-0.5">റൂട്ട് ഏജന്റ് (Route Agent):</label>
-          <input list="agentListOptions" id="editMasterAgent" placeholder="ഏജന്റ് പേര്..." class="w-full p-2 rounded-xl border bg-slate-50 font-bold uppercase-input outline-none" />
-        </div>
-
-        <div id="editMasterOpeningBox">
-          <label id="editMasterOpeningLabel" class="block font-bold text-slate-700 mb-0.5">തുടക്ക ബാലൻസ്:</label>
-          <input type="number" step="any" id="editMasterOpening" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:ring-2 focus:ring-emerald-500" />
-        </div>
-
-        <div id="editMasterSalaryBox" class="hidden">
-          <label class="block font-bold text-slate-700 mb-0.5">മാസ ശമ്പളം:</label>
-          <input type="number" step="any" id="editMasterSalary" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:ring-2 focus:ring-emerald-500" />
-        </div>
-
-        <div id="editMasterJoinDateBox" class="hidden">
-          <label class="block font-bold text-slate-700 mb-0.5">ജോയിനിങ് തീയതി:</label>
-          <input type="date" id="editMasterJoinDate" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none cursor-pointer" />
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">കുറിപ്പ് (Note):</label>
+          <input type="text" id="staffDepositNote" placeholder="ഉദാ: കടത്തിലേക്ക് തന്നത് / അഡ്വാൻസ് തിരികെ" class="w-full p-2 rounded-xl border bg-slate-50 outline-none" />
         </div>
       </div>
 
       <div class="pt-2 border-t flex gap-2">
-        <button type="button" onclick="closeEditMasterModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
-        <button type="button" onclick="saveEditedMasterItem()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ് ചെയ്യുക</button>
+        <button type="button" onclick="closeStaffDepositModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveStaffDepositEntry()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ് ചെയ്യുക</button>
       </div>
     </div>
   </div>
 
-  <!-- 4. NEW CUSTOMER MODAL -->
+  <!-- POPUP MODALS FOR SALES / PURCHASES / EXPENSES -->
+  <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
+          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് ഇടപാടുകൾ (Selected Date)
+        </h3>
+        <button onclick="closeTodaySalesModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-1">
+        <span class="text-[10px] font-black text-emerald-800 uppercase block">1. ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
+        <div id="modalCashSalesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="space-y-1 pt-2 border-t">
+        <span class="text-[10px] font-black text-amber-800 uppercase block">2. ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
+        <div id="modalCreditSalesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodaySalesModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് ഇടപാടുകൾ (Selected Date)
+        </h3>
+        <button onclick="closeTodayPurchaseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-1">
+        <span class="text-[10px] font-black text-blue-900 uppercase block">1. ക്യാഷ് പർച്ചേസ് (Cash Vendors)</span>
+        <div id="modalCashPurchasesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="space-y-1 pt-2 border-t">
+        <span class="text-[10px] font-black text-indigo-900 uppercase block">2. ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
+        <div id="modalCreditPurchasesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodayPurchaseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-amber-900 flex items-center gap-1.5">
+          <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവുകൾ & സാലറി (Selected Date)
+        </h3>
+        <button onclick="closeTodayExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-1">
+        <span class="text-[10px] font-black text-purple-900 uppercase block">1. സാലറി നൽകിയത് (Staff Salaries)</span>
+        <div id="modalSalariesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="space-y-1 pt-2 border-t">
+        <span class="text-[10px] font-black text-amber-900 uppercase block">2. ഷോപ്പ് ചിലവുകൾ (Shop Expenses)</span>
+        <div id="modalExpensesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodayExpenseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW CREDIT CUSTOMER -->
   <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">🛒 പുതിയ കസ്റ്റമർ</h3>
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">🛒 പുതിയ ക്രെഡിറ്റ് കസ്റ്റമർ</h3>
         <button onclick="closeNewCustomerModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">കസ്റ്റമർ പേര്:</label>
           <input type="text" id="newCustName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500 uppercase-input" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">ഇടപാട് തരം:</label>
-          <select id="newCustType" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none">
-            <option value="credit">ക്രെഡിറ്റ് (Credit)</option>
-            <option value="cash">ക്യാഷ് (Cash)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">റൂട്ട് ഏജന്റ് (Route Agent):</label>
-          <input list="agentListOptions" id="newCustAgent" placeholder="ഏജന്റ് പേര് (ഓപ്ഷണൽ)..." class="w-full p-2 rounded-xl border bg-slate-50 font-bold uppercase-input outline-none focus:border-emerald-500" />
-          <datalist id="agentListOptions"></datalist>
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">പഴയ കടം / ബാലൻസ്:</label>
@@ -907,24 +691,17 @@
     </div>
   </div>
 
-  <!-- 5. NEW VENDOR MODAL -->
+  <!-- MODAL: NEW CREDIT VENDOR -->
   <div id="newVendorModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">🚚 പുതിയ വെണ്ടർ</h3>
+        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">🚚 പുതിയ ക്രെഡിറ്റ് വെണ്ടർ</h3>
         <button onclick="closeNewVendorModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">വെണ്ടർ പേര്:</label>
           <input type="text" id="newVendName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500 uppercase-input" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">ഇടപാട് തരം:</label>
-          <select id="newVendType" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none">
-            <option value="credit">ക്രെഡിറ്റ് (Credit)</option>
-            <option value="cash">ക്യാഷ് (Cash)</option>
-          </select>
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">പഴയ ബാക്കി / കൊടുക്കാനുള്ളത്:</label>
@@ -938,7 +715,7 @@
     </div>
   </div>
 
-  <!-- 6. NEW EMPLOYEE MODAL -->
+  <!-- MODAL: NEW EMPLOYEE MODAL -->
   <div id="newEmployeeModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -972,72 +749,7 @@
     </div>
   </div>
 
-  <!-- 7. CASH / BANK TRANSFER MODAL -->
-  <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-4">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-purple-900 flex items-center gap-1.5">
-          <i data-lucide="repeat" class="w-4 h-4 text-purple-600"></i> ക്യാഷ് / ബാങ്ക് മാറ്റം (Transfer)
-        </h3>
-        <button onclick="closeTransferModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div class="bg-blue-50/80 p-3 rounded-2xl border border-blue-200 space-y-1.5">
-          <label class="block font-black text-blue-900 text-[11px]">ബാങ്കിലേക്ക് ഇടുക (Cash to Bank):</label>
-          <div class="flex gap-2">
-            <input type="number" step="any" inputmode="decimal" id="depositAmount" placeholder="തുക" class="flex-1 p-2 rounded-xl border bg-white font-black text-center text-blue-700 outline-none" />
-            <button onclick="saveDeposit()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow touch-btn cursor-pointer">ഇടുക</button>
-          </div>
-        </div>
-
-        <div class="bg-emerald-50/80 p-3 rounded-2xl border border-emerald-200 space-y-1.5">
-          <label class="block font-black text-emerald-900 text-[11px]">കയ്യിലേക്ക് എടുക്കുക (Bank to Cash):</label>
-          <div class="flex gap-2">
-            <input type="number" step="any" inputmode="decimal" id="withdrawalAmount" placeholder="തുക" class="flex-1 p-2 rounded-xl border bg-white font-black text-center text-emerald-700 outline-none" />
-            <button onclick="saveWithdrawal()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow touch-btn cursor-pointer">എടുക്കുക</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 8. STAFF DEPOSIT MODAL -->
-  <div id="staffDepositModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">📥 സ്റ്റാഫ് കടയിലേക്ക് പണം തന്നത്</h3>
-        <button onclick="closeStaffDepositModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <p class="text-[10px] text-slate-500 leading-tight">ഇത് കടയുടെ ഫണ്ടിൽ <b>വരവായി (Inflow)</b> കയറുകയും ജീവനക്കാരന് കൂടുതൽ അർഹതയാവുകയും ചെയ്യും.</p>
-      <div class="space-y-2 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">ജീവനക്കാരന്റെ പേര്:</label>
-          <input type="text" id="staffDepositEmpName" readonly class="w-full p-2.5 rounded-xl border bg-slate-100 font-black text-slate-800 outline-none uppercase-input" />
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div class="bg-emerald-50 p-2 rounded-xl border border-emerald-200">
-            <label class="block text-[10px] font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് തന്നത്</label>
-            <input type="number" step="any" inputmode="decimal" id="staffDepositCash" placeholder="0.00" class="w-full p-2 rounded-lg border bg-white font-black text-center text-emerald-700 outline-none" />
-          </div>
-          <div class="bg-blue-50 p-2 rounded-xl border border-blue-200">
-            <label class="block text-[10px] font-black text-blue-900 mb-0.5 text-center">🏦 ബാങ്കിൽ തന്നത്</label>
-            <input type="number" step="any" inputmode="decimal" id="staffDepositBank" placeholder="0.00" class="w-full p-2 rounded-lg border bg-white font-black text-center text-blue-700 outline-none" />
-          </div>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">കുറിപ്പ് (Note):</label>
-          <input type="text" id="staffDepositNote" placeholder="ഉദാ: കടത്തിലേക്ക് തന്നത് / അഡ്വാൻസ് തിരികെ" class="w-full p-2 rounded-xl border bg-slate-50 outline-none" />
-        </div>
-      </div>
-      <div class="pt-2 border-t flex gap-2">
-        <button type="button" onclick="closeStaffDepositModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
-        <button type="button" onclick="saveStaffDepositEntry()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ് ചെയ്യുക</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 9. EDIT TRANSACTION MODAL -->
+  <!-- MODAL: EDIT TRANSACTION -->
   <div id="editTransactionModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1076,7 +788,7 @@
     </div>
   </div>
 
-  <!-- 10. PIN VERIFY MODAL -->
+  <!-- PIN VERIFY MODAL -->
   <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
       <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
@@ -1089,71 +801,7 @@
     </div>
   </div>
 
-  <!-- 11. TODAY'S SALES BREAKDOWN MODAL -->
-  <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5"><i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് ഇടപാടുകൾ</h3>
-        <button onclick="closeTodaySalesModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-1">
-        <span class="text-[10px] font-black text-emerald-800 uppercase block">1. ക്യാഷ് കസ്റ്റമർമാർ</span>
-        <div id="modalCashSalesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="space-y-1 pt-2 border-t">
-        <span class="text-[10px] font-black text-amber-800 uppercase block">2. ക്രെഡിറ്റ് കസ്റ്റമർമാർ</span>
-        <div id="modalCreditSalesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeTodaySalesModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 12. TODAY'S PURCHASES BREAKDOWN MODAL -->
-  <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5"><i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് ഇടപാടുകൾ</h3>
-        <button onclick="closeTodayPurchaseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-1">
-        <span class="text-[10px] font-black text-blue-900 uppercase block">1. ക്യാഷ് പർച്ചേസ്</span>
-        <div id="modalCashPurchasesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="space-y-1 pt-2 border-t">
-        <span class="text-[10px] font-black text-indigo-900 uppercase block">2. ക്രെഡിറ്റ് വെണ്ടർമാർ</span>
-        <div id="modalCreditPurchasesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeTodayPurchaseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 13. TODAY'S EXPENSES BREAKDOWN MODAL -->
-  <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-amber-900 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവുകൾ & സാലറി</h3>
-        <button onclick="closeTodayExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-1">
-        <span class="text-[10px] font-black text-purple-900 uppercase block">1. സാലറി നൽകിയത്</span>
-        <div id="modalSalariesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="space-y-1 pt-2 border-t">
-        <span class="text-[10px] font-black text-amber-900 uppercase block">2. ഷോപ്പ് ചിലവുകൾ</span>
-        <div id="modalExpensesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeTodayExpenseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
-      </div>
-    </div>
-  </div>
-  <!-- ======================================================== -->
-  <!-- PART 3: COMPLETE JAVASCRIPT LOGIC ENGINE -->
-  <!-- ======================================================== -->
+  <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
     let SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : [];
     let currentShopId = null;
@@ -1175,16 +823,15 @@
     let currentReportMode = 'daily';
     let currentReportDataForWA = {};
     let currentStatementDataForWA = null;
-    let currentMasterTab = 'customer';
 
-    // PREVENT BACK-FORWARD CACHE (BFCACHE)
+    // PREVENT BACK-FORWARD CACHE (BFCACHE) POLLUTION
     window.addEventListener('pageshow', function (event) {
       if (event.persisted) {
         window.location.reload();
       }
     });
 
-    // PWA INSTALL PROMPT
+    // PWA INSTALL LOGIC
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -1204,7 +851,7 @@
       });
     }
 
-    // SAUDI BUSINESS DATE (6:00 AM CUT-OFF SYNC)
+    // SAUDI BUSINESS DATE (6:00 AM CUT-OFF SYNC - BULLETPROOF NO RECURSION)
     function getSaudiBusinessDate() {
       try {
         const now = new Date();
@@ -1339,10 +986,6 @@
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("admin");
         initMultiShopSystem();
-        setTimeout(() => {
-          if (window.lucide) lucide.createIcons();
-          renderQuickTotalsAndRecent();
-        }, 50);
         return;
       }
 
@@ -1356,10 +999,6 @@
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("shop");
         initMultiShopSystem(matched.id);
-        setTimeout(() => {
-          if (window.lucide) lucide.createIcons();
-          renderQuickTotalsAndRecent();
-        }, 50);
         return;
       }
 
@@ -1380,11 +1019,13 @@
       }
     }
 
+    // AUTOMATIC IN-MEMORY & CACHE PURGE ON LOGOUT (NO CTRL+F5 NEEDED)
     function logoutApp() {
       sessionStorage.clear();
       window.location.replace(window.location.pathname);
     }
 
+    // DESKTOP PORTAL PROTECTION
     function goToDesktopPortal() {
       const userRole = sessionStorage.getItem("ALNASSR_USER_ROLE");
       if (userRole === 'admin') {
@@ -1476,15 +1117,13 @@
       const tabs = ['sale', 'purchase', 'expense'];
       tabs.forEach(t => {
         const btn = document.getElementById(`mTab-${t}`);
-        const iconWrap = btn ? btn.querySelector('div') : null;
-        if (btn && iconWrap) {
-          if (t === tabId) {
-            btn.className = `flex flex-col items-center gap-1 font-extrabold text-xs touch-btn cursor-pointer ${t === 'sale' ? 'text-emerald-600' : t === 'purchase' ? 'text-blue-600' : 'text-amber-600'}`;
-            iconWrap.className = `p-1.5 rounded-xl ${t === 'sale' ? 'bg-emerald-100' : t === 'purchase' ? 'bg-blue-100' : 'bg-amber-100'}`;
-          } else {
-            btn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold text-xs touch-btn cursor-pointer";
-            iconWrap.className = "p-1.5 rounded-xl bg-slate-50";
-          }
+        const iconWrap = btn.querySelector('div');
+        if (t === tabId) {
+          btn.className = `flex flex-col items-center gap-1 font-extrabold text-xs touch-btn cursor-pointer ${t === 'sale' ? 'text-emerald-600' : t === 'purchase' ? 'text-blue-600' : 'text-amber-600'}`;
+          iconWrap.className = `p-1.5 rounded-xl ${t === 'sale' ? 'bg-emerald-100' : t === 'purchase' ? 'bg-blue-100' : 'bg-amber-100'}`;
+        } else {
+          btn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold text-xs touch-btn cursor-pointer";
+          iconWrap.className = "p-1.5 rounded-xl bg-slate-50";
         }
       });
       if (window.lucide) lucide.createIcons();
@@ -1595,11 +1234,6 @@
         expensesMasterList.forEach(e => uDL.innerHTML += `<option value="${e.name.toUpperCase()}">`);
         employeesList.forEach(em => uDL.innerHTML += `<option value="${em.name.toUpperCase()}">`);
       }
-      const agDL = document.getElementById("agentListOptions");
-      if (agDL) {
-        agDL.innerHTML = "";
-        agentsList.forEach(a => agDL.innerHTML += `<option value="${a.name.toUpperCase()}">`);
-      }
     }
 
     function renderSaleInputs(type) {
@@ -1652,8 +1286,7 @@
             liveBal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
           }
         });
-        let agStr = cust.agent_name ? ` | ഏജന്റ്: ${cust.agent_name}` : '';
-        info.innerText = `ലൈവ് ബാലൻസ്: ${liveBal.toLocaleString('en-IN')}${agStr}`;
+        info.innerText = `ലൈവ് ബാലൻസ് (കിട്ടാനുള്ളത്): ${liveBal.toLocaleString('en-IN')}`;
         renderSaleInputs('credit');
       } else {
         info.innerText = cust ? "ക്യാഷ് കസ്റ്റമർ" : "പുതിയ കസ്റ്റമർ (ക്യാഷ് ആയി സേവ് ആകും)";
@@ -1711,7 +1344,7 @@
             liveBal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
           }
         });
-        info.innerText = `ലൈവ് ബാലൻസ്: ${liveBal.toLocaleString('en-IN')}`;
+        info.innerText = `ലൈവ് ബാലൻസ് (കൊടുക്കാനുള്ളത്): ${liveBal.toLocaleString('en-IN')}`;
         renderPurchaseInputs('credit');
       } else {
         info.innerText = vend ? "ക്യാഷ് വെണ്ടർ" : "പുതിയ വെണ്ടർ (ക്യാഷ് ആയി സേവ് ആകും)";
@@ -1719,7 +1352,7 @@
       }
     }
 
-    // SALARY ENGINE & LIVE BALANCE CALCULATION (LOOP-SAFE & CRASH-PROOF)
+    // SALARY ENGINE & LIVE BALANCE CALCULATION
     function getCycleStartDate(joinDate, cycleIndex) {
       let d = new Date(joinDate.getFullYear(), joinDate.getMonth() + cycleIndex, joinDate.getDate());
       let expectedMonth = (joinDate.getMonth() + cycleIndex) % 12;
@@ -1734,70 +1367,62 @@
       if (!emp) return 0;
       const monthlySalary = parseFloat(emp.monthly_salary) || 0;
       const baseAdv = parseFloat(emp.opening_advance || emp.opening_balance) || 0;
-      if (!monthlySalary || !emp.joining_date) return baseAdv;
+      if (!monthlySalary) return baseAdv;
 
-      try {
-        const joinD = parseToDateObj(emp.joining_date);
-        if (isNaN(joinD.getTime())) return baseAdv;
+      const joinD = parseToDateObj(emp.joining_date);
+      const refStr = asOfDateStr ? cleanDate(asOfDateStr) : (document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate());
+      let targetD = parseToDateObj(refStr);
 
-        const refStr = asOfDateStr ? cleanDate(asOfDateStr) : (document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate());
-        let targetD = parseToDateObj(refStr);
-        if (isNaN(targetD.getTime())) targetD = new Date();
-
-        const isStopped = (emp.status === 'stopped' || emp.status === 'left');
-        let stopD = null;
-        if (isStopped && emp.stop_date) {
-          stopD = parseToDateObj(emp.stop_date);
-          if (!isNaN(stopD.getTime()) && stopD < targetD) targetD = stopD;
-        }
-
-        if (targetD < joinD) return baseAdv;
-
-        let monthsDiff = (targetD.getFullYear() - joinD.getFullYear()) * 12 + (targetD.getMonth() - joinD.getMonth());
-        if (targetD.getDate() < joinD.getDate()) monthsDiff--;
-        let k = Math.max(0, monthsDiff);
-        let safeGuard = 0;
-        while (k < 360 && safeGuard < 400) {
-          safeGuard++;
-          let nextCycleStart = getCycleStartDate(joinD, k + 1);
-          if (targetD >= nextCycleStart) {
-            k++;
-          } else {
-            break;
-          }
-        }
-
-        let totalSalary = baseAdv + (k * monthlySalary);
-
-        if (isStopped) {
-          let currentCycleStart = getCycleStartDate(joinD, k);
-          let nextCycleStart = getCycleStartDate(joinD, k + 1);
-
-          let currentCycleEnd = new Date(nextCycleStart);
-          currentCycleEnd.setDate(currentCycleEnd.getDate() - 1);
-
-          if (targetD >= currentCycleStart && targetD <= currentCycleEnd) {
-            if (targetD.getTime() === currentCycleEnd.getTime()) {
-              totalSalary += monthlySalary;
-            } else {
-              let diffMs = targetD.getTime() - currentCycleStart.getTime();
-              let daysWorked = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
-              let year = targetD.getFullYear();
-              let month = targetD.getMonth() + 1;
-              let daysInMonth = new Date(year, month, 0).getDate();
-              let dailyRate = monthlySalary / daysInMonth;
-              let proRataAmt = Math.round(dailyRate * daysWorked * 100) / 100;
-              totalSalary += proRataAmt;
-            }
-          }
-        }
-
-        return totalSalary;
-      } catch (e) {
-        return baseAdv;
+      const isStopped = (emp.status === 'stopped' || emp.status === 'left');
+      let stopD = null;
+      if (isStopped && emp.stop_date) {
+        stopD = parseToDateObj(emp.stop_date);
+        if (stopD < targetD) targetD = stopD;
       }
+
+      if (targetD < joinD) return baseAdv;
+
+      let k = 0;
+      while (true) {
+        let nextCycleStart = getCycleStartDate(joinD, k + 1);
+        if (targetD >= nextCycleStart) {
+          k++;
+        } else {
+          break;
+        }
+      }
+
+      let totalSalary = baseAdv + (k * monthlySalary);
+
+      if (isStopped) {
+        let currentCycleStart = getCycleStartDate(joinD, k);
+        let nextCycleStart = getCycleStartDate(joinD, k + 1);
+
+        let currentCycleEnd = new Date(nextCycleStart);
+        currentCycleEnd.setDate(currentCycleEnd.getDate() - 1);
+
+        if (targetD >= currentCycleStart && targetD <= currentCycleEnd) {
+          if (targetD.getTime() === currentCycleEnd.getTime()) {
+            totalSalary += monthlySalary;
+          } else {
+            let diffMs = targetD.getTime() - currentCycleStart.getTime();
+            let daysWorked = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+            
+            let year = targetD.getFullYear();
+            let month = targetD.getMonth() + 1;
+            let daysInMonth = new Date(year, month, 0).getDate();
+
+            let dailyRate = monthlySalary / daysInMonth;
+            let proRataAmt = Math.round(dailyRate * daysWorked * 100) / 100;
+            totalSalary += proRataAmt;
+          }
+        }
+      }
+
+      return totalSalary;
     }
 
+    // ACCURATELY FILTER ADVANCES UP TO asOfDateStr
     function calculateEmployeePendingBalance(emp, asOfDateStr) {
       if (!emp) return 0;
       const refDate = asOfDateStr || (document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate());
@@ -1860,6 +1485,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    // TRANSFER MODAL LOGIC (CASH / BANK)
     function openTransferModal() {
       document.getElementById("depositAmount").value = "";
       document.getElementById("withdrawalAmount").value = "";
@@ -1923,444 +1549,21 @@
       closeTransferModal();
     }
 
-    // ========================================================
-    // MASTER MANAGEMENT (CUSTOMERS / VENDORS / STAFF / AGENTS)
-    // ========================================================
-    function openMasterModal() {
-      document.getElementById("masterModal").classList.remove("hidden");
-      switchMasterTab(currentMasterTab || 'customer');
-      if (window.lucide) lucide.createIcons();
+    // MODAL HANDLERS
+    function openNewCustomerModal() {
+      document.getElementById("newCustName").value = "";
+      document.getElementById("newCustOpening").value = "";
+      document.getElementById("newCustomerModal").classList.remove("hidden");
+      document.getElementById("newCustName").focus();
     }
-
-    function closeMasterModal() {
-      document.getElementById("masterModal").classList.add("hidden");
-    }
-
-    function switchMasterTab(tab) {
-      currentMasterTab = tab;
-      const tabs = ['customer', 'vendor', 'employee', 'agent', 'expense'];
-      tabs.forEach(t => {
-        const btn = document.getElementById(`mTabBtn-${t}`);
-        if (btn) {
-          if (t === tab) btn.className = "flex-1 py-1.5 px-2 rounded-xl bg-emerald-600 text-white shadow font-black whitespace-nowrap cursor-pointer";
-          else btn.className = "flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer";
-        }
-      });
-      document.getElementById("masterSearchInput").value = "";
-      renderActiveMasterList();
-    }
-
-    function triggerMasterAdd() {
-      if (currentMasterTab === 'customer') openNewCustomerModal();
-      else if (currentMasterTab === 'vendor') openNewVendorModal();
-      else if (currentMasterTab === 'employee') openNewEmployeeModal();
-      else if (currentMasterTab === 'agent') quickAddAgentPrompt();
-      else if (currentMasterTab === 'expense') quickAddExpensePrompt();
-    }
-
-    async function quickAddAgentPrompt() {
-      let name = prompt("പുതിയ റൂട്ട് ഏജന്റിന്റെ പേര് നൽകുക:");
-      if (!name || !name.trim()) return;
-      name = name.trim().toUpperCase();
-
-      const newAg = { name: name };
-      if (navigator.onLine && supabaseClient) {
-        const { data } = await supabaseClient.from('agents').insert([newAg]).select();
-        if (data && data[0]) newAg.id = data[0].id;
-      } else {
-        newAg.id = 'ag_' + Date.now();
-      }
-      agentsList.push(newAg);
-      localStorage.setItem(`ALNASSR_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
-      populateDropdowns();
-      renderActiveMasterList();
-      alert("പുതിയ ഏജന്റിനെ ചേർത്തു!");
-    }
-
-    function renderActiveMasterList() {
-      const container = document.getElementById("masterListContainer");
-      const search = (document.getElementById("masterSearchInput")?.value || "").trim().toLowerCase();
-      let html = "";
-
-      if (currentMasterTab === 'customer') {
-        let list = customersList.filter(c => !search || (c.name || '').toLowerCase().includes(search));
-        html = `
-          <table class="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr class="bg-emerald-100/70 text-slate-900 font-black border-b">
-                <th class="p-2">കസ്റ്റമർ പേര്</th>
-                <th class="p-2 text-center">ഏജന്റ്</th>
-                <th class="p-2 text-center">വിഭാഗം</th>
-                <th class="p-2 text-right">പഴയ ബാലൻസ്</th>
-                <th class="p-2 text-right">⚙️ നടപടി</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 font-bold">
-        `;
-        if (list.length === 0) html += `<tr><td colspan="5" class="p-4 text-center text-slate-400">കസ്റ്റമർമാർ ആരും ഇല്ല</td></tr>`;
-        else {
-          list.forEach(c => {
-            html += `
-              <tr class="hover:bg-slate-100/60">
-                <td class="p-2 font-black text-slate-900">${c.name}</td>
-                <td class="p-2 text-center text-slate-600 text-[11px]">${c.agent_name || '-'}</td>
-                <td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${c.type === 'credit' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${c.type === 'credit' ? 'ക്രെഡിറ്റ്' : 'ക്യാഷ്'}</span></td>
-                <td class="p-2 text-right text-slate-800">${(parseFloat(c.opening_balance) || 0).toLocaleString('en-IN')}</td>
-                <td class="p-2 text-right whitespace-nowrap">
-                  <button onclick="openEditMasterItem('customer', '${c.name}')" title="തിരുത്തുക" class="p-1 text-blue-600 hover:text-blue-800 cursor-pointer">✏️</button>
-                  <button onclick="deleteMasterItem('customer', '${c.name}')" title="ഡിലീറ്റ്" class="p-1 text-rose-600 hover:text-rose-800 cursor-pointer">🗑️</button>
-                </td>
-              </tr>
-            `;
-          });
-        }
-        html += `</tbody></table>`;
-      } else if (currentMasterTab === 'vendor') {
-        let list = vendorsList.filter(v => !search || (v.name || '').toLowerCase().includes(search));
-        html = `
-          <table class="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr class="bg-blue-100/70 text-slate-900 font-black border-b">
-                <th class="p-2">വെണ്ടർ പേര്</th>
-                <th class="p-2 text-center">വിഭാഗം</th>
-                <th class="p-2 text-right">കൊടുക്കാനുള്ള ബാക്കി</th>
-                <th class="p-2 text-right">⚙️ നടപടി</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 font-bold">
-        `;
-        if (list.length === 0) html += `<tr><td colspan="4" class="p-4 text-center text-slate-400">വെണ്ടർമാർ ആരും ഇല്ല</td></tr>`;
-        else {
-          list.forEach(v => {
-            html += `
-              <tr class="hover:bg-slate-100/60">
-                <td class="p-2 font-black text-slate-900">${v.name}</td>
-                <td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${v.type === 'cash' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">${v.type === 'cash' ? 'ക്യാഷ്' : 'ക്രെഡിറ്റ്'}</span></td>
-                <td class="p-2 text-right text-slate-800">${(parseFloat(v.opening_balance) || 0).toLocaleString('en-IN')}</td>
-                <td class="p-2 text-right whitespace-nowrap">
-                  <button onclick="openEditMasterItem('vendor', '${v.name}')" title="തിരുത്തുക" class="p-1 text-blue-600 hover:text-blue-800 cursor-pointer">✏️</button>
-                  <button onclick="deleteMasterItem('vendor', '${v.name}')" title="ഡിലീറ്റ്" class="p-1 text-rose-600 hover:text-rose-800 cursor-pointer">🗑️</button>
-                </td>
-              </tr>
-            `;
-          });
-        }
-        html += `</tbody></table>`;
-      } else if (currentMasterTab === 'employee') {
-        let list = employeesList.filter(e => !search || (e.name || '').toLowerCase().includes(search));
-        html = `
-          <table class="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr class="bg-purple-100/70 text-slate-900 font-black border-b">
-                <th class="p-2">സ്റ്റാഫ് പേര്</th>
-                <th class="p-2 text-center">ശമ്പളം</th>
-                <th class="p-2 text-center">ജോയിനിങ് തീയതി</th>
-                <th class="p-2 text-right">തുടക്ക ബാക്കി</th>
-                <th class="p-2 text-right">⚙️ നടപടി</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 font-bold">
-        `;
-        if (list.length === 0) html += `<tr><td colspan="5" class="p-4 text-center text-slate-400">ജീവനക്കാർ ആരും ഇല്ല</td></tr>`;
-        else {
-          list.forEach(e => {
-            html += `
-              <tr class="hover:bg-slate-100/60">
-                <td class="p-2 font-black text-slate-900">${e.name}</td>
-                <td class="p-2 text-center text-purple-900">${(parseFloat(e.monthly_salary) || 0).toLocaleString('en-IN')}</td>
-                <td class="p-2 text-center text-slate-600">${e.joining_date || '-'}</td>
-                <td class="p-2 text-right text-slate-800">${(parseFloat(e.opening_advance || e.opening_balance) || 0).toLocaleString('en-IN')}</td>
-                <td class="p-2 text-right whitespace-nowrap">
-                  <button onclick="openEditMasterItem('employee', '${e.name}')" title="തിരുത്തുക" class="p-1 text-blue-600 hover:text-blue-800 cursor-pointer">✏️</button>
-                  <button onclick="deleteMasterItem('employee', '${e.name}')" title="ഡിലീറ്റ്" class="p-1 text-rose-600 hover:text-rose-800 cursor-pointer">🗑️</button>
-                </td>
-              </tr>
-            `;
-          });
-        }
-        html += `</tbody></table>`;
-      } else if (currentMasterTab === 'agent') {
-        let list = agentsList.filter(a => !search || (a.name || '').toLowerCase().includes(search));
-        html = `
-          <table class="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr class="bg-indigo-100/70 text-slate-900 font-black border-b">
-                <th class="p-2">റൂട്ട് ഏജന്റ് പേര്</th>
-                <th class="p-2 text-right">⚙️ നടപടി</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 font-bold">
-        `;
-        if (list.length === 0) html += `<tr><td colspan="2" class="p-4 text-center text-slate-400">ഏജന്റുമാർ ആരും ഇല്ല</td></tr>`;
-        else {
-          list.forEach(a => {
-            html += `
-              <tr class="hover:bg-slate-100/60">
-                <td class="p-2 font-black text-slate-900">${a.name}</td>
-                <td class="p-2 text-right whitespace-nowrap">
-                  <button onclick="openEditMasterItem('agent', '${a.name}')" title="തിരുത്തുക" class="p-1 text-blue-600 hover:text-blue-800 cursor-pointer">✏️</button>
-                  <button onclick="deleteMasterItem('agent', '${a.name}')" title="ഡിലീറ്റ്" class="p-1 text-rose-600 hover:text-rose-800 cursor-pointer">🗑️</button>
-                </td>
-              </tr>
-            `;
-          });
-        }
-        html += `</tbody></table>`;
-      } else if (currentMasterTab === 'expense') {
-        let list = expensesMasterList.filter(ex => !search || (ex.name || '').toLowerCase().includes(search));
-        html = `
-          <table class="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr class="bg-amber-100/70 text-slate-900 font-black border-b">
-                <th class="p-2">ചിലവ് ഇനം</th>
-                <th class="p-2 text-right">⚙️ നടപടി</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 font-bold">
-        `;
-        if (list.length === 0) html += `<tr><td colspan="2" class="p-4 text-center text-slate-400">ചിലവ് ഇനങ്ങൾ ഇല്ല</td></tr>`;
-        else {
-          list.forEach(ex => {
-            html += `
-              <tr class="hover:bg-slate-100/60">
-                <td class="p-2 font-black text-slate-900">${ex.name}</td>
-                <td class="p-2 text-right whitespace-nowrap">
-                  <button onclick="openEditMasterItem('expense', '${ex.name}')" title="തിരുത്തുക" class="p-1 text-blue-600 hover:text-blue-800 cursor-pointer">✏️</button>
-                  <button onclick="deleteMasterItem('expense', '${ex.name}')" title="ഡിലീറ്റ്" class="p-1 text-rose-600 hover:text-rose-800 cursor-pointer">🗑️</button>
-                </td>
-              </tr>
-            `;
-          });
-        }
-        html += `</tbody></table>`;
-      }
-
-      container.innerHTML = html;
-    }
-
-    function openEditMasterItem(type, originalName) {
-      document.getElementById("editMasterType").value = type;
-      document.getElementById("editMasterOriginalId").value = originalName;
-
-      const title = document.getElementById("editMasterModalTitle");
-      const nameInp = document.getElementById("editMasterName");
-      const partyTypeBox = document.getElementById("editMasterPartyTypeBox");
-      const partyTypeSel = document.getElementById("editMasterPartyType");
-      const agentBox = document.getElementById("editMasterAgentBox");
-      const agentInp = document.getElementById("editMasterAgent");
-      const openingBox = document.getElementById("editMasterOpeningBox");
-      const openingLabel = document.getElementById("editMasterOpeningLabel");
-      const openingInp = document.getElementById("editMasterOpening");
-      const salaryBox = document.getElementById("editMasterSalaryBox");
-      const salaryInp = document.getElementById("editMasterSalary");
-      const joinBox = document.getElementById("editMasterJoinDateBox");
-      const joinInp = document.getElementById("editMasterJoinDate");
-
-      nameInp.value = originalName;
-
-      if (type === 'customer') {
-        const item = customersList.find(c => c.name === originalName);
-        title.innerText = "🛒 കസ്റ്റമർ വിവരങ്ങൾ തിരുത്തുക";
-        partyTypeBox.classList.remove("hidden");
-        partyTypeSel.value = item ? (item.type || 'credit') : 'credit';
-        agentBox.classList.remove("hidden");
-        agentInp.value = item ? (item.agent_name || '') : '';
-        openingBox.classList.remove("hidden");
-        openingLabel.innerText = "പഴയ കടം / ബാലൻസ്:";
-        openingInp.value = item ? (item.opening_balance || 0) : 0;
-        salaryBox.classList.add("hidden");
-        joinBox.classList.add("hidden");
-      } else if (type === 'vendor') {
-        const item = vendorsList.find(v => v.name === originalName);
-        title.innerText = "🚚 വെണ്ടർ തിരുത്തുക";
-        partyTypeBox.classList.remove("hidden");
-        partyTypeSel.value = item ? (item.type || 'credit') : 'credit';
-        agentBox.classList.add("hidden");
-        openingBox.classList.remove("hidden");
-        openingLabel.innerText = "കൊടുക്കാനുള്ള ബാക്കി തുക:";
-        openingInp.value = item ? (item.opening_balance || 0) : 0;
-        salaryBox.classList.add("hidden");
-        joinBox.classList.add("hidden");
-      } else if (type === 'employee') {
-        const item = employeesList.find(e => e.name === originalName);
-        title.innerText = "👥 ജീവനക്കാരന്റെ വിവരങ്ങൾ തിരുത്തുക";
-        partyTypeBox.classList.add("hidden");
-        agentBox.classList.add("hidden");
-        openingBox.classList.remove("hidden");
-        openingLabel.innerText = "തുടക്ക ബാക്കി / അഡ്വാൻസ്:";
-        openingInp.value = item ? (item.opening_advance || item.opening_balance || 0) : 0;
-        salaryBox.classList.remove("hidden");
-        salaryInp.value = item ? (item.monthly_salary || 0) : 0;
-        joinBox.classList.remove("hidden");
-        joinInp.value = item ? (item.joining_date || '') : '';
-      } else if (type === 'agent') {
-        title.innerText = "👤 റൂട്ട് ഏജന്റ് തിരുത്തുക";
-        partyTypeBox.classList.add("hidden");
-        agentBox.classList.add("hidden");
-        openingBox.classList.add("hidden");
-        salaryBox.classList.add("hidden");
-        joinBox.classList.add("hidden");
-      } else if (type === 'expense') {
-        title.innerText = "⚡ ചിലവ് ഇനം തിരുത്തുക";
-        partyTypeBox.classList.add("hidden");
-        agentBox.classList.add("hidden");
-        openingBox.classList.add("hidden");
-        salaryBox.classList.add("hidden");
-        joinBox.classList.add("hidden");
-      }
-
-      document.getElementById("editMasterModal").classList.remove("hidden");
-      nameInp.focus();
-    }
-
-    function closeEditMasterModal() {
-      document.getElementById("editMasterModal").classList.add("hidden");
-    }
-
-    async function saveEditedMasterItem() {
-      const type = document.getElementById("editMasterType").value;
-      const originalName = document.getElementById("editMasterOriginalId").value;
-      const newName = document.getElementById("editMasterName").value.trim().toUpperCase();
-      const opening = parseFloat(document.getElementById("editMasterOpening").value) || 0;
-
-      if (!newName) return alert("പേര് നൽകുക!");
-
-      if (type === 'customer') {
-        const item = customersList.find(c => c.name === originalName);
-        if (!item) return;
-        const selectedPartyType = document.getElementById("editMasterPartyType").value;
-        const agentName = document.getElementById("editMasterAgent").value.trim().toUpperCase();
-        const matchedAg = agentsList.find(a => a.name.toUpperCase() === agentName);
-        const payload = { 
-          name: newName, 
-          type: selectedPartyType,
-          opening_balance: opening,
-          agent_name: agentName,
-          agent_id: matchedAg ? matchedAg.id : null
-        };
-        if (navigator.onLine && supabaseClient) {
-          if (item.id) await supabaseClient.from('customers').update(payload).eq('id', item.id);
-          else await supabaseClient.from('customers').update(payload).eq('name', originalName);
-        }
-        Object.assign(item, payload);
-        localStorage.setItem(`ALNASSR_${currentShopId}_CUSTOMERS`, JSON.stringify(customersList));
-      } else if (type === 'vendor') {
-        const item = vendorsList.find(v => v.name === originalName);
-        if (!item) return;
-        const selectedPartyType = document.getElementById("editMasterPartyType").value;
-        const payload = { name: newName, type: selectedPartyType, opening_balance: opening };
-        if (navigator.onLine && supabaseClient) {
-          if (item.id) await supabaseClient.from('vendors').update(payload).eq('id', item.id);
-          else await supabaseClient.from('vendors').update(payload).eq('name', originalName);
-        }
-        Object.assign(item, payload);
-        localStorage.setItem(`ALNASSR_${currentShopId}_VENDORS`, JSON.stringify(vendorsList));
-      } else if (type === 'employee') {
-        const item = employeesList.find(e => e.name === originalName);
-        if (!item) return;
-        const salary = parseFloat(document.getElementById("editMasterSalary").value) || 0;
-        const joinDate = document.getElementById("editMasterJoinDate").value || item.joining_date;
-        const payload = { name: newName, monthly_salary: salary, opening_advance: opening, joining_date: joinDate };
-        if (navigator.onLine && supabaseClient) {
-          if (item.id) await supabaseClient.from('employees').update(payload).eq('id', item.id);
-          else await supabaseClient.from('employees').update(payload).eq('name', originalName);
-        }
-        Object.assign(item, payload);
-        localStorage.setItem(`ALNASSR_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
-      } else if (type === 'agent') {
-        const item = agentsList.find(a => a.name === originalName);
-        if (!item) return;
-        const payload = { name: newName };
-        if (navigator.onLine && supabaseClient) {
-          if (item.id) await supabaseClient.from('agents').update(payload).eq('id', item.id);
-          else await supabaseClient.from('agents').update(payload).eq('name', originalName);
-        }
-        item.name = newName;
-        localStorage.setItem(`ALNASSR_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
-      } else if (type === 'expense') {
-        const item = expensesMasterList.find(ex => ex.name === originalName);
-        if (!item) return;
-        const payload = { name: newName };
-        if (navigator.onLine && supabaseClient) {
-          if (item.id) await supabaseClient.from('expenses_master').update(payload).eq('id', item.id);
-          else await supabaseClient.from('expenses_master').update(payload).eq('name', originalName);
-        }
-        item.name = newName;
-        localStorage.setItem(`ALNASSR_${currentShopId}_EXPENSES`, JSON.stringify(expensesMasterList));
-      }
-
-      populateDropdowns();
-      renderActiveMasterList();
-      closeEditMasterModal();
-      alert("വിവരങ്ങൾ വിജയകരമായി സേവ് ചെയ്തു!");
-    }
-
-    async function deleteMasterItem(type, name) {
-      if (!confirm(`'${name}' എന്ന റെക്കോർഡ് ഡിലീറ്റ് ചെയ്യണമെന്ന് ഉറപ്പാണോ?`)) return;
-
-      if (type === 'customer') {
-        const item = customersList.find(c => c.name === name);
-        if (navigator.onLine && supabaseClient && item) {
-          if (item.id) await supabaseClient.from('customers').delete().eq('id', item.id);
-          else await supabaseClient.from('customers').delete().eq('name', name);
-        }
-        customersList = customersList.filter(c => c.name !== name);
-        localStorage.setItem(`ALNASSR_${currentShopId}_CUSTOMERS`, JSON.stringify(customersList));
-      } else if (type === 'vendor') {
-        const item = vendorsList.find(v => v.name === name);
-        if (navigator.onLine && supabaseClient && item) {
-          if (item.id) await supabaseClient.from('vendors').delete().eq('id', item.id);
-          else await supabaseClient.from('vendors').delete().eq('name', name);
-        }
-        vendorsList = vendorsList.filter(v => v.name !== name);
-        localStorage.setItem(`ALNASSR_${currentShopId}_VENDORS`, JSON.stringify(vendorsList));
-      } else if (type === 'employee') {
-        const item = employeesList.find(e => e.name === name);
-        if (navigator.onLine && supabaseClient && item) {
-          if (item.id) await supabaseClient.from('employees').delete().eq('id', item.id);
-          else await supabaseClient.from('employees').delete().eq('name', name);
-        }
-        employeesList = employeesList.filter(e => e.name !== name);
-        localStorage.setItem(`ALNASSR_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
-      } else if (type === 'agent') {
-        const item = agentsList.find(a => a.name === name);
-        if (navigator.onLine && supabaseClient && item) {
-          if (item.id) await supabaseClient.from('agents').delete().eq('id', item.id);
-          else await supabaseClient.from('agents').delete().eq('name', name);
-        }
-        agentsList = agentsList.filter(a => a.name !== name);
-        localStorage.setItem(`ALNASSR_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
-      } else if (type === 'expense') {
-        const item = expensesMasterList.find(ex => ex.name === name);
-        if (navigator.onLine && supabaseClient && item) {
-          if (item.id) await supabaseClient.from('expenses_master').delete().eq('id', item.id);
-          else await supabaseClient.from('expenses_master').delete().eq('name', name);
-        }
-        expensesMasterList = expensesMasterList.filter(ex => ex.name !== name);
-        localStorage.setItem(`ALNASSR_${currentShopId}_EXPENSES`, JSON.stringify(expensesMasterList));
-      }
-
-      populateDropdowns();
-      renderActiveMasterList();
-      alert("ഡിലീറ്റ് ചെയ്തു!");
-    }
+    function closeNewCustomerModal() { document.getElementById("newCustomerModal").classList.add("hidden"); }
 
     async function saveNewCustomerMaster() {
       const name = document.getElementById("newCustName").value.trim().toUpperCase();
-      const type = document.getElementById("newCustType")?.value || 'credit';
       const opening = parseFloat(document.getElementById("newCustOpening").value) || 0;
-      const agentName = (document.getElementById("newCustAgent")?.value || '').trim().toUpperCase();
       if (!name) return alert("കസ്റ്റമർ പേര് നൽകുക!");
 
-      const matchedAg = agentsList.find(a => a.name.toUpperCase() === agentName);
-      const newCust = { 
-        name: name, 
-        type: type, 
-        opening_balance: opening,
-        agent_name: agentName,
-        agent_id: matchedAg ? matchedAg.id : null
-      };
-
+      const newCust = { name: name, type: 'credit', opening_balance: opening };
       if (navigator.onLine && supabaseClient) {
         await supabaseClient.from('customers').insert([newCust]);
       }
@@ -2371,17 +1574,23 @@
       document.getElementById("saleCustomerInput").value = name;
       onCustomerSelected();
       closeNewCustomerModal();
-      renderActiveMasterList();
-      alert("പുതിയ കസ്റ്റമറെ ചേർത്തു!");
+      alert("പുതിയ ക്രെഡിറ്റ് കസ്റ്റമറെ ചേർത്തു!");
     }
+
+    function openNewVendorModal() {
+      document.getElementById("newVendName").value = "";
+      document.getElementById("newVendOpening").value = "";
+      document.getElementById("newVendorModal").classList.remove("hidden");
+      document.getElementById("newVendName").focus();
+    }
+    function closeNewVendorModal() { document.getElementById("newVendorModal").classList.add("hidden"); }
 
     async function saveNewVendorMaster() {
       const name = document.getElementById("newVendName").value.trim().toUpperCase();
-      const type = document.getElementById("newVendType")?.value || 'credit';
       const opening = parseFloat(document.getElementById("newVendOpening").value) || 0;
       if (!name) return alert("വെണ്ടർ പേര് നൽകുക!");
 
-      const newVend = { name: name, type: type, opening_balance: opening };
+      const newVend = { name: name, type: 'credit', opening_balance: opening };
       if (navigator.onLine && supabaseClient) {
         await supabaseClient.from('vendors').insert([newVend]);
       }
@@ -2392,9 +1601,18 @@
       document.getElementById("purchaseVendorInput").value = name;
       onVendorSelected();
       closeNewVendorModal();
-      renderActiveMasterList();
-      alert("പുതിയ വെണ്ടറെ ചേർത്തു!");
+      alert("പുതിയ ക്രെഡിറ്റ് വെണ്ടറെ ചേർത്തു!");
     }
+
+    function openNewEmployeeModal() {
+      document.getElementById("newEmpName").value = "";
+      document.getElementById("newEmpSalary").value = "";
+      document.getElementById("newEmpAdvance").value = "";
+      document.getElementById("newEmpJoinDate").value = getSaudiBusinessDate();
+      document.getElementById("newEmployeeModal").classList.remove("hidden");
+      document.getElementById("newEmpName").focus();
+    }
+    function closeNewEmployeeModal() { document.getElementById("newEmployeeModal").classList.add("hidden"); }
 
     async function saveNewEmployeeMaster() {
       const name = document.getElementById("newEmpName").value.trim().toUpperCase();
@@ -2413,7 +1631,7 @@
       };
 
       if (navigator.onLine && supabaseClient) {
-        const { data } = await supabaseClient.from('employees').insert([newEmp]).select();
+        const { data, error } = await supabaseClient.from('employees').insert([newEmp]).select();
         if (data && data[0]) newEmp.id = data[0].id;
       } else {
         newEmp.id = 'emp_' + Date.now();
@@ -2426,54 +1644,29 @@
       document.getElementById("unifiedPartyInput").value = name;
       onUnifiedPartySelected();
       closeNewEmployeeModal();
-      renderActiveMasterList();
       alert("പുതിയ ജീവനക്കാരനെ ചേർത്തു!");
     }
 
-    async function quickAddExpensePrompt() {
-      let name = prompt("പുതിയ ചിലവ് ഇനം നൽകുക:");
-      if (!name || !name.trim()) return;
-      name = name.trim().toUpperCase();
+    // STAFF DEPOSIT MODAL LOGIC
+    function openStaffDepositModal() {
+      const currentVal = document.getElementById("unifiedPartyInput").value.trim().toUpperCase();
+      const cleanVal = cleanPartyName(currentVal);
+      const emp = employeesList.find(e => cleanPartyName(e.name) === cleanVal);
 
-      const newExp = { name: name };
-      if (navigator.onLine && supabaseClient) {
-        await supabaseClient.from('expenses_master').insert([newExp]);
-      }
-      expensesMasterList.push(newExp);
-      localStorage.setItem(`ALNASSR_${currentShopId}_EXPENSES`, JSON.stringify(expensesMasterList));
-      populateDropdowns();
+      if (!emp) return alert("ദയവായി ആദ്യം ജീവനക്കാരന്റെ പേര് തിരഞ്ഞെടുക്കുക!");
 
-      document.getElementById("unifiedPartyInput").value = name;
-      onUnifiedPartySelected();
-      renderActiveMasterList();
+      document.getElementById("staffDepositEmpName").value = emp.name;
+      document.getElementById("staffDepositCash").value = "";
+      document.getElementById("staffDepositBank").value = "";
+      document.getElementById("staffDepositNote").value = "";
+
+      document.getElementById("staffDepositModal").classList.remove("hidden");
+      document.getElementById("staffDepositCash").focus();
     }
 
-    function openNewCustomerModal() {
-      document.getElementById("newCustName").value = "";
-      if (document.getElementById("newCustAgent")) document.getElementById("newCustAgent").value = "";
-      document.getElementById("newCustOpening").value = "";
-      document.getElementById("newCustomerModal").classList.remove("hidden");
-      document.getElementById("newCustName").focus();
+    function closeStaffDepositModal() {
+      document.getElementById("staffDepositModal").classList.add("hidden");
     }
-    function closeNewCustomerModal() { document.getElementById("newCustomerModal").classList.add("hidden"); }
-
-    function openNewVendorModal() {
-      document.getElementById("newVendName").value = "";
-      document.getElementById("newVendOpening").value = "";
-      document.getElementById("newVendorModal").classList.remove("hidden");
-      document.getElementById("newVendName").focus();
-    }
-    function closeNewVendorModal() { document.getElementById("newVendorModal").classList.add("hidden"); }
-
-    function openNewEmployeeModal() {
-      document.getElementById("newEmpName").value = "";
-      document.getElementById("newEmpSalary").value = "";
-      document.getElementById("newEmpAdvance").value = "";
-      document.getElementById("newEmpJoinDate").value = getSaudiBusinessDate();
-      document.getElementById("newEmployeeModal").classList.remove("hidden");
-      document.getElementById("newEmpName").focus();
-    }
-    function closeNewEmployeeModal() { document.getElementById("newEmployeeModal").classList.add("hidden"); }
 
     async function saveStaffDepositEntry() {
       const empName = document.getElementById("staffDepositEmpName").value.trim().toUpperCase();
@@ -2514,26 +1707,24 @@
       onUnifiedPartySelected();
     }
 
-    function openStaffDepositModal() {
-      const currentVal = document.getElementById("unifiedPartyInput").value.trim().toUpperCase();
-      const cleanVal = cleanPartyName(currentVal);
-      const emp = employeesList.find(e => cleanPartyName(e.name) === cleanVal);
+    async function quickAddExpensePrompt() {
+      let name = prompt("പുതിയ ചിലവ് ഇനം നൽകുക:");
+      if (!name || !name.trim()) return;
+      name = name.trim().toUpperCase();
 
-      if (!emp) return alert("ദയവായി ആദ്യം ജീവനക്കാരന്റെ പേര് തിരഞ്ഞെടുക്കുക!");
+      const newExp = { name: name };
+      if (navigator.onLine && supabaseClient) {
+        await supabaseClient.from('expenses_master').insert([newExp]);
+      }
+      expensesMasterList.push(newExp);
+      localStorage.setItem(`ALNASSR_${currentShopId}_EXPENSES`, JSON.stringify(expensesMasterList));
+      populateDropdowns();
 
-      document.getElementById("staffDepositEmpName").value = emp.name;
-      document.getElementById("staffDepositCash").value = "";
-      document.getElementById("staffDepositBank").value = "";
-      document.getElementById("staffDepositNote").value = "";
-
-      document.getElementById("staffDepositModal").classList.remove("hidden");
-      document.getElementById("staffDepositCash").focus();
+      document.getElementById("unifiedPartyInput").value = name;
+      onUnifiedPartySelected();
     }
 
-    function closeStaffDepositModal() {
-      document.getElementById("staffDepositModal").classList.add("hidden");
-    }
-
+    // BREAKDOWN MODALS
     function openTodaySalesModal() {
       document.getElementById("todaySalesModal").classList.remove("hidden");
       if (window.lucide) lucide.createIcons();
@@ -2552,6 +1743,7 @@
     }
     function closeTodayExpenseModal() { document.getElementById("todayExpenseModal").classList.add("hidden"); }
 
+    // OFFLINE QUEUE
     function getOfflineQueue() {
       try {
         return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`)) || [];
@@ -2602,6 +1794,7 @@
       }
     }
 
+    // TRANSACTION SAVING
     async function saveSaleEntry() {
       let rawName = document.getElementById("saleCustomerInput").value.trim().toUpperCase();
       if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
@@ -2773,7 +1966,377 @@
       onUnifiedPartySelected();
     }
 
+    // DASHBOARD & MODAL RENDERING
+    function renderQuickTotalsAndRecent() {
+      const selectedDate = getSelectedDate();
+      let saleTotal = 0, purTotal = 0, expTotal = 0;
+
+      let curCash = openingSettings.openingCash;
+      let curBank = openingSettings.openingBank;
+
+      let modalCashSales = [];
+      let modalCreditSales = [];
+      let modalCashPurchases = [];
+      let modalCreditPurchases = [];
+      let modalSalaries = [];
+      let modalExpenses = [];
+
+      transactionsList.forEach(t => {
+        if (!t) return;
+        curCash += (parseFloat(t.cash_amount) || 0);
+        curBank += (parseFloat(t.bank_amount) || 0);
+
+        const isSelectedDate = String(t.date).startsWith(selectedDate);
+        if (isSelectedDate) {
+          const cAmt = Math.abs(parseFloat(t.cash_amount) || 0);
+          const bAmt = Math.abs(parseFloat(t.bank_amount) || 0);
+          const crAmt = parseFloat(t.credit_amount) || 0;
+
+          if (t.type === 'sale') {
+            const cleanN = cleanPartyName(t.party_name);
+            const cust = customersList.find(c => cleanPartyName(c.name) === cleanN);
+            const isCreditCust = cust && (cust.type || '').toLowerCase() === 'credit';
+
+            if (isCreditCust) {
+              saleTotal += crAmt;
+              modalCreditSales.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, cr: crAmt });
+            } else {
+              saleTotal += (cAmt + bAmt + crAmt);
+              modalCashSales.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt + crAmt) });
+            }
+          } else if (t.type === 'purchase') {
+            const cleanN = cleanPartyName(t.party_name);
+            const vend = vendorsList.find(v => cleanPartyName(v.name) === cleanN);
+            const isCreditVend = vend && (vend.type || '').toLowerCase() === 'credit';
+
+            if (isCreditVend) {
+              purTotal += crAmt;
+              modalCreditPurchases.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, cr: crAmt });
+            } else {
+              purTotal += (cAmt + bAmt + crAmt);
+              modalCashPurchases.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt + crAmt) });
+            }
+          } else if (t.type === 'salary') {
+            let rawC = parseFloat(t.cash_amount) || 0;
+            let rawB = parseFloat(t.bank_amount) || 0;
+            if (rawC > 0 || rawB > 0) {
+              modalSalaries.push({ 
+                id: t.id, 
+                name: `${t.party_name} (📥 വരവ്)`, 
+                cash: rawC, 
+                bank: rawB, 
+                total: `+${rawC + rawB}`,
+                isInflow: true 
+              });
+            } else {
+              let posC = Math.abs(rawC);
+              let posB = Math.abs(rawB);
+              expTotal += (posC + posB);
+              modalSalaries.push({ 
+                id: t.id, 
+                name: t.party_name, 
+                cash: posC, 
+                bank: posB, 
+                total: posC + posB,
+                isInflow: false 
+              });
+            }
+          } else if (t.type === 'expense') {
+            expTotal += (cAmt + bAmt);
+            modalExpenses.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt), isInflow: false });
+          }
+        }
+      });
+
+      document.getElementById("quickSaleTotal").innerText = `${saleTotal.toLocaleString('en-IN')}`;
+      document.getElementById("quickPurTotal").innerText = `${purTotal.toLocaleString('en-IN')}`;
+      document.getElementById("quickExpTotal").innerText = `${expTotal.toLocaleString('en-IN')}`;
+
+      const totalLiq = curCash + curBank;
+      document.getElementById("liveTotalLiquid").innerText = `${totalLiq.toLocaleString('en-IN')}`;
+      document.getElementById("liveHandCash").innerText = `💵 ക്യാഷ്: ${curCash.toLocaleString('en-IN')}`;
+      document.getElementById("liveBankCash").innerText = `🏦 ബാങ്ക്: ${curBank.toLocaleString('en-IN')}`;
+
+      renderModalTable("modalCashSalesList", modalCashSales, ["കസ്റ്റമർ", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'cash_sale');
+      renderModalTable("modalCreditSalesList", modalCreditSales, ["കസ്റ്റമർ", "ക്യാഷ് റസീറ്റ്", "ബാങ്ക് റസീറ്റ്", "ക്രെഡിറ്റ് സെയിൽ"], 'credit_sale');
+      renderModalTable("modalCashPurchasesList", modalCashPurchases, ["വെണ്ടർ", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'cash_pur');
+      renderModalTable("modalCreditPurchasesList", modalCreditPurchases, ["വെണ്ടർ", "ക്യാഷ് നൽകിയത്", "ബാങ്ക് നൽകിയത്", "ക്രെഡിറ്റ് ബില്ല്"], 'credit_pur');
+      renderModalTable("modalSalariesList", modalSalaries, ["സ്റ്റാഫ്", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'salary');
+      renderModalTable("modalExpensesList", modalExpenses, ["ചിലവ് ഇനം", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'expense');
+    }
+
+    function renderModalTable(containerId, dataList, headers, type) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      if (!dataList || dataList.length === 0) {
+        container.innerHTML = `<div class="p-2 text-center text-slate-400 text-xs font-bold">ഇടപാടുകൾ ഇല്ല</div>`;
+        return;
+      }
+
+      let total1 = 0, total2 = 0, total3 = 0;
+
+      let html = `
+        <table class="w-full text-[11px] text-center border-collapse border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <thead>
+            <tr class="bg-slate-100 text-slate-900 font-black border-b border-slate-200">
+              <th class="p-1.5 text-left">${headers[0]}</th>
+              <th class="p-1.5">${headers[1]}</th>
+              <th class="p-1.5">${headers[2]}</th>
+              <th class="p-1.5">${headers[3]}</th>
+              <th class="p-1.5 text-right">⚙️</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-bold">
+      `;
+
+      dataList.forEach(row => {
+        let col1 = row.cash || 0;
+        let col2 = row.bank || 0;
+        let col3 = (row.cr !== undefined) ? row.cr : (row.total || 0);
+
+        if (!row.isInflow) {
+          total1 += col1;
+          total2 += col2;
+          total3 += (typeof col3 === 'number') ? col3 : 0;
+        }
+
+        html += `
+          <tr class="hover:bg-slate-50 ${row.isInflow ? 'bg-emerald-50/40 text-emerald-900' : ''}">
+            <td class="p-1.5 text-left font-black truncate max-w-[110px]" title="${row.name}">
+              ${row.name}
+            </td>
+            <td class="p-1.5">${col1}</td>
+            <td class="p-1.5">${col2}</td>
+            <td class="p-1.5 font-black ${row.isInflow ? 'text-emerald-700 font-extrabold' : 'text-slate-950'}">${col3}</td>
+            <td class="p-1.5 text-right whitespace-nowrap">
+              <button onclick="requestEdit('${row.id}')" title="തിരുത്തുക" class="text-blue-600 hover:text-blue-800 p-1 cursor-pointer">✏️</button>
+              <button onclick="requestDelete('${row.id}')" title="ഡിലീറ്റ്" class="text-rose-600 hover:text-rose-800 p-1 cursor-pointer">🗑️</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-slate-200 text-slate-950 font-black border-t-2 border-slate-300">
+              <td class="p-1.5 text-left uppercase">ആകെ:</td>
+              <td class="p-1.5">${total1}</td>
+              <td class="p-1.5">${total2}</td>
+              <td class="p-1.5 font-black">${total3}</td>
+              <td class="p-1.5"></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // EDIT TRANSACTION WORKFLOW
+    function requestEdit(id) {
+      if (String(id).startsWith('temp_')) {
+        alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. ഇത് നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
+        return;
+      }
+
+      const txn = (transactionsList || []).find(t => String(t.id) === String(id));
+      if (!txn) return alert("ഇടപാട് കണ്ടെത്താനായില്ല!");
+
+      const todayStr = getSaudiBusinessDate();
+      let isOlderThanLimit = false;
+
+      if (txn.date) {
+        const txnDateStr = String(txn.date).split('T')[0].split(' ')[0].trim();
+        const limitDays = window.STAFF_DELETE_LIMIT_DAYS || 2;
+        const dToday = new Date(todayStr);
+        const dTxn = new Date(txnDateStr);
+        const diffDays = Math.floor((dToday - dTxn) / (1000 * 60 * 60 * 24));
+        if (diffDays > limitDays) isOlderThanLimit = true;
+      }
+
+      if (isOlderThanLimit) {
+        pendingAction = 'edit';
+        pendingTxnId = id;
+        document.getElementById("pinSubText").innerText = "⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണ്! എഡിറ്റ് ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക.";
+        document.getElementById("pinInput").value = "";
+        document.getElementById("pinModal").classList.remove("hidden");
+        document.getElementById("pinInput").focus();
+      } else {
+        openEditModal(txn);
+      }
+    }
+
+    function openEditModal(txn) {
+      document.getElementById("editTxnId").value = txn.id;
+      document.getElementById("editTxnDate").value = String(txn.date).split('T')[0];
+      document.getElementById("editTxnParty").value = txn.party_name || "";
+      document.getElementById("editTxnCash").value = Math.abs(parseFloat(txn.cash_amount) || 0);
+      document.getElementById("editTxnBank").value = Math.abs(parseFloat(txn.bank_amount) || 0);
+      
+      const crBox = document.getElementById("editCreditContainer");
+      if (txn.type === 'expense' || txn.type === 'salary') {
+        crBox.classList.add("hidden");
+      } else {
+        crBox.classList.remove("hidden");
+        document.getElementById("editTxnCredit").value = parseFloat(txn.credit_amount) || 0;
+      }
+
+      document.getElementById("editTransactionModal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editTransactionModal").classList.add("hidden");
+    }
+
+    async function saveEditedTransaction() {
+      const id = document.getElementById("editTxnId").value;
+      const txn = (transactionsList || []).find(t => String(t.id) === String(id));
+      if (!txn) return;
+
+      const newDate = document.getElementById("editTxnDate").value;
+      const newParty = document.getElementById("editTxnParty").value.trim().toUpperCase();
+      let cashAmt = parseFloat(document.getElementById("editTxnCash").value) || 0;
+      let bankAmt = parseFloat(document.getElementById("editTxnBank").value) || 0;
+      let creditAmt = parseFloat(document.getElementById("editTxnCredit").value) || 0;
+
+      if (cashAmt <= 0 && bankAmt <= 0 && creditAmt <= 0) return alert("തുക നൽകുക!");
+
+      const isStaffInflow = (txn.type === 'salary' && (parseFloat(txn.cash_amount) > 0 || parseFloat(txn.bank_amount) > 0));
+
+      if ((txn.type === 'purchase' || txn.type === 'expense' || txn.type === 'salary') && !isStaffInflow) {
+        cashAmt = -cashAmt;
+        bankAmt = -bankAmt;
+      }
+
+      const updatePayload = {
+        date: newDate,
+        party_name: newParty,
+        cash_amount: cashAmt,
+        bank_amount: bankAmt,
+        credit_amount: creditAmt
+      };
+
+      if (navigator.onLine && supabaseClient) {
+        const { error } = await supabaseClient.from('transactions').update(updatePayload).eq('id', id);
+        if (error) return alert("അപ്‌ഡേറ്റ് പരാജയപ്പെട്ടു: " + error.message);
+      }
+
+      Object.assign(txn, updatePayload);
+      localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+      renderQuickTotalsAndRecent();
+      closeEditModal();
+      alert("ഇടപാട് വിജയകരമായി തിരുത്തി!");
+    }
+
+    // 2 DAYS DELETE RULE ENGINE
+    function requestDelete(id) {
+      if (String(id).startsWith('temp_')) {
+        alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
+        return;
+      }
+      pendingAction = 'delete';
+      pendingTxnId = id;
+      
+      const txn = (transactionsList || []).find(t => String(t.id) === String(id));
+      const todayStr = getSaudiBusinessDate();
+      let isOlderThanLimit = false;
+
+      if (txn && txn.date) {
+        const txnDateStr = String(txn.date).split('T')[0].split(' ')[0].trim();
+        const limitDays = window.STAFF_DELETE_LIMIT_DAYS || 2;
+        const dToday = new Date(todayStr);
+        const dTxn = new Date(txnDateStr);
+        const diffDays = Math.floor((dToday - dTxn) / (1000 * 60 * 60 * 24));
+        if (diffDays > limitDays) isOlderThanLimit = true;
+      }
+
+      const subTitle = document.getElementById("pinSubText");
+      if (subTitle) {
+        subTitle.innerText = isOlderThanLimit 
+          ? "⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണ്! ഡിലീറ്റ് ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക." 
+          : "ഡിലീറ്റ് ചെയ്യാൻ ലോഗിൻ പിൻ നൽകുക";
+      }
+
+      document.getElementById("pinInput").value = "";
+      document.getElementById("pinModal").classList.remove("hidden");
+      document.getElementById("pinInput").focus();
+    }
+
+    function closePinModal() {
+      document.getElementById("pinModal").classList.add("hidden");
+      pendingTxnId = null;
+      pendingAction = null;
+    }
+
+    async function verifyPinAndExecute() {
+      const pinVal = document.getElementById("pinInput").value.trim();
+      const sessionPin = sessionStorage.getItem("ALNASSR_ACTIVE_PIN");
+      const masterPin = String(window.MASTER_PIN);
+      const currentShopPin = currentShop ? String(currentShop.pin) : null;
+
+      // DESKTOP PORTAL VERIFICATION
+      if (pendingAction === 'open_desktop_portal') {
+        if (pinVal === masterPin) {
+          closePinModal();
+          window.location.href = "index.html";
+        } else {
+          alert("അഡ്മിൻ മാസ്റ്റർ പിൻ തെറ്റാണ്!");
+          document.getElementById("pinInput").value = "";
+        }
+        return;
+      }
+
+      if (pendingTxnId) {
+        const id = pendingTxnId;
+        const txn = (transactionsList || []).find(t => String(t.id) === String(id));
+        const todayStr = getSaudiBusinessDate();
+        let isOlderThanLimit = false;
+
+        if (txn && txn.date) {
+          const txnDateStr = String(txn.date).split('T')[0].split(' ')[0].trim();
+          const limitDays = window.STAFF_DELETE_LIMIT_DAYS || 2;
+          const dToday = new Date(todayStr);
+          const dTxn = new Date(txnDateStr);
+          const diffDays = Math.floor((dToday - dTxn) / (1000 * 60 * 60 * 24));
+          if (diffDays > limitDays) isOlderThanLimit = true;
+        }
+
+        if (isOlderThanLimit) {
+          if (pinVal !== masterPin) {
+            alert("⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ള എൻട്രികൾ തിരുത്താനും ഡിലീറ്റ് ചെയ്യാനും സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ തന്നെ വേണം!");
+            document.getElementById("pinInput").value = "";
+            return;
+          }
+        } else {
+          const isValidPin = (pinVal === sessionPin) || (pinVal === masterPin) || (pinVal === currentShopPin);
+          if (!isValidPin) {
+            alert("പിൻ തെറ്റാണ്!");
+            document.getElementById("pinInput").value = "";
+            return;
+          }
+        }
+
+        const action = pendingAction;
+        closePinModal();
+
+        if (action === 'delete') {
+          const { error } = await supabaseClient.from('transactions').delete().eq('id', id);
+          if (error) alert("ഡിലീറ്റ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+          else {
+            alert("വിജയകരമായി ഡിലീറ്റ് ചെയ്തു!");
+            fetchAllData();
+          }
+        } else if (action === 'edit') {
+          openEditModal(txn);
+        }
+      }
+    }
+
+    // ========================================================
     // REPORTS & STATEMENTS ENGINE
+    // ========================================================
     function openReportModal() {
       const modal = document.getElementById("reportModal");
       if (modal) {
@@ -2846,8 +2409,13 @@
       }
     }
 
-    function onReportDateChanged() { renderReportData('daily'); }
-    function onReportMonthChanged() { renderReportData('monthly'); }
+    function onReportDateChanged() {
+      renderReportData('daily');
+    }
+
+    function onReportMonthChanged() {
+      renderReportData('monthly');
+    }
 
     function formatShortName(name) {
       if (!name) return '';
@@ -2879,10 +2447,8 @@
         dateBadgeText = `മാസം: ${targetMonth}`;
       }
 
-      const repModeTitle = document.getElementById("reportModeTitle");
-      const repDateBadge = document.getElementById("reportDateBadgeLabel");
-      if (repModeTitle) repModeTitle.innerText = titleText;
-      if (repDateBadge) repDateBadge.innerText = dateBadgeText;
+      document.getElementById("reportModeTitle").innerText = titleText;
+      document.getElementById("reportDateBadgeLabel").innerText = dateBadgeText;
 
       let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
       const offlineQueue = getOfflineQueue();
@@ -3040,103 +2606,281 @@
       let totalDayOpening = dayOpeningCash + dayOpeningBank;
       let totalTargetClosing = targetClosingCash + targetClosingBank;
 
-      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
-      setVal("repOpeningLiquidBal", totalDayOpening.toLocaleString('en-IN'));
-      setVal("repTotalSale", totSale.toLocaleString('en-IN'));
-      setVal("repTotalPurchase", totPur.toLocaleString('en-IN'));
-      setVal("repTotalExpense", (totExp + totSal).toLocaleString('en-IN'));
-      setVal("repCustBal", totalCustOutstanding.toLocaleString('en-IN'));
-      setVal("repVendorBal", totalVendOutstanding.toLocaleString('en-IN'));
-      setVal("repSalaryBal", totalEmpPending.toLocaleString('en-IN'));
-      setVal("repLiquidBal", totalTargetClosing.toLocaleString('en-IN'));
+      document.getElementById("repOpeningLiquidBal").innerText = totalDayOpening.toLocaleString('en-IN');
+      document.getElementById("repTotalSale").innerText = totSale.toLocaleString('en-IN');
+      document.getElementById("repTotalPurchase").innerText = totPur.toLocaleString('en-IN');
+      document.getElementById("repTotalExpense").innerText = (totExp + totSal).toLocaleString('en-IN');
+      document.getElementById("repCustBal").innerText = totalCustOutstanding.toLocaleString('en-IN');
+      document.getElementById("repVendorBal").innerText = totalVendOutstanding.toLocaleString('en-IN');
+      document.getElementById("repSalaryBal").innerText = totalEmpPending.toLocaleString('en-IN');
+      document.getElementById("repLiquidBal").innerText = totalTargetClosing.toLocaleString('en-IN');
 
-      setVal("salesGrandBadge", `ആകെ: ${totSale.toLocaleString('en-IN')}`);
-      setVal("purchaseGrandBadge", `ആകെ: ${totPur.toLocaleString('en-IN')}`);
+      document.getElementById("salesGrandBadge").innerText = `ആകെ: ${totSale.toLocaleString('en-IN')}`;
+      document.getElementById("purchaseGrandBadge").innerText = `ആകെ: ${totPur.toLocaleString('en-IN')}`;
 
-      // TABLES IN MODAL
+      // 1. Cash Sales Table
       const cashSalesArr = Object.values(cashSalesMap);
       let rCSCash = 0, rCSBank = 0, rCSTotal = 0;
-      let cashSalesHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-emerald-100 text-slate-900 font-black border-b"><th class="p-1 text-left">പേര്</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (cashSalesArr.length === 0) cashSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
+      let cashSalesHtml = `
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="bg-emerald-100 text-slate-900 font-black border-b">
+              <th class="p-1 text-left">പേര്</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ആകെ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-bold">
+      `;
+      if (cashSalesArr.length === 0) {
+        cashSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
         cashSalesArr.forEach(s => {
           rCSCash += s.cash; rCSBank += s.bank; rCSTotal += s.total;
-          cashSalesHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td><td class="p-1 text-emerald-800">${s.cash}</td><td class="p-1 text-blue-800">${s.bank}</td><td class="p-1 text-right font-black text-slate-950">${s.total}</td></tr>`;
+          cashSalesHtml += `
+            <tr>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td>
+              <td class="p-1 text-emerald-800">${s.cash}</td>
+              <td class="p-1 text-blue-800">${s.bank}</td>
+              <td class="p-1 text-right font-black text-slate-950">${s.total}</td>
+            </tr>
+          `;
         });
       }
-      cashSalesHtml += `</tbody><tfoot><tr class="bg-emerald-50 text-emerald-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCSCash}</td><td class="p-1">${rCSBank}</td><td class="p-1 text-right text-slate-950">${rCSTotal}</td></tr></tfoot></table>`;
-      const repCS = document.getElementById("repCashSalesList");
-      if (repCS) repCS.innerHTML = cashSalesHtml;
+      cashSalesHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-emerald-50 text-emerald-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rCSCash}</td>
+              <td class="p-1">${rCSBank}</td>
+              <td class="p-1 text-right text-slate-950">${rCSTotal}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      document.getElementById("repCashSalesList").innerHTML = cashSalesHtml;
 
+      // 2. Credit Sales Table
       const creditSalesArr = Object.values(creditSalesMap);
       let rCrSCash = 0, rCrSBank = 0, rCrSCr = 0;
-      let creditSalesHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-amber-100 text-slate-900 font-black border-b"><th class="p-1 text-left">പേര്</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ക്രെഡിറ്റ്</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (creditSalesArr.length === 0) creditSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
+      let creditSalesHtml = `
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="bg-amber-100 text-slate-900 font-black border-b">
+              <th class="p-1 text-left">പേര്</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ക്രെഡിറ്റ്</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-bold">
+      `;
+      if (creditSalesArr.length === 0) {
+        creditSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
         creditSalesArr.forEach(s => {
           rCrSCash += s.cash; rCrSBank += s.bank; rCrSCr += s.cr;
-          creditSalesHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td><td class="p-1 text-emerald-800">${s.cash}</td><td class="p-1 text-blue-800">${s.bank}</td><td class="p-1 text-right font-black text-amber-900">${s.cr}</td></tr>`;
+          creditSalesHtml += `
+            <tr>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td>
+              <td class="p-1 text-emerald-800">${s.cash}</td>
+              <td class="p-1 text-blue-800">${s.bank}</td>
+              <td class="p-1 text-right font-black text-amber-900">${s.cr}</td>
+            </tr>
+          `;
         });
       }
-      creditSalesHtml += `</tbody><tfoot><tr class="bg-amber-50 text-amber-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCrSCash}</td><td class="p-1">${rCrSBank}</td><td class="p-1 text-right text-amber-950">${rCrSCr}</td></tr></tfoot></table>`;
-      const repCrS = document.getElementById("repCreditSalesList");
-      if (repCrS) repCrS.innerHTML = creditSalesHtml;
+      creditSalesHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-amber-50 text-amber-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rCrSCash}</td>
+              <td class="p-1">${rCrSBank}</td>
+              <td class="p-1 text-right text-amber-950">${rCrSCr}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      document.getElementById("repCreditSalesList").innerHTML = creditSalesHtml;
 
+      // 3. Cash Purchases Table
       const cashPurArr = Object.values(cashPurMap);
       let rCPCash = 0, rCPBank = 0, rCPTotal = 0;
-      let cashPurHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-blue-100 text-slate-900 font-black border-b"><th class="p-1 text-left">വെണ്ടർ</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (cashPurArr.length === 0) cashPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
+      let cashPurHtml = `
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="bg-blue-100 text-slate-900 font-black border-b">
+              <th class="p-1 text-left">വെണ്ടർ</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ആകെ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-bold">
+      `;
+      if (cashPurArr.length === 0) {
+        cashPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
         cashPurArr.forEach(p => {
           rCPCash += p.cash; rCPBank += p.bank; rCPTotal += p.total;
-          cashPurHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td><td class="p-1 text-blue-800">${p.cash}</td><td class="p-1 text-indigo-800">${p.bank}</td><td class="p-1 text-right font-black text-slate-950">${p.total}</td></tr>`;
+          cashPurHtml += `
+            <tr>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td>
+              <td class="p-1 text-blue-800">${p.cash}</td>
+              <td class="p-1 text-indigo-800">${p.bank}</td>
+              <td class="p-1 text-right font-black text-slate-950">${p.total}</td>
+            </tr>
+          `;
         });
       }
-      cashPurHtml += `</tbody><tfoot><tr class="bg-blue-50 text-blue-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCPCash}</td><td class="p-1">${rCPBank}</td><td class="p-1 text-right text-slate-950">${rCPTotal}</td></tr></tfoot></table>`;
-      const repCP = document.getElementById("repCashPurchasesList");
-      if (repCP) repCP.innerHTML = cashPurHtml;
+      cashPurHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-blue-50 text-blue-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rCPCash}</td>
+              <td class="p-1">${rCPBank}</td>
+              <td class="p-1 text-right text-slate-950">${rCPTotal}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      document.getElementById("repCashPurchasesList").innerHTML = cashPurHtml;
 
+      // 4. Credit Purchases Table
       const creditPurArr = Object.values(creditPurMap);
       let rCrPCash = 0, rCrPBank = 0, rCrPCr = 0;
-      let creditPurHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-indigo-100 text-slate-900 font-black border-b"><th class="p-1 text-left">വെണ്ടർ</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ക്രെഡിറ്റ്</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (creditPurArr.length === 0) creditPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
+      let creditPurHtml = `
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="bg-indigo-100 text-slate-900 font-black border-b">
+              <th class="p-1 text-left">വെണ്ടർ</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ക്രെഡിറ്റ്</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-bold">
+      `;
+      if (creditPurArr.length === 0) {
+        creditPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
         creditPurArr.forEach(p => {
           rCrPCash += p.cash; rCrPBank += p.bank; rCrPCr += p.cr;
-          creditPurHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td><td class="p-1 text-blue-800">${p.cash}</td><td class="p-1 text-indigo-800">${p.bank}</td><td class="p-1 text-right font-black text-indigo-950">${p.cr}</td></tr>`;
+          creditPurHtml += `
+            <tr>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td>
+              <td class="p-1 text-blue-800">${p.cash}</td>
+              <td class="p-1 text-indigo-800">${p.bank}</td>
+              <td class="p-1 text-right font-black text-indigo-950">${p.cr}</td>
+            </tr>
+          `;
         });
       }
-      creditPurHtml += `</tbody><tfoot><tr class="bg-indigo-50 text-indigo-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCrPCash}</td><td class="p-1">${rCrPBank}</td><td class="p-1 text-right text-indigo-950">${rCrPCr}</td></tr></tfoot></table>`;
-      const repCrP = document.getElementById("repCreditPurchasesList");
-      if (repCrP) repCrP.innerHTML = creditPurHtml;
+      creditPurHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-indigo-50 text-indigo-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rCrPCash}</td>
+              <td class="p-1">${rCrPBank}</td>
+              <td class="p-1 text-right text-indigo-950">${rCrPCr}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      document.getElementById("repCreditPurchasesList").innerHTML = creditPurHtml;
 
+      // 5. Salaries Table
       const salArr = Object.values(salariesMap);
       let rSalCash = 0, rSalBank = 0, rSalTotal = 0;
-      let salHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-purple-100 text-slate-900 font-black border-b"><th class="p-1 text-left">സ്റ്റാഫ്</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (salArr.length === 0) salHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
+      let salHtml = `
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="bg-purple-100 text-slate-900 font-black border-b">
+              <th class="p-1 text-left">സ്റ്റാഫ്</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ആകെ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-bold">
+      `;
+      if (salArr.length === 0) {
+        salHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      } else {
         salArr.forEach(s => {
           rSalCash += s.cash; rSalBank += s.bank; rSalTotal += s.total;
-          salHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td><td class="p-1 text-purple-800">${s.cash}</td><td class="p-1 text-blue-800">${s.bank}</td><td class="p-1 text-right font-black text-purple-950">${s.total}</td></tr>`;
+          salHtml += `
+            <tr>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td>
+              <td class="p-1 text-purple-800">${s.cash}</td>
+              <td class="p-1 text-blue-800">${s.bank}</td>
+              <td class="p-1 text-right font-black text-purple-950">${s.total}</td>
+            </tr>
+          `;
         });
       }
-      salHtml += `</tbody><tfoot><tr class="bg-purple-50 text-purple-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rSalCash}</td><td class="p-1">${rSalBank}</td><td class="p-1 text-right text-purple-950">${rSalTotal}</td></tr></tfoot></table>`;
-      const repSal = document.getElementById("repSalariesList");
-      if (repSal) repSal.innerHTML = salHtml;
+      salHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-purple-50 text-purple-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rSalCash}</td>
+              <td class="p-1">${rSalBank}</td>
+              <td class="p-1 text-right text-purple-950">${rSalTotal}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      document.getElementById("repSalariesList").innerHTML = salHtml;
 
+      // 6. Expenses Table
       const expArr = Object.values(expensesMap);
       let rExpCash = 0, rExpBank = 0, rExpTotal = 0;
-      let expHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-amber-100 text-slate-900 font-black border-b"><th class="p-1 text-left">ഇനം</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (expArr.length === 0) expHtml += `<tr><td colspan="2" class="p-1 text-center text-slate-400">ചിലവുകൾ ഇല്ല</td></tr>`;
-      else {
+      let expHtml = `
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="bg-amber-100 text-slate-900 font-black border-b">
+              <th class="p-1 text-left">ഇനം</th>
+              <th class="p-1">ക്യാഷ്</th>
+              <th class="p-1">ബാങ്ക്</th>
+              <th class="p-1 text-right">ആകെ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-bold">
+      `;
+      if (expArr.length === 0) {
+        expHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ചിലവുകൾ ഇല്ല</td></tr>`;
+      } else {
         expArr.forEach(e => {
           rExpCash += e.cash; rExpBank += e.bank; rExpTotal += e.total;
-          expHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${e.name}">${formatShortName(e.name)}</td><td class="p-1 text-amber-800">${e.cash}</td><td class="p-1 text-blue-800">${e.bank}</td><td class="p-1 text-right font-black text-slate-950">${e.total}</td></tr>`;
+          expHtml += `
+            <tr>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${e.name}">${formatShortName(e.name)}</td>
+              <td class="p-1 text-amber-800">${e.cash}</td>
+              <td class="p-1 text-blue-800">${e.bank}</td>
+              <td class="p-1 text-right font-black text-slate-950">${e.total}</td>
+            </tr>
+          `;
         });
       }
-      expHtml += `</tbody><tfoot><tr class="bg-amber-50 text-amber-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rExpCash}</td><td class="p-1">${rExpBank}</td><td class="p-1 text-right text-slate-950">${rExpTotal}</td></tr></tfoot></table>`;
-      const repExp = document.getElementById("repExpensesList");
-      if (repExp) repExp.innerHTML = expHtml;
+      expHtml += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-amber-50 text-amber-950 font-black border-t">
+              <td class="p-1 text-left uppercase">ആകെ:</td>
+              <td class="p-1">${rExpCash}</td>
+              <td class="p-1">${rExpBank}</td>
+              <td class="p-1 text-right text-slate-950">${rExpTotal}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      document.getElementById("repExpensesList").innerHTML = expHtml;
 
       currentReportDataForWA = {
         shopName: currentShop.name,
@@ -3155,7 +2899,6 @@
       };
     }
 
-    // STATEMENT ENGINE WITH ALL CUSTOMERS / AGENT SUPPORT
     function populateStatementPartyDatalist() {
       const type = document.getElementById("statPartyType").value;
       const dl = document.getElementById("statPartyDatalist");
@@ -3168,7 +2911,9 @@
         const creditCustomers = (customersList || []).filter(c => c && (c.type || '').toLowerCase() === 'credit');
         dl.innerHTML += `<option value="ALL CUSTOMERS">`;
         creditCustomers.forEach(c => {
-          if (c && c.name) dl.innerHTML += `<option value="${c.name.toUpperCase()}">`;
+          if (c && c.name) {
+            dl.innerHTML += `<option value="${c.name.toUpperCase()}">`;
+          }
         });
         if (inp) inp.value = "ALL CUSTOMERS";
       } else if (type === 'vendor') {
@@ -3629,19 +3374,12 @@
         runningBal = totalAgentClosing;
       }
 
-      const statHead = document.getElementById("statHeaderTitle");
-      const statPeriod = document.getElementById("statPeriodLabel");
-      const statOpen = document.getElementById("statOpeningBalText");
-      const statSales = document.getElementById("statMonthSalesText");
-      const statPaid = document.getElementById("statMonthPaidText");
-      const statClose = document.getElementById("statClosingBalText");
-
-      if (statHead) statHead.innerText = `${partyName} - MONTHLY STATEMENT`;
-      if (statPeriod) statPeriod.innerText = `Period: ${monthVal}`;
-      if (statOpen) statOpen.innerText = `${openingBal.toLocaleString('en-IN')}`;
-      if (statSales) statSales.innerText = `${totalSalesOrBills.toLocaleString('en-IN')}`;
-      if (statPaid) statPaid.innerText = `${totalPaidOrCollected.toLocaleString('en-IN')}`;
-      if (statClose) statClose.innerText = `${runningBal.toLocaleString('en-IN')}`;
+      document.getElementById("statHeaderTitle").innerText = `${partyName} - MONTHLY STATEMENT`;
+      document.getElementById("statPeriodLabel").innerText = `Period: ${monthVal}`;
+      document.getElementById("statOpeningBalText").innerText = `${openingBal.toLocaleString('en-IN')}`;
+      document.getElementById("statMonthSalesText").innerText = `${totalSalesOrBills.toLocaleString('en-IN')}`;
+      document.getElementById("statMonthPaidText").innerText = `${totalPaidOrCollected.toLocaleString('en-IN')}`;
+      document.getElementById("statClosingBalText").innerText = `${runningBal.toLocaleString('en-IN')}`;
 
       let tableHtml = "";
 
@@ -3820,8 +3558,7 @@
         `;
       }
 
-      const statTable = document.getElementById("statTableContainer");
-      if (statTable) statTable.innerHTML = tableHtml;
+      document.getElementById("statTableContainer").innerHTML = tableHtml;
 
       currentStatementDataForWA = {
         partyName: partyName,
