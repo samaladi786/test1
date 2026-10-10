@@ -56,7 +56,7 @@
         size: A4 portrait;
         margin: 4mm 6mm;
       }
-      header, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #editTransactionModal, .no-print {
+      header, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
         display: none !important;
       }
       body {
@@ -231,12 +231,12 @@
   </div>
 
   <!-- 3. MAIN WORKSPACE CONTAINER -->
-  <main class="w-full max-w-md mx-auto px-3.5 pt-3 flex-1 flex flex-col justify-between space-y-4">
+  <main class="w-full max-w-md mx-auto px-3 pt-2.5 flex-1 flex flex-col justify-between space-y-3">
 
-    <!-- TOP SECTION: ENTRY TABS -->
+    <!-- TOP SECTION: ENTRY TABS WITH LARGER TOUCH INPUTS -->
     <div>
       <!-- TAB 1: SALE ENTRY -->
-      <div id="view-sale" class="tab-view space-y-3">
+      <div id="view-sale" class="tab-view space-y-2.5">
         <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between border-b pb-2">
             <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-1.5">
@@ -247,8 +247,8 @@
 
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="block text-[11px] font-bold text-slate-700">കസ്റ്റമർ:</label>
-              <button type="button" onclick="openNewCustomerModal()" class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-0.5 rounded-full touch-btn cursor-pointer">
+              <label class="block text-xs font-bold text-slate-700">കസ്റ്റമർ തിരഞ്ഞെടുക്കുക:</label>
+              <button type="button" onclick="openNewCustomerModal()" class="text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
                 + ന്യൂ കസ്റ്റമർ
               </button>
             </div>
@@ -262,27 +262,28 @@
                 oninput="this.value = this.value.toUpperCase(); onCustomerSelected();" 
                 onchange="onCustomerSelected()" 
                 value="SHOPE" 
-                placeholder="കസ്റ്റമർ പേര്..." 
-                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 uppercase-input" 
+                placeholder="കസ്റ്റമർ പേര് ടൈപ്പ് ചെയ്യുക..." 
+                class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 uppercase-input" 
               />
-              <button type="button" onclick="clearCustomerInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-black text-sm p-1 cursor-pointer">
+              <button type="button" onclick="clearCustomerInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
                 ✕
               </button>
             </div>
             <datalist id="customerListOptions"></datalist>
-            <span id="custOpeningInfo" class="text-[11px] font-black text-emerald-700 block mt-1 truncate"></span>
+            <span id="custOpeningInfo" class="text-xs font-black text-emerald-700 block mt-1 truncate"></span>
           </div>
 
-          <div id="saleAmountsContainer" class="pt-1"></div>
+          <!-- DYNAMIC SALE AMOUNTS CONTAINER -->
+          <div id="saleAmountsContainer" class="pt-0.5"></div>
 
-          <button onclick="saveSaleEntry()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
-            <i data-lucide="check-circle" class="w-4 h-4"></i> സെയിൽ സേവ് ചെയ്യുക
+          <button onclick="saveSaleEntry()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="check-circle" class="w-5 h-5"></i> സെയിൽ സേവ് ചെയ്യുക
           </button>
         </div>
       </div>
 
       <!-- TAB 2: PURCHASE ENTRY -->
-      <div id="view-purchase" class="tab-view hidden space-y-3">
+      <div id="view-purchase" class="tab-view hidden space-y-2.5">
         <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between border-b pb-2">
             <h2 class="font-extrabold text-sm text-blue-900 flex items-center gap-1.5">
@@ -293,8 +294,8 @@
 
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="block text-[11px] font-bold text-slate-700">വെണ്ടർ:</label>
-              <button type="button" onclick="openNewVendorModal()" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-2.5 py-0.5 rounded-full touch-btn cursor-pointer">
+              <label class="block text-xs font-bold text-slate-700">വെണ്ടർ തിരഞ്ഞെടുക്കുക:</label>
+              <button type="button" onclick="openNewVendorModal()" class="text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
                 + ന്യൂ വെണ്ടർ
               </button>
             </div>
@@ -306,27 +307,28 @@
                 onfocus="this.select()" 
                 oninput="this.value = this.value.toUpperCase(); onVendorSelected();" 
                 onchange="onVendorSelected()" 
-                placeholder="വെണ്ടർ പേര്..." 
-                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 uppercase-input" 
+                placeholder="വെണ്ടർ പേര് ടൈപ്പ് ചെയ്യുക..." 
+                class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 uppercase-input" 
               />
-              <button type="button" onclick="clearVendorInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-black text-sm p-1 cursor-pointer">
+              <button type="button" onclick="clearVendorInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
                 ✕
               </button>
             </div>
             <datalist id="vendorListOptions"></datalist>
-            <span id="vendorOpeningInfo" class="text-[11px] font-black text-blue-700 block mt-1 truncate"></span>
+            <span id="vendorOpeningInfo" class="text-xs font-black text-blue-700 block mt-1 truncate"></span>
           </div>
 
-          <div id="purAmountsContainer" class="pt-1"></div>
+          <!-- DYNAMIC PURCHASE AMOUNTS CONTAINER -->
+          <div id="purAmountsContainer" class="pt-0.5"></div>
 
-          <button onclick="savePurchaseEntry()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-blue-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
-            <i data-lucide="check-circle" class="w-4 h-4"></i> പർച്ചേസ് സേവ് ചെയ്യുക
+          <button onclick="savePurchaseEntry()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-blue-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="check-circle" class="w-5 h-5"></i> പർച്ചേസ് സേവ് ചെയ്യുക
           </button>
         </div>
       </div>
 
       <!-- TAB 3: EXPENSE & SALARY ENTRY -->
-      <div id="view-expense" class="tab-view hidden space-y-3">
+      <div id="view-expense" class="tab-view hidden space-y-2.5">
         <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between border-b pb-2">
             <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-1.5">
@@ -337,10 +339,15 @@
 
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="block text-[11px] font-bold text-slate-700">ഇനം / ജീവനക്കാരൻ:</label>
-              <button type="button" onclick="quickAddExpensePrompt()" class="text-[10px] bg-amber-600 hover:bg-amber-700 text-white font-bold px-2.5 py-0.5 rounded-full touch-btn cursor-pointer">
-                + ന്യൂ ചിലവ് ഇനം
-              </button>
+              <label class="block text-xs font-bold text-slate-700">ഇനം / ജീവനക്കാരൻ:</label>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="openNewEmployeeModal()" class="text-[10px] bg-purple-700 hover:bg-purple-800 text-white font-bold px-2 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
+                  👥 ന്യൂ സ്റ്റാഫ്
+                </button>
+                <button type="button" onclick="quickAddExpensePrompt()" class="text-[10px] bg-amber-600 hover:bg-amber-700 text-white font-bold px-2 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
+                  + ന്യൂ ചിലവ്
+                </button>
+              </div>
             </div>
             <div class="relative">
               <input 
@@ -350,25 +357,26 @@
                 onfocus="this.select()" 
                 oninput="this.value = this.value.toUpperCase(); onUnifiedPartySelected();" 
                 onchange="onUnifiedPartySelected()" 
-                placeholder="പേര് തിരഞ്ഞെടുക്കുക..." 
-                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-amber-500 uppercase-input" 
+                placeholder="പേര് ടൈപ്പ് ചെയ്യുക..." 
+                class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-amber-500 uppercase-input" 
               />
-              <button type="button" onclick="clearUnifiedInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-black text-sm p-1 cursor-pointer">
+              <button type="button" onclick="clearUnifiedInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
                 ✕
               </button>
             </div>
             <datalist id="unifiedPartyOptions"></datalist>
-            <span id="unifiedPartyInfo" class="text-[11px] font-black text-amber-700 block mt-1 truncate"></span>
+            <span id="unifiedPartyInfo" class="text-xs font-black text-amber-700 block mt-1 truncate"></span>
           </div>
 
+          <!-- AMOUNTS -->
           <div class="grid grid-cols-2 gap-2">
             <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
               <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
-              <input type="number" step="any" inputmode="decimal" id="expSalCashAmt" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+              <input type="number" step="any" inputmode="decimal" id="expSalCashAmt" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
             </div>
             <div class="bg-purple-50/80 p-2 rounded-2xl border border-purple-200">
               <label class="block text-[10px] font-black text-purple-900 mb-0.5 text-center">🏦 ബാങ്ക് നൽകിയത്</label>
-              <input type="number" step="any" inputmode="decimal" id="expSalBankAmt" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-purple-500 text-purple-700" />
+              <input type="number" step="any" inputmode="decimal" id="expSalBankAmt" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-purple-500 text-purple-700" />
             </div>
           </div>
 
@@ -377,43 +385,42 @@
             <input type="text" id="expSalNote" placeholder="കുറിപ്പ്..." class="w-full text-xs p-2.5 rounded-xl border bg-slate-50 outline-none" />
           </div>
 
-          <button id="btnSaveUnified" onclick="saveUnifiedExpSalEntry()" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
-            <i data-lucide="check-circle" class="w-4 h-4"></i> ചിലവ് സേവ് ചെയ്യുക
+          <button id="btnSaveUnified" onclick="saveUnifiedExpSalEntry()" class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="check-circle" class="w-5 h-5"></i> ചിലവ് സേവ് ചെയ്യുക
           </button>
-        </div>
-      </div>
-
-      <!-- TAB 4: RECENT ENTRIES OF SELECTED DATE -->
-      <div id="view-recent" class="tab-view hidden space-y-3">
-        <div class="bg-white p-4 rounded-3xl border shadow-sm space-y-2.5">
-          <div class="flex items-center justify-between border-b pb-2">
-            <h2 class="font-extrabold text-sm text-slate-800 flex items-center gap-1.5">
-              <i data-lucide="history" class="w-4 h-4 text-slate-600"></i> ഇടപാടുകൾ (Selected Date)
-            </h2>
-            <span id="recentCountBadge" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">0 എൻട്രികൾ</span>
-          </div>
-          <div id="todayRecentList" class="divide-y divide-slate-100 max-h-[55vh] overflow-y-auto space-y-1 text-xs"></div>
         </div>
       </div>
     </div>
 
-    <!-- BOTTOM METRIC SECTION -->
+    <!-- BOTTOM SECTION: CLICKABLE CARDS (WITH BREAKDOWN POPUPS & EDIT/DELETE) -->
     <div class="space-y-2 pt-2">
       <div class="grid grid-cols-3 gap-1.5 text-center">
-        <div class="bg-emerald-900/90 text-white rounded-2xl p-2 border border-emerald-700/50 shadow-sm">
-          <span class="text-[9px] text-emerald-300 font-extrabold block uppercase">സെയിൽസ്</span>
+        <!-- 1. SALES CARD (CLICKABLE) -->
+        <div onclick="openTodaySalesModal()" class="bg-emerald-900/90 hover:bg-emerald-800 text-white rounded-2xl p-2 border border-emerald-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
+          <span class="text-[9px] text-emerald-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
+            സെയിൽസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
+          </span>
           <span id="quickSaleTotal" class="text-xs font-black">0</span>
         </div>
-        <div class="bg-blue-900/90 text-white rounded-2xl p-2 border border-blue-700/50 shadow-sm">
-          <span class="text-[9px] text-blue-300 font-extrabold block uppercase">പർച്ചേസ്</span>
+
+        <!-- 2. PURCHASE CARD (CLICKABLE) -->
+        <div onclick="openTodayPurchaseModal()" class="bg-blue-900/90 hover:bg-blue-800 text-white rounded-2xl p-2 border border-blue-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
+          <span class="text-[9px] text-blue-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
+            പർച്ചേസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
+          </span>
           <span id="quickPurTotal" class="text-xs font-black">0</span>
         </div>
-        <div class="bg-amber-900/90 text-white rounded-2xl p-2 border border-amber-700/50 shadow-sm">
-          <span class="text-[9px] text-amber-300 font-extrabold block uppercase">ചിലവ്</span>
+
+        <!-- 3. EXPENSE CARD (CLICKABLE) -->
+        <div onclick="openTodayExpenseModal()" class="bg-amber-900/90 hover:bg-amber-800 text-white rounded-2xl p-2 border border-amber-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
+          <span class="text-[9px] text-amber-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
+            ചിലവ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
+          </span>
           <span id="quickExpTotal" class="text-xs font-black">0</span>
         </div>
       </div>
 
+      <!-- LIVE LIQUID FUNDS CARD -->
       <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-2.5 border border-slate-700 text-white flex items-center justify-between text-xs font-bold shadow-md">
         <div class="space-y-0.5">
           <span class="text-[9px] text-slate-400 font-extrabold uppercase flex items-center gap-1">
@@ -430,39 +437,272 @@
 
   </main>
 
-  <!-- 4. FIXED BOTTOM NAVIGATION BAR -->
-  <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 z-40 shadow-lg flex items-center justify-around">
-    <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-[11px] touch-btn cursor-pointer">
+  <!-- 4. FIXED BOTTOM NAVIGATION BAR (CLEAN 3 BUTTONS) -->
+  <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 z-40 shadow-lg flex items-center justify-around">
+    <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-xs touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-emerald-50">
         <i data-lucide="shopping-cart" class="w-5 h-5"></i>
       </div>
-      <span>സെയിൽ</span>
+      <span>സെയിൽസ്</span>
     </button>
 
-    <button onclick="switchMobileTab('purchase')" id="mTab-purchase" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
+    <button onclick="switchMobileTab('purchase')" id="mTab-purchase" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-xs touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-slate-50">
         <i data-lucide="shopping-bag" class="w-5 h-5"></i>
       </div>
       <span>പർച്ചേസ്</span>
     </button>
 
-    <button onclick="switchMobileTab('expense')" id="mTab-expense" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
+    <button onclick="switchMobileTab('expense')" id="mTab-expense" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-xs touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-slate-50">
         <i data-lucide="receipt" class="w-5 h-5"></i>
       </div>
-      <span>ചിലവ്</span>
-    </button>
-
-    <button onclick="switchMobileTab('recent')" id="mTab-recent" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
-      <div class="p-1.5 rounded-xl bg-slate-50">
-        <i data-lucide="history" class="w-5 h-5"></i>
-      </div>
-      <span>ലിസ്റ്റ്</span>
+      <span>ചിലവ് & സാലറി</span>
     </button>
   </nav>
 
   <!-- ======================================================== -->
-  <!-- MODAL: REPORTS & STATEMENTS (CONTINUOUS 2-COLUMN FLOW) -->
+  <!-- POPUP: TODAY'S SALES BREAKDOWN (EDIT / DELETE READY) -->
+  <!-- ======================================================== -->
+  <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
+          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> ഇന്നത്തെ സെയിൽസ് ഇടപാടുകൾ
+        </h3>
+        <button onclick="closeTodaySalesModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-1">
+        <span class="text-[10px] font-black text-emerald-800 uppercase block">1. ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
+        <div id="modalCashSalesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="space-y-1 pt-2 border-t">
+        <span class="text-[10px] font-black text-amber-800 uppercase block">2. ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
+        <div id="modalCreditSalesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodaySalesModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">
+          തിരികെ പോകുക
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- POPUP: TODAY'S PURCHASES BREAKDOWN (EDIT / DELETE READY) -->
+  <!-- ======================================================== -->
+  <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> ഇന്നത്തെ പർച്ചേസ് ഇടപാടുകൾ
+        </h3>
+        <button onclick="closeTodayPurchaseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-1">
+        <span class="text-[10px] font-black text-blue-900 uppercase block">1. ക്യാഷ് പർച്ചേസ് (Cash Vendors)</span>
+        <div id="modalCashPurchasesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="space-y-1 pt-2 border-t">
+        <span class="text-[10px] font-black text-indigo-900 uppercase block">2. ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
+        <div id="modalCreditPurchasesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodayPurchaseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">
+          തിരികെ പോകുക
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- POPUP: TODAY'S EXPENSES BREAKDOWN (EDIT / DELETE READY) -->
+  <!-- ======================================================== -->
+  <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-amber-900 flex items-center gap-1.5">
+          <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ഇന്നത്തെ ചിലവുകൾ & സാലറി
+        </h3>
+        <button onclick="closeTodayExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-1">
+        <span class="text-[10px] font-black text-purple-900 uppercase block">1. സാലറി നൽകിയത് (Staff Salaries)</span>
+        <div id="modalSalariesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="space-y-1 pt-2 border-t">
+        <span class="text-[10px] font-black text-amber-900 uppercase block">2. ഷോപ്പ് ചിലവുകൾ (Shop Expenses)</span>
+        <div id="modalExpensesList" class="overflow-x-auto"></div>
+      </div>
+
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodayExpenseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">
+          തിരികെ പോകുക
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW CREDIT CUSTOMER -->
+  <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
+          🛒 പുതിയ ക്രെഡിറ്റ് കസ്റ്റമർ
+        </h3>
+        <button onclick="closeNewCustomerModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">കസ്റ്റമർ പേര്:</label>
+          <input type="text" id="newCustName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500 uppercase-input" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">പഴയ കടം / ബാലൻസ്:</label>
+          <input type="number" step="any" id="newCustOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewCustomerModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewCustomerMaster()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW CREDIT VENDOR -->
+  <div id="newVendorModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">
+          🚚 പുതിയ ക്രെഡിറ്റ് വെണ്ടർ
+        </h3>
+        <button onclick="closeNewVendorModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">വെണ്ടർ പേര്:</label>
+          <input type="text" id="newVendName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500 uppercase-input" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">പഴയ ബാക്കി / കൊടുക്കാനുള്ളത്:</label>
+          <input type="number" step="any" id="newVendOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewVendorModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewVendorMaster()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW EMPLOYEE MODAL (EXPENSE TAB) -->
+  <div id="newEmployeeModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-purple-900 flex items-center gap-1.5">
+          👥 പുതിയ ജീവനക്കാരനെ ചേർക്കുക
+        </h3>
+        <button onclick="closeNewEmployeeModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">സ്റ്റാഫ് പേര്:</label>
+          <input type="text" id="newEmpName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500 uppercase-input" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">മാസ ശമ്പളം:</label>
+            <input type="number" step="any" id="newEmpSalary" placeholder="0.00" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">തുടക്ക ബാക്കി:</label>
+            <input type="number" step="any" id="newEmpAdvance" placeholder="0.00" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ജോയിനിങ് ഡേറ്റ്:</label>
+          <input type="date" id="newEmpJoinDate" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500 cursor-pointer" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewEmployeeModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewEmployeeMaster()" class="flex-1 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT TRANSACTION -->
+  <div id="editTransactionModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+          ✏️ ഇടപാട് തിരുത്തുക
+        </h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <input type="hidden" id="editTxnId" />
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">തീയതി:</label>
+          <input type="date" id="editTxnDate" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">പേര് / വിവരണം:</label>
+          <input type="text" id="editTxnParty" oninput="this.value = this.value.toUpperCase();" class="w-full p-2 rounded-xl border bg-slate-50 font-bold uppercase-input" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">ക്യാഷ് തുക:</label>
+            <input type="number" step="any" id="editTxnCash" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">ബാങ്ക് തുക:</label>
+            <input type="number" step="any" id="editTxnBank" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
+          </div>
+        </div>
+        <div id="editCreditContainer">
+          <label class="block font-bold text-slate-700 mb-0.5">ക്രെഡിറ്റ് തുക:</label>
+          <input type="number" step="any" id="editTxnCredit" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeEditModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveEditedTransaction()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">അപ്‌ഡേറ്റ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN VERIFY MODAL -->
+  <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
+      <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
+      <p id="pinSubText" class="text-xs text-slate-500">തുടരാൻ ലോഗിൻ പിൻ നൽകുക</p>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" id="pinInput" placeholder="••••" class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-rose-500" onkeydown="if(event.key === 'Enter') verifyPinAndExecute()" />
+      <div class="flex gap-2 pt-2">
+        <button onclick="closePinModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-xs font-semibold cursor-pointer">റദ്ദാക്കുക</button>
+        <button onclick="verifyPinAndExecute()" class="flex-1 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">സ്ഥിരീകരിക്കുക</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: REPORTS & STATEMENTS (A4 BOLD WITH SIGNATURES) -->
   <!-- ======================================================== -->
   <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-4xl w-full bg-white p-3 sm:p-5 shadow-2xl rounded-3xl border space-y-2.5 my-auto max-h-[96vh] overflow-y-auto">
@@ -537,35 +777,39 @@
           </div>
         </div>
 
-        <!-- 7 MINI SUMMARY CARDS -->
-        <div class="grid grid-cols-4 sm:grid-cols-7 gap-1 font-bold">
-          <div class="bg-emerald-50/90 p-1 rounded-lg border border-emerald-300 text-center">
-            <span class="text-[8.5px] font-bold text-emerald-800 block">സെയിൽസ്</span>
-            <h3 id="repTotalSale" class="text-[11px] font-black text-emerald-700">0</h3>
+        <!-- ENHANCED BOLD SUMMARY CARDS (INCLUDING OPENING FUND) -->
+        <div class="grid grid-cols-4 sm:grid-cols-8 gap-1 font-bold">
+          <div class="bg-slate-200/90 p-1.5 rounded-lg border border-slate-400 text-center">
+            <span class="text-[8.5px] font-black text-slate-800 block uppercase">തുടക്ക ഫണ്ട്</span>
+            <h3 id="repOpeningLiquidBal" class="text-xs font-black text-slate-900">0</h3>
           </div>
-          <div class="bg-blue-50/90 p-1 rounded-lg border border-blue-300 text-center">
-            <span class="text-[8.5px] font-bold text-blue-800 uppercase block">പർച്ചേസ്</span>
-            <h3 id="repTotalPurchase" class="text-[11px] font-black text-blue-700">0</h3>
+          <div class="bg-emerald-50/90 p-1.5 rounded-lg border border-emerald-300 text-center">
+            <span class="text-[8.5px] font-black text-emerald-800 block uppercase">സെയിൽസ്</span>
+            <h3 id="repTotalSale" class="text-xs font-black text-emerald-700">0</h3>
           </div>
-          <div class="bg-amber-50/90 p-1 rounded-lg border border-amber-300 text-center">
-            <span class="text-[8.5px] font-bold text-amber-800 uppercase block">എക്സ്പെൻസ്</span>
-            <h3 id="repTotalExpense" class="text-[11px] font-black text-amber-700">0</h3>
+          <div class="bg-blue-50/90 p-1.5 rounded-lg border border-blue-300 text-center">
+            <span class="text-[8.5px] font-black text-blue-800 uppercase block">പർച്ചേസ്</span>
+            <h3 id="repTotalPurchase" class="text-xs font-black text-blue-700">0</h3>
           </div>
-          <div class="bg-teal-50/90 p-1 rounded-lg border border-teal-300 text-center">
-            <span class="text-[8.5px] font-bold text-teal-800 uppercase block">കസ്റ്റമർ ബാക്കി</span>
-            <h3 id="repCustBal" class="text-[9.5px] font-extrabold text-teal-900 leading-tight">0</h3>
+          <div class="bg-amber-50/90 p-1.5 rounded-lg border border-amber-300 text-center">
+            <span class="text-[8.5px] font-black text-amber-800 uppercase block">എക്സ്പെൻസ്</span>
+            <h3 id="repTotalExpense" class="text-xs font-black text-amber-700">0</h3>
           </div>
-          <div class="bg-rose-50/90 p-1 rounded-lg border border-rose-300 text-center">
-            <span class="text-[8.5px] font-bold text-rose-800 uppercase block">വെണ്ടർ ബാക്കി</span>
-            <h3 id="repVendorBal" class="text-[9.5px] font-extrabold text-rose-900 leading-tight">0</h3>
+          <div class="bg-teal-50/90 p-1.5 rounded-lg border border-teal-300 text-center">
+            <span class="text-[8.5px] font-black text-teal-800 uppercase block">കസ്റ്റമർ ബാക്കി</span>
+            <h3 id="repCustBal" class="text-[10px] font-black text-teal-900 leading-tight">0</h3>
           </div>
-          <div class="bg-purple-50/90 p-1 rounded-lg border border-purple-300 text-center">
-            <span class="text-[8.5px] font-bold text-purple-800 uppercase block">സാലറി ബാക്കി</span>
-            <h3 id="repSalaryBal" class="text-[9.5px] font-extrabold text-purple-900 leading-tight">0</h3>
+          <div class="bg-rose-50/90 p-1.5 rounded-lg border border-rose-300 text-center">
+            <span class="text-[8.5px] font-black text-rose-800 uppercase block">വെണ്ടർ ബാക്കി</span>
+            <h3 id="repVendorBal" class="text-[10px] font-black text-rose-900 leading-tight">0</h3>
           </div>
-          <div class="bg-slate-100 p-1 rounded-lg border border-slate-300 text-center">
-            <span class="text-[8.5px] font-bold text-slate-700 uppercase block">ലിക്വിഡ് ഫണ്ട്</span>
-            <h3 id="repLiquidBal" class="text-[9.5px] font-extrabold text-slate-900 leading-tight">0</h3>
+          <div class="bg-purple-50/90 p-1.5 rounded-lg border border-purple-300 text-center">
+            <span class="text-[8.5px] font-black text-purple-800 uppercase block">സാലറി ബാക്കി</span>
+            <h3 id="repSalaryBal" class="text-[10px] font-black text-purple-900 leading-tight">0</h3>
+          </div>
+          <div class="bg-slate-100 p-1.5 rounded-lg border border-slate-300 text-center">
+            <span class="text-[8.5px] font-black text-slate-800 uppercase block">ലിക്വിഡ് ഫണ്ട്</span>
+            <h3 id="repLiquidBal" class="text-[10px] font-black text-slate-900 leading-tight">0</h3>
           </div>
         </div>
 
@@ -625,6 +869,19 @@
           </div>
 
         </div>
+
+        <!-- MANUAL SIGNATURE BOX AT REPORT BOTTOM -->
+        <div class="pt-5 mt-4 border-t-2 border-slate-900 flex justify-between items-end text-[10.5px] font-black">
+          <div class="text-left space-y-6">
+            <div>...................................................................<br>ഷോപ്പ് ഇൻ-ചാർജ് ഒപ്പ് (Shop In-Charge Sign)</div>
+            <div>തീയതി (Date): ............................................</div>
+          </div>
+          <div class="text-right space-y-6">
+            <div>...................................................................<br>മാനേജർ ഒപ്പ് (Manager Sign)</div>
+            <div>തീയതി (Date): ............................................</div>
+          </div>
+        </div>
+
       </div>
 
       <!-- STATEMENT PRINT CONTAINER -->
@@ -659,6 +916,18 @@
         </div>
 
         <div id="statTableContainer" class="overflow-x-auto"></div>
+
+        <!-- MANUAL SIGNATURE BOX AT STATEMENT BOTTOM -->
+        <div class="pt-5 mt-4 border-t-2 border-slate-900 flex justify-between items-end text-[10.5px] font-black">
+          <div class="text-left space-y-6">
+            <div>...................................................................<br>കസ്റ്റമർ / വെണ്ടർ ഒപ്പ് (Party Signature)</div>
+            <div>തീയതി (Date): ............................................</div>
+          </div>
+          <div class="text-right space-y-6">
+            <div>...................................................................<br>മാനേജർ ഒപ്പ് (Manager Sign)</div>
+            <div>തീയതി (Date): ............................................</div>
+          </div>
+        </div>
       </div>
 
       <!-- ACTION BUTTONS -->
@@ -669,118 +938,6 @@
         <button onclick="shareActiveReportWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
           🟢 വാട്‌സ്ആപ്പിലേക്ക് സെന്റ് ചെയ്യുക
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: NEW CREDIT CUSTOMER -->
-  <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
-          🛒 പുതിയ ക്രെഡിറ്റ് കസ്റ്റമർ
-        </h3>
-        <button onclick="closeNewCustomerModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-
-      <div class="space-y-2 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">കസ്റ്റമർ പേര്:</label>
-          <input type="text" id="newCustName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500 uppercase-input" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">പഴയ കടം / ബാലൻസ്:</label>
-          <input type="number" step="any" id="newCustOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500" />
-        </div>
-      </div>
-
-      <div class="pt-2 border-t flex gap-2">
-        <button type="button" onclick="closeNewCustomerModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
-        <button type="button" onclick="saveNewCustomerMaster()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: NEW CREDIT VENDOR -->
-  <div id="newVendorModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">
-          🚚 പുതിയ ക്രെഡിറ്റ് വെണ്ടർ
-        </h3>
-        <button onclick="closeNewVendorModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-
-      <div class="space-y-2 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">വെണ്ടർ പേര്:</label>
-          <input type="text" id="newVendName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500 uppercase-input" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">പഴയ ബാക്കി / കൊടുക്കാനുള്ളത്:</label>
-          <input type="number" step="any" id="newVendOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
-        </div>
-      </div>
-
-      <div class="pt-2 border-t flex gap-2">
-        <button type="button" onclick="closeNewVendorModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
-        <button type="button" onclick="saveNewVendorMaster()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: EDIT TRANSACTION -->
-  <div id="editTransactionModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5">
-          ✏️ ഇടപാട് തിരുത്തുക
-        </h3>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-
-      <input type="hidden" id="editTxnId" />
-      <div class="space-y-2 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">തീയതി:</label>
-          <input type="date" id="editTxnDate" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">പേര് / വിവരണം:</label>
-          <input type="text" id="editTxnParty" oninput="this.value = this.value.toUpperCase();" class="w-full p-2 rounded-xl border bg-slate-50 font-bold uppercase-input" />
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-bold text-slate-700 mb-0.5">ക്യാഷ് തുക:</label>
-            <input type="number" step="any" id="editTxnCash" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-0.5">ബാങ്ക് തുക:</label>
-            <input type="number" step="any" id="editTxnBank" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
-          </div>
-        </div>
-        <div id="editCreditContainer">
-          <label class="block font-bold text-slate-700 mb-0.5">ക്രെഡിറ്റ് തുക:</label>
-          <input type="number" step="any" id="editTxnCredit" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
-        </div>
-      </div>
-
-      <div class="pt-2 border-t flex gap-2">
-        <button type="button" onclick="closeEditModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
-        <button type="button" onclick="saveEditedTransaction()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">അപ്‌ഡേറ്റ്</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PIN VERIFY MODAL -->
-  <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
-      <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
-      <p id="pinSubText" class="text-xs text-slate-500">തുടരാൻ ലോഗിൻ പിൻ നൽകുക</p>
-      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" id="pinInput" placeholder="••••" class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-rose-500" onkeydown="if(event.key === 'Enter') verifyPinAndExecute()" />
-      <div class="flex gap-2 pt-2">
-        <button onclick="closePinModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-xs font-semibold cursor-pointer">റദ്ദാക്കുക</button>
-        <button onclick="verifyPinAndExecute()" class="flex-1 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">സ്ഥിരീകരിക്കുക</button>
       </div>
     </div>
   </div>
@@ -1055,15 +1212,15 @@
       document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
       document.getElementById(`view-${tabId}`).classList.remove('hidden');
 
-      const tabs = ['sale', 'purchase', 'expense', 'recent'];
+      const tabs = ['sale', 'purchase', 'expense'];
       tabs.forEach(t => {
         const btn = document.getElementById(`mTab-${t}`);
         const iconWrap = btn.querySelector('div');
         if (t === tabId) {
-          btn.className = `flex flex-col items-center gap-1 font-extrabold text-[11px] touch-btn cursor-pointer ${t === 'sale' ? 'text-emerald-600' : t === 'purchase' ? 'text-blue-600' : t === 'expense' ? 'text-amber-600' : 'text-slate-800'}`;
-          iconWrap.className = `p-1.5 rounded-xl ${t === 'sale' ? 'bg-emerald-100' : t === 'purchase' ? 'bg-blue-100' : t === 'expense' ? 'bg-amber-100' : 'bg-slate-200'}`;
+          btn.className = `flex flex-col items-center gap-1 font-extrabold text-xs touch-btn cursor-pointer ${t === 'sale' ? 'text-emerald-600' : t === 'purchase' ? 'text-blue-600' : 'text-amber-600'}`;
+          iconWrap.className = `p-1.5 rounded-xl ${t === 'sale' ? 'bg-emerald-100' : t === 'purchase' ? 'bg-blue-100' : 'bg-amber-100'}`;
         } else {
-          btn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer";
+          btn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold text-xs touch-btn cursor-pointer";
           iconWrap.className = "p-1.5 rounded-xl bg-slate-50";
         }
       });
@@ -1125,7 +1282,7 @@
           supabaseClient.from('vendors').select('*').order('name'),
           supabaseClient.from('employees').select('*').order('name'),
           supabaseClient.from('expenses_master').select('*').order('name'),
-          supabaseClient.from('transactions').select('*').order('date', { ascending: false }).limit(2000),
+          supabaseClient.from('transactions').select('*').order('date', { ascending: false }).limit(2500),
           supabaseClient.from('agents').select('*').order('name'),
           supabaseClient.from('app_settings').select('*')
         ]);
@@ -1184,30 +1341,30 @@
       if (type === 'credit') {
         box.innerHTML = `
           <div class="grid grid-cols-3 gap-1.5">
-            <div class="bg-emerald-50/80 p-1.5 rounded-xl border border-emerald-200">
-              <label class="block text-[9px] font-black text-emerald-900 mb-0.5 text-center truncate">💵 ക്യാഷ് റസീറ്റ്</label>
-              <input type="number" step="any" inputmode="decimal" id="saleCash" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-emerald-500 text-emerald-700" />
+            <div class="bg-emerald-50/80 p-2 rounded-2xl border border-emerald-200">
+              <label class="block text-[10px] font-black text-emerald-900 mb-0.5 text-center truncate">💵 ക്യാഷ് റസീറ്റ്</label>
+              <input type="number" step="any" inputmode="decimal" id="saleCash" placeholder="0.00" class="w-full text-center text-sm sm:text-base font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-emerald-500 text-emerald-700" />
             </div>
-            <div class="bg-blue-50/80 p-1.5 rounded-xl border border-blue-200">
-              <label class="block text-[9px] font-black text-blue-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് റസീറ്റ്</label>
-              <input type="number" step="any" inputmode="decimal" id="saleBank" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+            <div class="bg-blue-50/80 p-2 rounded-2xl border border-blue-200">
+              <label class="block text-[10px] font-black text-blue-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് റസീറ്റ്</label>
+              <input type="number" step="any" inputmode="decimal" id="saleBank" placeholder="0.00" class="w-full text-center text-sm sm:text-base font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
             </div>
-            <div class="bg-amber-50/80 p-1.5 rounded-xl border border-amber-200">
-              <label class="block text-[9px] font-black text-amber-900 mb-0.5 text-center truncate">🛒 ക്രെഡിറ്റ് സെയിൽ</label>
-              <input type="number" step="any" inputmode="decimal" id="saleCredit" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+            <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
+              <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center truncate">🛒 ക്രെഡിറ്റ് സെയിൽ</label>
+              <input type="number" step="any" inputmode="decimal" id="saleCredit" placeholder="0.00" class="w-full text-center text-sm sm:text-base font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
             </div>
           </div>
         `;
       } else {
         box.innerHTML = `
           <div class="grid grid-cols-2 gap-2">
-            <div class="bg-emerald-50/80 p-2 rounded-2xl border border-emerald-200">
-              <label class="block text-[10px] font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് സെയിൽ</label>
-              <input type="number" step="any" inputmode="decimal" id="saleCash" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-emerald-500 text-emerald-700" />
+            <div class="bg-emerald-50/80 p-2.5 rounded-2xl border border-emerald-200">
+              <label class="block text-xs font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് സെയിൽ</label>
+              <input type="number" step="any" inputmode="decimal" id="saleCash" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-emerald-500 text-emerald-700" />
             </div>
-            <div class="bg-blue-50/80 p-2 rounded-2xl border border-blue-200">
-              <label class="block text-[10px] font-black text-blue-900 mb-0.5 text-center">🏦 ബാങ്ക് സെയിൽ</label>
-              <input type="number" step="any" inputmode="decimal" id="saleBank" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+            <div class="bg-blue-50/80 p-2.5 rounded-2xl border border-blue-200">
+              <label class="block text-xs font-black text-blue-900 mb-0.5 text-center">🏦 ബാങ്ക് സെയിൽ</label>
+              <input type="number" step="any" inputmode="decimal" id="saleBank" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
             </div>
           </div>
         `;
@@ -1242,30 +1399,30 @@
       if (type === 'credit') {
         box.innerHTML = `
           <div class="grid grid-cols-3 gap-1.5">
-            <div class="bg-blue-50/80 p-1.5 rounded-xl border border-blue-200">
-              <label class="block text-[9px] font-black text-blue-900 mb-0.5 text-center truncate">💵 ക്യാഷ് നൽകിയത്</label>
-              <input type="number" step="any" inputmode="decimal" id="purCash" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+            <div class="bg-blue-50/80 p-2 rounded-2xl border border-blue-200">
+              <label class="block text-[10px] font-black text-blue-900 mb-0.5 text-center truncate">💵 ക്യാഷ് നൽകിയത്</label>
+              <input type="number" step="any" inputmode="decimal" id="purCash" placeholder="0.00" class="w-full text-center text-sm sm:text-base font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
             </div>
-            <div class="bg-indigo-50/80 p-1.5 rounded-xl border border-indigo-200">
-              <label class="block text-[9px] font-black text-indigo-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് നൽകിയത്</label>
-              <input type="number" step="any" inputmode="decimal" id="purBank" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-700" />
+            <div class="bg-indigo-50/80 p-2 rounded-2xl border border-indigo-200">
+              <label class="block text-[10px] font-black text-indigo-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് നൽകിയത്</label>
+              <input type="number" step="any" inputmode="decimal" id="purBank" placeholder="0.00" class="w-full text-center text-sm sm:text-base font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-700" />
             </div>
-            <div class="bg-amber-50/80 p-1.5 rounded-xl border border-amber-200">
-              <label class="block text-[9px] font-black text-amber-900 mb-0.5 text-center truncate">🚚 ക്രെഡിറ്റ് പർച്ചേസ്</label>
-              <input type="number" step="any" inputmode="decimal" id="purCredit" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+            <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
+              <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center truncate">🚚 ക്രെഡിറ്റ് പർച്ചേസ്</label>
+              <input type="number" step="any" inputmode="decimal" id="purCredit" placeholder="0.00" class="w-full text-center text-sm sm:text-base font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
             </div>
           </div>
         `;
       } else {
         box.innerHTML = `
           <div class="grid grid-cols-2 gap-2">
-            <div class="bg-blue-50/80 p-2 rounded-2xl border border-blue-200">
-              <label class="block text-[10px] font-black text-blue-900 mb-0.5 text-center">💵 ക്യാഷ് പർച്ചേസ്</label>
-              <input type="number" step="any" inputmode="decimal" id="purCash" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
+            <div class="bg-blue-50/80 p-2.5 rounded-2xl border border-blue-200">
+              <label class="block text-xs font-black text-blue-900 mb-0.5 text-center">💵 ക്യാഷ് പർച്ചേസ്</label>
+              <input type="number" step="any" inputmode="decimal" id="purCash" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
             </div>
-            <div class="bg-indigo-50/80 p-2 rounded-2xl border border-indigo-200">
-              <label class="block text-[10px] font-black text-indigo-900 mb-0.5 text-center">🏦 ബാങ്ക് പർച്ചേസ്</label>
-              <input type="number" step="any" inputmode="decimal" id="purBank" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-700" />
+            <div class="bg-indigo-50/80 p-2.5 rounded-2xl border border-indigo-200">
+              <label class="block text-xs font-black text-indigo-900 mb-0.5 text-center">🏦 ബാങ്ക് പർച്ചേസ്</label>
+              <input type="number" step="any" inputmode="decimal" id="purBank" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-700" />
             </div>
           </div>
         `;
@@ -1293,6 +1450,7 @@
       }
     }
 
+    // SALARY ENGINE & LIVE BALANCE CALCULATION
     function getCycleStartDate(joinDate, cycleIndex) {
       let d = new Date(joinDate.getFullYear(), joinDate.getMonth() + cycleIndex, joinDate.getDate());
       let expectedMonth = (joinDate.getMonth() + cycleIndex) % 12;
@@ -1397,8 +1555,8 @@
       if (emp) {
         badge.className = "text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-bold";
         badge.innerText = "സാലറി";
-        btn.className = "w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-purple-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5";
-        btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> സാലറി സേവ് ചെയ്യുക`;
+        btn.className = "w-full py-3.5 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-purple-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition";
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> സാലറി സേവ് ചെയ്യുക`;
 
         const busDate = document.getElementById("mobileFilterDate")?.value || getSaudiToday();
         const liveBal = calculateEmployeePendingBalance(emp, busDate);
@@ -1406,13 +1564,14 @@
       } else {
         badge.className = "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold";
         badge.innerText = "ചിലവ്";
-        btn.className = "w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5";
-        btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> ചിലവ് സേവ് ചെയ്യുക`;
+        btn.className = "w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition";
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> ചിലവ് സേവ് ചെയ്യുക`;
         info.innerText = "";
       }
       if (window.lucide) lucide.createIcons();
     }
 
+    // MODAL HANDLERS
     function openNewCustomerModal() {
       document.getElementById("newCustName").value = "";
       document.getElementById("newCustOpening").value = "";
@@ -1467,6 +1626,49 @@
       alert("പുതിയ ക്രെഡിറ്റ് വെണ്ടറെ ചേർത്തു!");
     }
 
+    function openNewEmployeeModal() {
+      document.getElementById("newEmpName").value = "";
+      document.getElementById("newEmpSalary").value = "";
+      document.getElementById("newEmpAdvance").value = "";
+      document.getElementById("newEmpJoinDate").value = getSaudiToday();
+      document.getElementById("newEmployeeModal").classList.remove("hidden");
+      document.getElementById("newEmpName").focus();
+    }
+    function closeNewEmployeeModal() { document.getElementById("newEmployeeModal").classList.add("hidden"); }
+
+    async function saveNewEmployeeMaster() {
+      const name = document.getElementById("newEmpName").value.trim().toUpperCase();
+      const salary = parseFloat(document.getElementById("newEmpSalary").value) || 0;
+      const advance = parseFloat(document.getElementById("newEmpAdvance").value) || 0;
+      const joinDate = document.getElementById("newEmpJoinDate").value || getSaudiToday();
+      if (!name) return alert("ജീവനക്കാരന്റെ പേര് നൽകുക!");
+
+      let newEmp = {
+        name: name,
+        monthly_salary: salary,
+        opening_advance: advance,
+        joining_date: joinDate,
+        status: 'active',
+        created_at: new Date().toISOString()
+      };
+
+      if (navigator.onLine && supabaseClient) {
+        const { data, error } = await supabaseClient.from('employees').insert([newEmp]).select();
+        if (data && data[0]) newEmp.id = data[0].id;
+      } else {
+        newEmp.id = 'emp_' + Date.now();
+      }
+
+      employeesList.push(newEmp);
+      localStorage.setItem(`ALNASSR_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
+      populateDropdowns();
+
+      document.getElementById("unifiedPartyInput").value = name;
+      onUnifiedPartySelected();
+      closeNewEmployeeModal();
+      alert("പുതിയ ജീവനക്കാരനെ ചേർത്തു!");
+    }
+
     async function quickAddExpensePrompt() {
       let name = prompt("പുതിയ ചിലവ് ഇനം നൽകുക:");
       if (!name || !name.trim()) return;
@@ -1484,6 +1686,26 @@
       onUnifiedPartySelected();
     }
 
+    // BREAKDOWN MODALS OPEN / CLOSE
+    function openTodaySalesModal() {
+      document.getElementById("todaySalesModal").classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeTodaySalesModal() { document.getElementById("todaySalesModal").classList.add("hidden"); }
+
+    function openTodayPurchaseModal() {
+      document.getElementById("todayPurchaseModal").classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeTodayPurchaseModal() { document.getElementById("todayPurchaseModal").classList.add("hidden"); }
+
+    function openTodayExpenseModal() {
+      document.getElementById("todayExpenseModal").classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeTodayExpenseModal() { document.getElementById("todayExpenseModal").classList.add("hidden"); }
+
+    // OFFLINE QUEUE ENGINE
     function getOfflineQueue() {
       try {
         return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`)) || [];
@@ -1534,6 +1756,7 @@
       }
     }
 
+    // TRANSACTION SAVING
     async function saveSaleEntry() {
       let rawName = document.getElementById("saleCustomerInput").value.trim().toUpperCase();
       if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
@@ -1705,13 +1928,20 @@
       onUnifiedPartySelected();
     }
 
+    // DASHBOARD & MODAL RENDERING
     function renderQuickTotalsAndRecent() {
       const selectedDate = getSelectedDate();
       let saleTotal = 0, purTotal = 0, expTotal = 0;
-      let dateFilteredList = [];
 
       let curCash = openingSettings.openingCash;
       let curBank = openingSettings.openingBank;
+
+      let modalCashSales = [];
+      let modalCreditSales = [];
+      let modalCashPurchases = [];
+      let modalCreditPurchases = [];
+      let modalSalaries = [];
+      let modalExpenses = [];
 
       transactionsList.forEach(t => {
         if (!t) return;
@@ -1720,7 +1950,9 @@
 
         const isSelectedDate = String(t.date).startsWith(selectedDate);
         if (isSelectedDate) {
-          dateFilteredList.push(t);
+          const cAmt = Math.abs(parseFloat(t.cash_amount) || 0);
+          const bAmt = Math.abs(parseFloat(t.bank_amount) || 0);
+          const crAmt = parseFloat(t.credit_amount) || 0;
 
           if (t.type === 'sale') {
             const cleanN = cleanPartyName(t.party_name);
@@ -1728,9 +1960,11 @@
             const isCreditCust = cust && (cust.type || '').toLowerCase() === 'credit';
 
             if (isCreditCust) {
-              saleTotal += (parseFloat(t.credit_amount) || 0);
+              saleTotal += crAmt;
+              modalCreditSales.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, cr: crAmt });
             } else {
-              saleTotal += (parseFloat(t.cash_amount) || 0) + (parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+              saleTotal += (cAmt + bAmt + crAmt);
+              modalCashSales.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt + crAmt) });
             }
           } else if (t.type === 'purchase') {
             const cleanN = cleanPartyName(t.party_name);
@@ -1738,12 +1972,18 @@
             const isCreditVend = vend && (vend.type || '').toLowerCase() === 'credit';
 
             if (isCreditVend) {
-              purTotal += (parseFloat(t.credit_amount) || 0);
+              purTotal += crAmt;
+              modalCreditPurchases.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, cr: crAmt });
             } else {
-              purTotal += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+              purTotal += (cAmt + bAmt + crAmt);
+              modalCashPurchases.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt + crAmt) });
             }
-          } else if (t.type === 'expense' || t.type === 'salary') {
-            expTotal += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+          } else if (t.type === 'salary') {
+            expTotal += (cAmt + bAmt);
+            modalSalaries.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt) });
+          } else if (t.type === 'expense') {
+            expTotal += (cAmt + bAmt);
+            modalExpenses.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt) });
           }
         }
       });
@@ -1751,76 +1991,87 @@
       document.getElementById("quickSaleTotal").innerText = `${saleTotal.toLocaleString('en-IN')}`;
       document.getElementById("quickPurTotal").innerText = `${purTotal.toLocaleString('en-IN')}`;
       document.getElementById("quickExpTotal").innerText = `${expTotal.toLocaleString('en-IN')}`;
-      document.getElementById("recentCountBadge").innerText = `${dateFilteredList.length} എൻട്രികൾ`;
 
       const totalLiq = curCash + curBank;
       document.getElementById("liveTotalLiquid").innerText = `${totalLiq.toLocaleString('en-IN')}`;
       document.getElementById("liveHandCash").innerText = `💵 ക്യാഷ്: ${curCash.toLocaleString('en-IN')}`;
       document.getElementById("liveBankCash").innerText = `🏦 ബാങ്ക്: ${curBank.toLocaleString('en-IN')}`;
 
-      const listContainer = document.getElementById("todayRecentList");
-      if (dateFilteredList.length === 0) {
-        listContainer.innerHTML = `<div class="py-6 text-center text-slate-400">തിരഞ്ഞെടുത്ത തീയതിയിൽ എൻട്രികൾ ഒന്നും ഇല്ല</div>`;
+      // POPULATE TODAY'S MODAL BREAKDOWN TABLES
+      renderModalTable("modalCashSalesList", modalCashSales, ["കസ്റ്റമർ", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'cash_sale');
+      renderModalTable("modalCreditSalesList", modalCreditSales, ["കസ്റ്റമർ", "ക്യാഷ് റസീറ്റ്", "ബാങ്ക് റസീറ്റ്", "ക്രെഡിറ്റ് സെയിൽ"], 'credit_sale');
+      renderModalTable("modalCashPurchasesList", modalCashPurchases, ["വെണ്ടർ", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'cash_pur');
+      renderModalTable("modalCreditPurchasesList", modalCreditPurchases, ["വെണ്ടർ", "ക്യാഷ് നൽകിയത്", "ബാങ്ക് നൽകിയത്", "ക്രെഡിറ്റ് ബില്ല്"], 'credit_pur');
+      renderModalTable("modalSalariesList", modalSalaries, ["സ്റ്റാഫ്", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'salary');
+      renderModalTable("modalExpensesList", modalExpenses, ["ചിലവ് ഇനം", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'expense');
+    }
+
+    function renderModalTable(containerId, dataList, headers, type) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      if (!dataList || dataList.length === 0) {
+        container.innerHTML = `<div class="p-2 text-center text-slate-400 text-xs font-bold">ഇടപാടുകൾ ഇല്ല</div>`;
         return;
       }
 
-      listContainer.innerHTML = dateFilteredList.map(t => {
-        let typeBadge = "";
-        let detailsHtml = "";
+      let total1 = 0, total2 = 0, total3 = 0;
 
-        const cAmt = Math.abs(parseFloat(t.cash_amount) || 0);
-        const bAmt = Math.abs(parseFloat(t.bank_amount) || 0);
-        const crAmt = parseFloat(t.credit_amount) || 0;
+      let html = `
+        <table class="w-full text-[11px] text-center border-collapse border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <thead>
+            <tr class="bg-slate-100 text-slate-900 font-black border-b border-slate-200">
+              <th class="p-1.5 text-left">${headers[0]}</th>
+              <th class="p-1.5">${headers[1]}</th>
+              <th class="p-1.5">${headers[2]}</th>
+              <th class="p-1.5">${headers[3]}</th>
+              <th class="p-1.5 text-right">⚙️</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-bold">
+      `;
 
-        if (t.type === 'sale') {
-          typeBadge = `<span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded text-[9px] font-bold">സെയിൽ</span>`;
-          const cust = customersList.find(c => cleanPartyName(c.name) === cleanPartyName(t.party_name));
-          const isCredit = cust && (cust.type || '').toLowerCase() === 'credit';
+      dataList.forEach(row => {
+        let col1 = row.cash || 0;
+        let col2 = row.bank || 0;
+        let col3 = (row.cr !== undefined) ? row.cr : (row.total || 0);
 
-          if (isCredit) {
-            detailsHtml = `<span class="text-slate-600 font-semibold">റസീറ്റ്: C:${cAmt} B:${bAmt} | <b class="text-amber-700">ക്രെഡിറ്റ് സെയിൽ: ${crAmt}</b></span>`;
-          } else {
-            detailsHtml = `<span class="text-slate-600 font-semibold">സെയിൽ: C:${cAmt} B:${bAmt}</span>`;
-          }
-        } else if (t.type === 'purchase') {
-          typeBadge = `<span class="bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded text-[9px] font-bold">പർച്ചേസ്</span>`;
-          const vend = vendorsList.find(v => cleanPartyName(v.name) === cleanPartyName(t.party_name));
-          const isCredit = vend && (vend.type || '').toLowerCase() === 'credit';
+        total1 += col1;
+        total2 += col2;
+        total3 += col3;
 
-          if (isCredit) {
-            detailsHtml = `<span class="text-slate-600 font-semibold">നൽകിയത്: C:${cAmt} B:${bAmt} | <b class="text-blue-800">ക്രെഡിറ്റ് ബില്ല്: ${crAmt}</b></span>`;
-          } else {
-            detailsHtml = `<span class="text-slate-600 font-semibold">പർച്ചേസ്: C:${cAmt} B:${bAmt}</span>`;
-          }
-        } else {
-          typeBadge = `<span class="bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded text-[9px] font-bold">ചിലവ്</span>`;
-          detailsHtml = `<span class="text-slate-600 font-semibold">ചിലവ്: C:${cAmt} B:${bAmt}</span>`;
-        }
-
-        return `
-          <div class="py-2.5 flex items-center justify-between gap-1">
-            <div class="space-y-0.5 truncate pr-1">
-              <div class="flex items-center gap-1.5">
-                ${typeBadge}
-                <span class="font-extrabold text-slate-800 truncate">${t.party_name}</span>
-              </div>
-              <div class="text-[10px] truncate">${detailsHtml}</div>
-              <span class="text-[9px] text-slate-400 block">${t.date}</span>
-            </div>
-            <div class="flex items-center gap-1 shrink-0">
-              <button onclick="requestEdit('${t.id}')" title="തിരുത്തുക" class="text-blue-600 hover:text-blue-800 p-1.5 rounded-lg bg-blue-50 touch-btn cursor-pointer">
-                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="requestDelete('${t.id}')" title="ഡിലീറ്റ്" class="text-rose-600 hover:text-rose-800 p-1.5 rounded-lg bg-rose-50 touch-btn cursor-pointer">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
+        html += `
+          <tr class="hover:bg-slate-50">
+            <td class="p-1.5 text-left font-black text-slate-800 truncate max-w-[110px]" title="${row.name}">${row.name}</td>
+            <td class="p-1.5 text-slate-700">${col1}</td>
+            <td class="p-1.5 text-slate-700">${col2}</td>
+            <td class="p-1.5 font-black text-slate-950">${col3}</td>
+            <td class="p-1.5 text-right whitespace-nowrap">
+              <button onclick="requestEdit('${row.id}')" title="തിരുത്തുക" class="text-blue-600 hover:text-blue-800 p-1 cursor-pointer">✏️</button>
+              <button onclick="requestDelete('${row.id}')" title="ഡിലീറ്റ്" class="text-rose-600 hover:text-rose-800 p-1 cursor-pointer">🗑️</button>
+            </td>
+          </tr>
         `;
-      }).join('');
-      if (window.lucide) lucide.createIcons();
+      });
+
+      html += `
+          </tbody>
+          <tfoot>
+            <tr class="bg-slate-200 text-slate-950 font-black border-t-2 border-slate-300">
+              <td class="p-1.5 text-left uppercase">ആകെ:</td>
+              <td class="p-1.5">${total1}</td>
+              <td class="p-1.5">${total2}</td>
+              <td class="p-1.5 font-black">${total3}</td>
+              <td class="p-1.5"></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+
+      container.innerHTML = html;
     }
 
+    // EDIT TRANSACTION WORKFLOW
     function requestEdit(id) {
       if (String(id).startsWith('temp_')) {
         alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. ഇത് നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
@@ -1914,6 +2165,7 @@
       alert("ഇടപാട് വിജയകരമായി തിരുത്തി!");
     }
 
+    // 2 DAYS DELETE RULE ENGINE
     function requestDelete(id) {
       if (String(id).startsWith('temp_')) {
         alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
@@ -2006,7 +2258,7 @@
     }
 
     // ========================================================
-    // REPORTS & STATEMENTS ENGINE WITH NAME TRUNCATION
+    // REPORTS & STATEMENTS ENGINE WITH OPENING LIQUID FUND
     // ========================================================
     function openReportModal() {
       const modal = document.getElementById("reportModal");
@@ -2101,13 +2353,16 @@
       let titleText = "";
       let dateBadgeText = "";
       let dateCondition;
+      let isBeforeTargetCondition;
 
       if (mode === 'daily') {
         dateCondition = (dStr) => cleanDate(dStr) === targetDate;
+        isBeforeTargetCondition = (dStr) => cleanDate(dStr) < targetDate;
         titleText = "ഡെയ്‌ലി റിപ്പോർട്ട് (Daily Report)";
         dateBadgeText = `തീയതി: ${targetDate}`;
       } else {
         dateCondition = (dStr) => cleanDate(dStr).startsWith(targetMonth);
+        isBeforeTargetCondition = (dStr) => cleanDate(dStr) < `${targetMonth}-01`;
         titleText = `മന്ത്ലി റിപ്പോർട്ട് (${targetMonth})`;
         dateBadgeText = `മാസം: ${targetMonth}`;
       }
@@ -2130,8 +2385,19 @@
       let custCashReceipt = 0, custBankReceipt = 0;
       let vendCashPay = 0, vendBankPay = 0;
 
+      // OPENING LIQUID FUND BEFORE TARGET
+      let dayOpeningCash = openingSettings.openingCash;
+      let dayOpeningBank = openingSettings.openingBank;
+
       allTx.forEach(t => {
         if (!t) return;
+        const tDate = cleanDate(t.date);
+
+        if (isBeforeTargetCondition(tDate)) {
+          dayOpeningCash += (parseFloat(t.cash_amount) || 0);
+          dayOpeningBank += (parseFloat(t.bank_amount) || 0);
+        }
+
         if (dateCondition(t.date)) {
           if (t.type === 'sale') {
             let cCash = Math.abs(parseFloat(t.cash_amount) || 0);
@@ -2254,7 +2520,9 @@
         curBank += (parseFloat(t.bank_amount) || 0);
       });
       let totalLiquid = curCash + curBank;
+      let totalDayOpening = dayOpeningCash + dayOpeningBank;
 
+      document.getElementById("repOpeningLiquidBal").innerText = totalDayOpening.toLocaleString('en-IN');
       document.getElementById("repTotalSale").innerText = totSale.toLocaleString('en-IN');
       document.getElementById("repTotalPurchase").innerText = totPur.toLocaleString('en-IN');
       document.getElementById("repTotalExpense").innerText = (totExp + totSal).toLocaleString('en-IN');
