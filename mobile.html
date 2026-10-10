@@ -36,6 +36,36 @@
     .touch-btn:active { transform: scale(0.97); }
     .uppercase-input { text-transform: uppercase; }
 
+    /* DESKTOP 3-COLUMN RESPONSIVE LAYOUT */
+    @media (min-width: 1024px) {
+      .desktop-layout-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 1.25rem !important;
+        max-width: 1400px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      .desktop-layout-grid .tab-view {
+        display: block !important;
+      }
+      #view-purchase {
+        order: 1 !important;
+      }
+      #view-expense {
+        order: 2 !important;
+      }
+      #view-sale {
+        order: 3 !important;
+      }
+      nav.fixed {
+        display: none !important;
+      }
+      body {
+        padding-bottom: 2rem !important;
+      }
+    }
+
     /* CONTINUOUS 2-COLUMN FLOW */
     .report-continuous-flow {
       column-count: 2;
@@ -192,6 +222,12 @@
           <i data-lucide="repeat" class="w-3.5 h-3.5"></i> മാറ്റം
         </button>
 
+        <!-- EXTERNAL REPORT PORTAL LINK -->
+        <a href="https://samaladi786.github.io/report" target="_blank" title="റിപ്പോർട്ട് പോർട്ടൽ" class="px-2.5 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> പോർട്ടൽ
+        </a>
+
+        <!-- REPORTS MODAL BUTTON -->
         <button onclick="openReportModal()" title="റിപ്പോർട്ടുകൾ & സ്റ്റേറ്റ്മെന്റ്" class="px-2.5 py-1.5 bg-violet-700 hover:bg-violet-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
           <i data-lucide="file-text" class="w-3.5 h-3.5"></i> റിപ്പോർട്ട്
         </button>
@@ -200,9 +236,10 @@
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
         </button>
 
-        <a href="index.html" title="ഡെസ്ക്ടോപ്പ് വ്യൂ" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
+        <!-- DESKTOP PORTAL LINK (ADMIN PIN PROTECTED) -->
+        <button onclick="goToDesktopPortal()" title="ഡെസ്ക്ടോപ്പ് പോർട്ടൽ (Admin Only)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
           <i data-lucide="monitor" class="w-4 h-4"></i>
-        </a>
+        </button>
         <button onclick="fetchAllData(true)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
           <i data-lucide="refresh-cw" class="w-4 h-4"></i>
         </button>
@@ -251,172 +288,178 @@
     ⚠️ <span id="offlineSyncMsg">നെറ്റ് ഇല്ലാതെ എടുത്ത എൻട്രികൾ ഉണ്ട്. സിങ്ക് ചെയ്യാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക.</span>
   </div>
 
-  <!-- 3. MAIN WORKSPACE CONTAINER -->
-  <main class="w-full max-w-md mx-auto px-3 pt-2.5 flex-1 flex flex-col justify-between space-y-3">
+  <!-- 3. MAIN WORKSPACE CONTAINER (RESPONSIVE: 1 COL ON MOBILE, 3 COLS ON PC) -->
+  <main class="w-full max-w-md lg:max-w-7xl mx-auto px-3 pt-2.5 flex-1 flex flex-col justify-between space-y-3">
 
-    <!-- TOP SECTION: ENTRY TABS WITH LARGE TOUCH INPUTS -->
-    <div>
-      <!-- TAB 1: SALE ENTRY -->
-      <div id="view-sale" class="tab-view space-y-2.5">
-        <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3">
-          <div class="flex items-center justify-between border-b pb-2">
-            <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-1.5">
-              <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് എൻട്രി (Sales)
-            </h2>
-            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">ക്വിക്ക് ബില്ലിംഗ്</span>
-          </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-bold text-slate-700">കസ്റ്റമർ തിരഞ്ഞെടുക്കുക:</label>
-              <button type="button" onclick="openNewCustomerModal()" class="text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
-                + ന്യൂ കസ്റ്റമർ
-              </button>
-            </div>
-            
-            <div class="relative">
-              <input 
-                list="customerListOptions" 
-                id="saleCustomerInput" 
-                onclick="this.select()" 
-                onfocus="this.select()" 
-                oninput="this.value = this.value.toUpperCase(); onCustomerSelected();" 
-                onchange="onCustomerSelected()" 
-                value="SHOPE" 
-                placeholder="കസ്റ്റമർ പേര് ടൈപ്പ് ചെയ്യുക..." 
-                class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 uppercase-input" 
-              />
-              <button type="button" onclick="clearCustomerInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
-                ✕
-              </button>
-            </div>
-            <datalist id="customerListOptions"></datalist>
-            <span id="custOpeningInfo" class="text-xs font-black text-emerald-700 block mt-1 truncate"></span>
-          </div>
-
-          <!-- DYNAMIC SALE AMOUNTS CONTAINER -->
-          <div id="saleAmountsContainer" class="pt-0.5"></div>
-
-          <button onclick="saveSaleEntry()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
-            <i data-lucide="check-circle" class="w-5 h-5"></i> സെയിൽ സേവ് ചെയ്യുക
-          </button>
-        </div>
-      </div>
-
-      <!-- TAB 2: PURCHASE ENTRY -->
+    <!-- DESKTOP GRID CONTAINER: PURCHASE (COL 1) | EXPENSE (COL 2) | SALES (COL 3) -->
+    <div class="desktop-layout-grid space-y-3 lg:space-y-0">
+      
+      <!-- TAB 2: PURCHASE ENTRY (ORDER 1 ON DESKTOP) -->
       <div id="view-purchase" class="tab-view hidden space-y-2.5">
-        <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3">
-          <div class="flex items-center justify-between border-b pb-2">
-            <h2 class="font-extrabold text-sm text-blue-900 flex items-center gap-1.5">
-              <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് എൻട്രി (Purchase)
-            </h2>
-            <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">വെണ്ടർ പെയ്മെന്റ്</span>
+        <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3 h-full flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b pb-2">
+              <h2 class="font-extrabold text-sm text-blue-900 flex items-center gap-1.5">
+                <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് എൻട്രി (Purchase)
+              </h2>
+              <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">വെണ്ടർ പെയ്മെന്റ്</span>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-slate-700">വെണ്ടർ തിരഞ്ഞെടുക്കുക:</label>
+                <button type="button" onclick="openNewVendorModal()" class="text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
+                  + ന്യൂ വെണ്ടർ
+                </button>
+              </div>
+              <div class="relative">
+                <input 
+                  list="vendorListOptions" 
+                  id="purchaseVendorInput" 
+                  onclick="this.select()" 
+                  onfocus="this.select()" 
+                  oninput="this.value = this.value.toUpperCase(); onVendorSelected();" 
+                  onchange="onVendorSelected()" 
+                  placeholder="വെണ്ടർ പേര് ടൈപ്പ് ചെയ്യുക..." 
+                  class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 uppercase-input" 
+                />
+                <button type="button" onclick="clearVendorInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
+                  ✕
+                </button>
+              </div>
+              <datalist id="vendorListOptions"></datalist>
+              <span id="vendorOpeningInfo" class="text-xs font-black text-blue-700 block mt-1 truncate"></span>
+            </div>
+
+            <!-- DYNAMIC PURCHASE AMOUNTS CONTAINER -->
+            <div id="purAmountsContainer" class="pt-0.5"></div>
           </div>
 
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-bold text-slate-700">വെണ്ടർ തിരഞ്ഞെടുക്കുക:</label>
-              <button type="button" onclick="openNewVendorModal()" class="text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
-                + ന്യൂ വെണ്ടർ
-              </button>
-            </div>
-            <div class="relative">
-              <input 
-                list="vendorListOptions" 
-                id="purchaseVendorInput" 
-                onclick="this.select()" 
-                onfocus="this.select()" 
-                oninput="this.value = this.value.toUpperCase(); onVendorSelected();" 
-                onchange="onVendorSelected()" 
-                placeholder="വെണ്ടർ പേര് ടൈപ്പ് ചെയ്യുക..." 
-                class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 uppercase-input" 
-              />
-              <button type="button" onclick="clearVendorInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
-                ✕
-              </button>
-            </div>
-            <datalist id="vendorListOptions"></datalist>
-            <span id="vendorOpeningInfo" class="text-xs font-black text-blue-700 block mt-1 truncate"></span>
-          </div>
-
-          <!-- DYNAMIC PURCHASE AMOUNTS CONTAINER -->
-          <div id="purAmountsContainer" class="pt-0.5"></div>
-
-          <button onclick="savePurchaseEntry()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-blue-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
+          <button onclick="savePurchaseEntry()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-blue-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition mt-3">
             <i data-lucide="check-circle" class="w-5 h-5"></i> പർച്ചേസ് സേവ് ചെയ്യുക
           </button>
         </div>
       </div>
 
-      <!-- TAB 3: EXPENSE & SALARY ENTRY -->
+      <!-- TAB 3: EXPENSE & SALARY ENTRY (ORDER 2 ON DESKTOP) -->
       <div id="view-expense" class="tab-view hidden space-y-2.5">
-        <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3">
-          <div class="flex items-center justify-between border-b pb-2">
-            <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-1.5">
-              <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവ് & സാലറി (Outflow)
-            </h2>
-            <div class="flex items-center gap-1">
-              <span id="currentExpTypeBadge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">ചിലവ്</span>
-              <!-- STAFF DEPOSIT BUTTON -->
-              <button type="button" onclick="openStaffDepositModal()" id="btnStaffDepositTrigger" class="hidden text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-black px-2.5 py-0.5 rounded-full touch-btn cursor-pointer shadow-sm flex items-center gap-0.5">
-                📥 സ്റ്റാഫ് തന്നത് (+)
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-bold text-slate-700">ഇനം / ജീവനക്കാരൻ:</label>
-              <div class="flex items-center gap-1.5">
-                <button type="button" onclick="openNewEmployeeModal()" class="text-[10px] bg-purple-700 hover:bg-purple-800 text-white font-bold px-2 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
-                  👥 ന്യൂ സ്റ്റാഫ്
-                </button>
-                <button type="button" onclick="quickAddExpensePrompt()" class="text-[10px] bg-amber-600 hover:bg-amber-700 text-white font-bold px-2 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
-                  + ന്യൂ ചിലവ്
+        <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3 h-full flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b pb-2">
+              <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-1.5">
+                <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവ് & സാലറി (Outflow)
+              </h2>
+              <div class="flex items-center gap-1">
+                <span id="currentExpTypeBadge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">ചിലവ്</span>
+                <button type="button" onclick="openStaffDepositModal()" id="btnStaffDepositTrigger" class="hidden text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-black px-2.5 py-0.5 rounded-full touch-btn cursor-pointer shadow-sm flex items-center gap-0.5">
+                  📥 സ്റ്റാഫ് തന്നത് (+)
                 </button>
               </div>
             </div>
-            <div class="relative">
-              <input 
-                list="unifiedPartyOptions" 
-                id="unifiedPartyInput" 
-                onclick="this.select()" 
-                onfocus="this.select()" 
-                oninput="this.value = this.value.toUpperCase(); onUnifiedPartySelected();" 
-                onchange="onUnifiedPartySelected()" 
-                placeholder="പേര് ടൈപ്പ് ചെയ്യുക..." 
-                class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-amber-500 uppercase-input" 
-              />
-              <button type="button" onclick="clearUnifiedInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
-                ✕
-              </button>
+
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-slate-700">ഇനം / ജീവനക്കാരൻ:</label>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="openNewEmployeeModal()" class="text-[10px] bg-purple-700 hover:bg-purple-800 text-white font-bold px-2 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
+                    👥 ന്യൂ സ്റ്റാഫ്
+                  </button>
+                  <button type="button" onclick="quickAddExpensePrompt()" class="text-[10px] bg-amber-600 hover:bg-amber-700 text-white font-bold px-2 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
+                    + ന്യൂ ചിലവ്
+                  </button>
+                </div>
+              </div>
+              <div class="relative">
+                <input 
+                  list="unifiedPartyOptions" 
+                  id="unifiedPartyInput" 
+                  onclick="this.select()" 
+                  onfocus="this.select()" 
+                  oninput="this.value = this.value.toUpperCase(); onUnifiedPartySelected();" 
+                  onchange="onUnifiedPartySelected()" 
+                  placeholder="പേര് ടൈപ്പ് ചെയ്യുക..." 
+                  class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-amber-500 uppercase-input" 
+                />
+                <button type="button" onclick="clearUnifiedInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
+                  ✕
+                </button>
+              </div>
+              <datalist id="unifiedPartyOptions"></datalist>
+              <span id="unifiedPartyInfo" class="text-xs font-black text-amber-700 block mt-1 truncate"></span>
             </div>
-            <datalist id="unifiedPartyOptions"></datalist>
-            <span id="unifiedPartyInfo" class="text-xs font-black text-amber-700 block mt-1 truncate"></span>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
+                <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
+                <input type="number" step="any" inputmode="decimal" id="expSalCashAmt" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+              </div>
+              <div class="bg-purple-50/80 p-2 rounded-2xl border border-purple-200">
+                <label class="block text-[10px] font-black text-purple-900 mb-0.5 text-center">🏦 ബാങ്ക് നൽകിയത്</label>
+                <input type="number" step="any" inputmode="decimal" id="expSalBankAmt" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-purple-500 text-purple-700" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-0.5">വിവരണം / കുറിപ്പ് (Note):</label>
+              <input type="text" id="expSalNote" placeholder="കുറിപ്പ്..." class="w-full text-xs p-2.5 rounded-xl border bg-slate-50 outline-none" />
+            </div>
           </div>
 
-          <!-- AMOUNTS PAID OUT TO STAFF / EXPENSE -->
-          <div class="grid grid-cols-2 gap-2">
-            <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
-              <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
-              <input type="number" step="any" inputmode="decimal" id="expSalCashAmt" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
-            </div>
-            <div class="bg-purple-50/80 p-2 rounded-2xl border border-purple-200">
-              <label class="block text-[10px] font-black text-purple-900 mb-0.5 text-center">🏦 ബാങ്ക് നൽകിയത്</label>
-              <input type="number" step="any" inputmode="decimal" id="expSalBankAmt" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-purple-500 text-purple-700" />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[10px] font-bold text-slate-600 mb-0.5">വിവരണം / കുറിപ്പ് (Note):</label>
-            <input type="text" id="expSalNote" placeholder="കുറിപ്പ്..." class="w-full text-xs p-2.5 rounded-xl border bg-slate-50 outline-none" />
-          </div>
-
-          <button id="btnSaveUnified" onclick="saveUnifiedExpSalEntry()" class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
+          <button id="btnSaveUnified" onclick="saveUnifiedExpSalEntry()" class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition mt-3">
             <i data-lucide="check-circle" class="w-5 h-5"></i> ചിലവ് സേവ് ചെയ്യുക
           </button>
         </div>
       </div>
+
+      <!-- TAB 1: SALE ENTRY (ORDER 3 ON DESKTOP) -->
+      <div id="view-sale" class="tab-view space-y-2.5">
+        <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3 h-full flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b pb-2">
+              <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-1.5">
+                <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് എൻട്രി (Sales)
+              </h2>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">ക്വിക്ക് ബില്ലിംഗ്</span>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-slate-700">കസ്റ്റമർ തിരഞ്ഞെടുക്കുക:</label>
+                <button type="button" onclick="openNewCustomerModal()" class="text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
+                  + ന്യൂ കസ്റ്റമർ
+                </button>
+              </div>
+              
+              <div class="relative">
+                <input 
+                  list="customerListOptions" 
+                  id="saleCustomerInput" 
+                  onclick="this.select()" 
+                  onfocus="this.select()" 
+                  oninput="this.value = this.value.toUpperCase(); onCustomerSelected();" 
+                  onchange="onCustomerSelected()" 
+                  value="SHOPE" 
+                  placeholder="കസ്റ്റമർ പേര് ടൈപ്പ് ചെയ്യുക..." 
+                  class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 uppercase-input" 
+                />
+                <button type="button" onclick="clearCustomerInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
+                  ✕
+                </button>
+              </div>
+              <datalist id="customerListOptions"></datalist>
+              <span id="custOpeningInfo" class="text-xs font-black text-emerald-700 block mt-1 truncate"></span>
+            </div>
+
+            <!-- DYNAMIC SALE AMOUNTS CONTAINER -->
+            <div id="saleAmountsContainer" class="pt-0.5"></div>
+          </div>
+
+          <button onclick="saveSaleEntry()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition mt-3">
+            <i data-lucide="check-circle" class="w-5 h-5"></i> സെയിൽ സേവ് ചെയ്യുക
+          </button>
+        </div>
+      </div>
+
     </div>
 
     <!-- BOTTOM SECTION: CLICKABLE CARDS -->
@@ -467,7 +510,7 @@
 
   </main>
 
-  <!-- 4. FIXED BOTTOM NAVIGATION BAR -->
+  <!-- 4. FIXED BOTTOM NAVIGATION BAR (HIDDEN ON DESKTOP) -->
   <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 z-40 shadow-lg flex items-center justify-around">
     <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-xs touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-emerald-50">
@@ -504,7 +547,6 @@
       </div>
 
       <div class="space-y-3 text-xs">
-        <!-- 1. DEPOSIT -->
         <div class="bg-blue-50/80 p-3 rounded-2xl border border-blue-200 space-y-1.5">
           <label class="block font-black text-blue-900 text-[11px]">ബാങ്കിലേക്ക് ഇടുക (Cash to Bank):</label>
           <div class="flex gap-2">
@@ -513,7 +555,6 @@
           </div>
         </div>
 
-        <!-- 2. WITHDRAWAL -->
         <div class="bg-emerald-50/80 p-3 rounded-2xl border border-emerald-200 space-y-1.5">
           <label class="block font-black text-emerald-900 text-[11px]">കയ്യിലേക്ക് എടുക്കുക (Bank to Cash):</label>
           <div class="flex gap-2">
@@ -804,7 +845,7 @@
         <div>
           <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">വിഭാഗം (Type):</label>
           <select id="statPartyType" onchange="populateStatementPartyDatalist()" class="w-full p-1.5 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]">
-            <option value="customer">🛒 കസ്റ്റമർ (Customer)</option>
+            <option value="customer">🛒 കസ്റ്റമർ (Credit Only)</option>
             <option value="vendor">🚚 വെണ്ടർ (Vendor)</option>
             <option value="employee">👥 ജീവനക്കാരൻ (Staff)</option>
             <option value="agent">👤 റൂട്ട് ഏജന്റ് (Route Agent)</option>
@@ -1233,6 +1274,20 @@
       }
     }
 
+    // DESKTOP PORTAL PROTECTION
+    function goToDesktopPortal() {
+      const userRole = sessionStorage.getItem("ALNASSR_USER_ROLE");
+      if (userRole === 'admin') {
+        window.location.href = "index.html";
+        return;
+      }
+      pendingAction = 'open_desktop_portal';
+      document.getElementById("pinSubText").innerText = "ഡെസ്ക്ടോപ്പ് പോർട്ടലിലേക്ക് പോകാൻ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക";
+      document.getElementById("pinInput").value = "";
+      document.getElementById("pinModal").classList.remove("hidden");
+      document.getElementById("pinInput").focus();
+    }
+
     function initMultiShopSystem(forceShopId = null) {
       const sel = document.getElementById("shopSelector");
       if (sel) sel.innerHTML = "";
@@ -1616,7 +1671,6 @@
       return totalSalary;
     }
 
-    // ACCURATELY FILTER ADVANCES UP TO asOfDateStr (AVOIDS DOUBLE DEDUCTION BUG)
     function calculateEmployeePendingBalance(emp, asOfDateStr) {
       if (!emp) return 0;
       const refDate = asOfDateStr || (document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate());
@@ -1634,7 +1688,6 @@
           let staffClean = cleanPartyName(t.party_name);
           if (staffClean.includes(empClean)) {
             let tDate = cleanDate(t.date);
-            // CRITICAL FIX: Only consider advances/deposits on or before refDate!
             if (refDate && tDate > refDate) return;
 
             let cAmt = parseFloat(t.cash_amount) || 0;
@@ -2471,6 +2524,18 @@
       const masterPin = String(window.MASTER_PIN);
       const currentShopPin = currentShop ? String(currentShop.pin) : null;
 
+      // DESKTOP PORTAL VERIFICATION
+      if (pendingAction === 'open_desktop_portal') {
+        if (pinVal === masterPin) {
+          closePinModal();
+          window.location.href = "index.html";
+        } else {
+          alert("അഡ്മിൻ മാസ്റ്റർ പിൻ തെറ്റാണ്!");
+          document.getElementById("pinInput").value = "";
+        }
+        return;
+      }
+
       if (pendingTxnId) {
         const id = pendingTxnId;
         const txn = (transactionsList || []).find(t => String(t.id) === String(id));
@@ -3091,8 +3156,9 @@
 
       let firstParty = "";
       if (type === 'customer') {
+        const creditCustomers = (customersList || []).filter(c => c && (c.type || '').toLowerCase() === 'credit');
         dl.innerHTML += `<option value="ALL CUSTOMERS">`;
-        customersList.forEach(c => {
+        creditCustomers.forEach(c => {
           if (c && c.name) {
             dl.innerHTML += `<option value="${c.name.toUpperCase()}">`;
           }
@@ -3200,14 +3266,15 @@
           }
         });
       } else if (isAllCustomersMode) {
-        partyName = `TOTAL CUSTOMERS MONTHLY STATEMENT`;
+        partyName = `TOTAL CREDIT CUSTOMERS MONTHLY STATEMENT`;
         let totalCustOpening = 0;
         let totalCustSales = 0;
         let totalCustPaid = 0;
         let totalCustClosing = 0;
 
-        customersList.forEach(cust => {
-          if (!cust) return;
+        const creditCustomers = (customersList || []).filter(c => c && (c.type || '').toLowerCase() === 'credit');
+
+        creditCustomers.forEach(cust => {
           let custOpeningBal = parseFloat(cust.opening_balance) || 0;
           let periodCredit = 0;
           let periodCash = 0;
@@ -3234,7 +3301,6 @@
           const periodPaid = periodCash + periodBank;
           const custClosingBal = custOpeningBal + periodCredit - periodPaid;
 
-          // ZERO FILTERING: Don't show if zero activity and zero balances
           const hasActivityOrBalance = (
             Math.abs(custOpeningBal) > 0.01 ||
             periodCredit > 0.01 ||
@@ -3379,7 +3445,6 @@
           const selYear = parseInt(monthVal.split('-')[0]);
           const selMonth = parseInt(monthVal.split('-')[1]) - 1;
 
-          // PRIOR MONTH END TO GET CLEAN OPENING BALANCE
           const priorMonthEnd = new Date(selYear, selMonth, 0);
           const y = priorMonthEnd.getFullYear();
           const m = String(priorMonthEnd.getMonth() + 1).padStart(2, '0');
@@ -3582,7 +3647,7 @@
             <tbody class="divide-y divide-slate-100 font-bold">
         `;
         if (customersConsolidatedSummary.length === 0) {
-          tableHtml += `<tr><td colspan="6" class="p-2 text-center text-slate-400 font-bold">No active customers found</td></tr>`;
+          tableHtml += `<tr><td colspan="6" class="p-2 text-center text-slate-400 font-bold">No active credit customers found</td></tr>`;
         } else {
           customersConsolidatedSummary.forEach((r, idx) => {
             tableHtml += `
@@ -3601,7 +3666,7 @@
             </tbody>
             <tfoot>
               <tr class="bg-emerald-100 text-emerald-950 font-black text-center border-t">
-                <td colspan="2" class="p-1 text-left uppercase">TOTAL ALL CUSTOMERS:</td>
+                <td colspan="2" class="p-1 text-left uppercase">TOTAL ALL CREDIT CUSTOMERS:</td>
                 <td class="p-1">${openingBal.toLocaleString('en-IN')}</td>
                 <td class="p-1 text-amber-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
                 <td class="p-1 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
@@ -3785,7 +3850,7 @@
           waText += `--------------------------------\n` +
                     `🔴 *Total Outstanding to Collect:* ${d.closingBal}`;
         } else if (d.isAllCustomers) {
-          waText = `📊 *${currentShop.name.toUpperCase()} - TOTAL CUSTOMERS STATEMENT*\n` +
+          waText = `📊 *${currentShop.name.toUpperCase()} - TOTAL CREDIT CUSTOMERS STATEMENT*\n` +
                    `📅 *Month:* ${d.month}\n` +
                    `--------------------------------\n` +
                    `🔹 *Total Old Opening:* ${d.openingBal}\n` +
@@ -3793,7 +3858,7 @@
                    `💵 *Total Month Collected:* ${d.totalPaid}\n` +
                    `🔴 *Total Net Balance Due:* ${d.closingBal}\n` +
                    `--------------------------------\n` +
-                   `*ACTIVE CUSTOMERS BREAKDOWN:*\n`;
+                   `*ACTIVE CREDIT CUSTOMERS BREAKDOWN:*\n`;
 
           (d.customerSummary || []).forEach(c => {
             waText += `▪ *${c.name}*: Open: ${c.opening} | Sales: ${c.sales} | Paid: ${c.paid} | Due: ${c.closing}\n`;
