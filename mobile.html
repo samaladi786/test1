@@ -36,11 +36,25 @@
     .touch-btn:active { transform: scale(0.97); }
     .uppercase-input { text-transform: uppercase; }
 
-    /* ENHANCED BOLD PRINT / PDF STYLES */
+    /* CONTINUOUS 2-COLUMN FLOW */
+    .report-continuous-flow {
+      column-count: 2;
+      column-gap: 12px;
+    }
+    .report-block {
+      break-inside: auto;
+      margin-bottom: 8px;
+    }
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    /* COMPACT BOLD A4 PRINT STYLES */
     @media print {
       @page {
         size: A4 portrait;
-        margin: 6mm 8mm;
+        margin: 4mm 6mm;
       }
       header, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #editTransactionModal, .no-print {
         display: none !important;
@@ -74,35 +88,43 @@
         border-radius: 0 !important;
         overflow: visible !important;
       }
+      .report-continuous-flow {
+        column-count: 2 !important;
+        column-gap: 10px !important;
+      }
+      .report-block {
+        break-inside: auto !important;
+        margin-bottom: 6px !important;
+      }
       #reportPrintContainer, #statementPrintContainer {
-        font-size: 13.5px !important;
-        line-height: 1.35 !important;
+        font-size: 11px !important;
+        line-height: 1.25 !important;
         color: #000 !important;
       }
       #reportPrintContainer table, #statementPrintContainer table {
-        font-size: 12.5px !important;
+        font-size: 10px !important;
         width: 100% !important;
         border-collapse: collapse !important;
       }
       #reportPrintContainer th, #statementPrintContainer th {
-        font-size: 13px !important;
-        padding: 6px 4px !important;
+        font-size: 10.5px !important;
+        padding: 4px 3px !important;
         font-weight: 900 !important;
         color: #000 !important;
-        border-bottom: 2px solid #000 !important;
+        border-bottom: 1.5px solid #000 !important;
       }
       #reportPrintContainer td, #statementPrintContainer td {
-        font-size: 12px !important;
-        padding: 5px 4px !important;
+        font-size: 10px !important;
+        padding: 3px 3px !important;
         font-weight: 700 !important;
         color: #000 !important;
       }
       #reportPrintContainer tfoot td, #statementPrintContainer tfoot td {
-        font-size: 13px !important;
-        padding: 6px 4px !important;
+        font-size: 10.5px !important;
+        padding: 4px 3px !important;
         font-weight: 900 !important;
         color: #000 !important;
-        border-top: 2px solid #000 !important;
+        border-top: 1.5px solid #000 !important;
       }
     }
   </style>
@@ -124,13 +146,13 @@
       <form onsubmit="event.preventDefault(); verifyLogin();" class="space-y-4">
         <input 
           type="password" 
-          inputmode="numeric"
-          pattern="[0-9]*"
+          inputmode="numeric" 
+          pattern="[0-9]*" 
           maxlength="8" 
           id="loginPasswordInput" 
           placeholder="••••" 
-          autocomplete="current-password"
-          autofocus
+          autocomplete="current-password" 
+          autofocus 
           class="text-center text-2xl tracking-[0.4em] font-black w-44 py-3 border-2 rounded-2xl mx-auto block outline-none focus:border-emerald-600 bg-slate-50" 
         />
         <button 
@@ -147,21 +169,18 @@
     <div class="flex items-center justify-between gap-2">
       
       <div class="flex items-center gap-2 overflow-hidden">
-        <!-- കടയുടെ ലോഗോ ബോക്സ് -->
         <div id="shopLogoBox" class="w-9 h-9 rounded-xl bg-white/10 p-0.5 flex items-center justify-center border border-white/20 shrink-0 overflow-hidden shadow-sm">
           <img id="shopLogoImg" src="icon-192.png" alt="Shop Logo" class="w-full h-full object-contain rounded-lg" onerror="this.style.display='none'; document.getElementById('shopDefaultIcon').classList.remove('hidden');" />
           <i id="shopDefaultIcon" data-lucide="store" class="w-5 h-5 text-emerald-400 hidden"></i>
         </div>
         
         <div class="truncate">
-          <!-- ADMIN DROPDOWN OR SHOP TITLE -->
           <div id="shopSelectorWrapper" class="hidden">
             <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-slate-700 outline-none cursor-pointer">
             </select>
           </div>
           <h1 id="shopStaticTitle" class="text-xs font-black truncate">ALNASSR POS</h1>
           
-          <!-- DATE PICKER BAR & OFFLINE BADGE -->
           <div class="flex items-center gap-1.5 mt-0.5">
             <input 
               type="date" 
@@ -184,25 +203,20 @@
       </div>
 
       <div class="flex items-center gap-1.5 shrink-0">
-        <!-- REPORTS MODAL BUTTON -->
         <button onclick="openReportModal()" title="റിപ്പോർട്ടുകൾ & സ്റ്റേറ്റ്മെന്റ്" class="px-2.5 py-1.5 bg-violet-700 hover:bg-violet-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
           <i data-lucide="file-text" class="w-3.5 h-3.5"></i> റിപ്പോർട്ട്
         </button>
 
-        <!-- PWA INSTALL APP BUTTON -->
         <button id="pwaInstallBtn" onclick="triggerPwaInstall()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-2 py-1.5 rounded-xl text-[10px] touch-btn flex items-center gap-1 shadow">
           <i data-lucide="download" class="w-3.5 h-3.5"></i> ഇൻസ്റ്റാൾ
         </button>
 
-        <!-- DESKTOP PORTAL LINK -->
         <a href="index.html" title="ഡെസ്ക്ടോപ്പ് വ്യൂ" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
           <i data-lucide="monitor" class="w-4 h-4"></i>
         </a>
-        <!-- REFRESH BUTTON -->
         <button onclick="fetchAllData(true)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
           <i data-lucide="refresh-cw" class="w-4 h-4"></i>
         </button>
-        <!-- LOGOUT BUTTON -->
         <button onclick="logoutApp()" class="p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs touch-btn cursor-pointer">
           <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
@@ -243,13 +257,13 @@
               <input 
                 list="customerListOptions" 
                 id="saleCustomerInput" 
-                onclick="this.select()"
-                onfocus="this.select()"
-                oninput="this.value = this.value.toUpperCase(); onCustomerSelected();"
-                onchange="onCustomerSelected()"
+                onclick="this.select()" 
+                onfocus="this.select()" 
+                oninput="this.value = this.value.toUpperCase(); onCustomerSelected();" 
+                onchange="onCustomerSelected()" 
                 value="SHOPE" 
                 placeholder="കസ്റ്റമർ പേര്..." 
-                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 uppercase-input"
+                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 uppercase-input" 
               />
               <button type="button" onclick="clearCustomerInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-black text-sm p-1 cursor-pointer">
                 ✕
@@ -259,7 +273,6 @@
             <span id="custOpeningInfo" class="text-[11px] font-black text-emerald-700 block mt-1 truncate"></span>
           </div>
 
-          <!-- DYNAMIC SALE AMOUNTS CONTAINER -->
           <div id="saleAmountsContainer" class="pt-1"></div>
 
           <button onclick="saveSaleEntry()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
@@ -289,12 +302,12 @@
               <input 
                 list="vendorListOptions" 
                 id="purchaseVendorInput" 
-                onclick="this.select()"
-                onfocus="this.select()"
-                oninput="this.value = this.value.toUpperCase(); onVendorSelected();"
-                onchange="onVendorSelected()"
+                onclick="this.select()" 
+                onfocus="this.select()" 
+                oninput="this.value = this.value.toUpperCase(); onVendorSelected();" 
+                onchange="onVendorSelected()" 
                 placeholder="വെണ്ടർ പേര്..." 
-                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 uppercase-input"
+                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 uppercase-input" 
               />
               <button type="button" onclick="clearVendorInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-black text-sm p-1 cursor-pointer">
                 ✕
@@ -304,7 +317,6 @@
             <span id="vendorOpeningInfo" class="text-[11px] font-black text-blue-700 block mt-1 truncate"></span>
           </div>
 
-          <!-- DYNAMIC PURCHASE AMOUNTS CONTAINER -->
           <div id="purAmountsContainer" class="pt-1"></div>
 
           <button onclick="savePurchaseEntry()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-blue-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
@@ -334,12 +346,12 @@
               <input 
                 list="unifiedPartyOptions" 
                 id="unifiedPartyInput" 
-                onclick="this.select()"
-                onfocus="this.select()"
-                oninput="this.value = this.value.toUpperCase(); onUnifiedPartySelected();"
-                onchange="onUnifiedPartySelected()"
+                onclick="this.select()" 
+                onfocus="this.select()" 
+                oninput="this.value = this.value.toUpperCase(); onUnifiedPartySelected();" 
+                onchange="onUnifiedPartySelected()" 
                 placeholder="പേര് തിരഞ്ഞെടുക്കുക..." 
-                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-amber-500 uppercase-input"
+                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-amber-500 uppercase-input" 
               />
               <button type="button" onclick="clearUnifiedInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-black text-sm p-1 cursor-pointer">
                 ✕
@@ -349,7 +361,6 @@
             <span id="unifiedPartyInfo" class="text-[11px] font-black text-amber-700 block mt-1 truncate"></span>
           </div>
 
-          <!-- AMOUNTS -->
           <div class="grid grid-cols-2 gap-2">
             <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
               <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
@@ -388,7 +399,6 @@
 
     <!-- BOTTOM METRIC SECTION -->
     <div class="space-y-2 pt-2">
-      <!-- QUICK DAILY METRIC BAR -->
       <div class="grid grid-cols-3 gap-1.5 text-center">
         <div class="bg-emerald-900/90 text-white rounded-2xl p-2 border border-emerald-700/50 shadow-sm">
           <span class="text-[9px] text-emerald-300 font-extrabold block uppercase">സെയിൽസ്</span>
@@ -404,7 +414,6 @@
         </div>
       </div>
 
-      <!-- LIVE LIQUID FUNDS CARD -->
       <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-2.5 border border-slate-700 text-white flex items-center justify-between text-xs font-bold shadow-md">
         <div class="space-y-0.5">
           <span class="text-[9px] text-slate-400 font-extrabold uppercase flex items-center gap-1">
@@ -453,38 +462,38 @@
   </nav>
 
   <!-- ======================================================== -->
-  <!-- MODAL: REPORTS & STATEMENTS (DESKTOP PARITY) -->
+  <!-- MODAL: REPORTS & STATEMENTS (CONTINUOUS 2-COLUMN FLOW) -->
   <!-- ======================================================== -->
   <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-4xl w-full bg-white p-4 sm:p-6 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[95vh] overflow-y-auto">
+    <div class="max-w-4xl w-full bg-white p-3 sm:p-5 shadow-2xl rounded-3xl border space-y-2.5 my-auto max-h-[96vh] overflow-y-auto">
       
       <div class="flex items-center justify-between border-b pb-2 no-print">
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-1.5">
           <h3 class="text-xs sm:text-sm font-bold text-slate-800">📊 ബിസിനസ്സ് റിപ്പോർട്ട് & സ്റ്റേറ്റ്മെന്റ്</h3>
-          <div class="flex bg-slate-100 p-0.5 rounded-xl text-[11px] font-bold border">
-            <button onclick="switchReportMode('daily')" id="repDailyBtn" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black">ഡെയ്‌ലി</button>
-            <button onclick="switchReportMode('monthly')" id="repMonthlyBtn" class="px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">മന്ത്ലി</button>
-            <button onclick="switchReportMode('statement')" id="repStatBtn" class="px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">📄 സ്റ്റേറ്റ്മെന്റ്</button>
+          <div class="flex bg-slate-100 p-0.5 rounded-xl text-[10px] font-bold border">
+            <button onclick="switchReportMode('daily')" id="repDailyBtn" class="px-2 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black">ഡെയ്‌ലി</button>
+            <button onclick="switchReportMode('monthly')" id="repMonthlyBtn" class="px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">മന്ത്ലി</button>
+            <button onclick="switchReportMode('statement')" id="repStatBtn" class="px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">📄 സ്റ്റേറ്റ്മെന്റ്</button>
           </div>
         </div>
         <button onclick="closeReportModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
       </div>
 
       <!-- FILTER BAR -->
-      <div id="reportDateSelectorBar" class="bg-slate-50 p-2.5 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-2 text-xs no-print">
-        <div class="flex items-center gap-2">
-          <span id="repFilterLabel" class="font-extrabold text-slate-700">📅 തീയതി മാറ്റുക:</span>
-          <input type="date" id="repFilterDate" onchange="onReportDateChanged()" class="p-1.5 rounded-xl border bg-white font-bold outline-none cursor-pointer text-xs" />
-          <input type="month" id="repFilterMonth" onchange="onReportMonthChanged()" class="hidden p-1.5 rounded-xl border bg-white font-bold outline-none cursor-pointer text-xs" />
+      <div id="reportDateSelectorBar" class="bg-slate-50 p-2 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-1.5 text-xs no-print">
+        <div class="flex items-center gap-1.5">
+          <span id="repFilterLabel" class="font-extrabold text-slate-700 text-[11px]">📅 തീയതി മാറ്റുക:</span>
+          <input type="date" id="repFilterDate" onchange="onReportDateChanged()" class="p-1 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]" />
+          <input type="month" id="repFilterMonth" onchange="onReportMonthChanged()" class="hidden p-1 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]" />
         </div>
-        <span class="text-[10px] font-bold text-slate-500">തീയതി മാറ്റി റിപ്പോർട്ട് പരിശോധിക്കാം</span>
+        <span class="text-[9px] font-bold text-slate-500">തീയതി മാറ്റി റിപ്പോർട്ട് പരിശോധിക്കാം</span>
       </div>
 
       <!-- STATEMENT CONTROLS -->
-      <div id="statementControlBar" class="hidden bg-slate-50 p-2.5 rounded-2xl border border-indigo-200 grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs no-print">
+      <div id="statementControlBar" class="hidden bg-slate-50 p-2 rounded-2xl border border-indigo-200 grid grid-cols-1 sm:grid-cols-4 gap-1.5 text-xs no-print">
         <div>
-          <label class="block font-bold text-slate-600 mb-0.5 text-[10px]">വിഭാഗം (Type):</label>
-          <select id="statPartyType" onchange="populateStatementPartyDatalist()" class="w-full p-2 rounded-xl border bg-white font-bold outline-none cursor-pointer text-xs">
+          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">വിഭാഗം (Type):</label>
+          <select id="statPartyType" onchange="populateStatementPartyDatalist()" class="w-full p-1.5 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]">
             <option value="customer">🛒 കസ്റ്റമർ (Customer)</option>
             <option value="vendor">🚚 വെണ്ടർ (Vendor)</option>
             <option value="employee">👥 ജീവനക്കാരൻ (Staff)</option>
@@ -492,120 +501,124 @@
           </select>
         </div>
         <div>
-          <label class="block font-bold text-slate-600 mb-0.5 text-[10px]">ആളെ തിരഞ്ഞെടുക്കുക / ടൈപ്പ് ചെയ്യുക:</label>
+          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">ആളെ തിരഞ്ഞെടുക്കുക:</label>
           <input 
             list="statPartyDatalist" 
             id="statPartyInput" 
-            onclick="this.select()"
-            onfocus="this.select()"
+            onclick="this.select()" 
+            onfocus="this.select()" 
             oninput="generateStatement()" 
             onchange="generateStatement()" 
             placeholder="പേര് ടൈപ്പ് ചെയ്യുക..." 
-            class="w-full p-2 rounded-xl border bg-white font-bold outline-none text-xs uppercase-input" 
+            class="w-full p-1.5 rounded-xl border bg-white font-bold outline-none text-[11px] uppercase-input" 
           />
           <datalist id="statPartyDatalist"></datalist>
         </div>
         <div>
-          <label class="block font-bold text-slate-600 mb-0.5 text-[10px]">മാസം (Statement Month):</label>
-          <input type="month" id="statMonth" onchange="generateStatement()" class="w-full p-1.5 rounded-xl border bg-white font-bold text-xs cursor-pointer" />
+          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">മാസം:</label>
+          <input type="month" id="statMonth" onchange="generateStatement()" class="w-full p-1 rounded-xl border bg-white font-bold text-[11px] cursor-pointer" />
         </div>
         <div class="flex items-end">
-          <button onclick="generateStatement()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow cursor-pointer text-xs">
-            🔍 സ്റ്റേറ്റ്മെന്റ് എടുക്കുക
+          <button onclick="generateStatement()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow cursor-pointer text-[11px]">
+            🔍 സ്റ്റേറ്റ്മെന്റ്
           </button>
         </div>
       </div>
 
       <!-- PRINTABLE REPORT CONTENT -->
-      <div id="reportPrintContainer" class="space-y-3 text-xs sm:text-sm">
-        <div class="text-center border-b pb-2 flex justify-between items-center">
+      <div id="reportPrintContainer" class="space-y-2 text-xs sm:text-sm">
+        <div class="text-center border-b pb-1.5 flex justify-between items-center">
           <div>
-            <h2 id="reportPageShopName" class="text-xs sm:text-base font-black text-slate-900 uppercase">ALNASSR</h2>
-            <p id="reportModeTitle" class="text-[10px] sm:text-xs font-bold text-slate-600">ഡെയ്‌ലി റിപ്പോർട്ട്</p>
+            <h2 id="reportPageShopName" class="text-xs sm:text-sm font-black text-slate-900 uppercase">ALNASSR</h2>
+            <p id="reportModeTitle" class="text-[9px] sm:text-[10px] font-bold text-slate-600">ഡെയ്‌ലി റിപ്പോർട്ട്</p>
           </div>
-          <div class="text-right text-[10px] sm:text-xs text-slate-600 font-bold">
+          <div class="text-right text-[9px] sm:text-[10px] text-slate-600 font-bold">
             <p id="reportDateBadgeLabel">തീയതി: --</p>
           </div>
         </div>
 
         <!-- 7 MINI SUMMARY CARDS -->
         <div class="grid grid-cols-4 sm:grid-cols-7 gap-1 font-bold">
-          <div class="bg-emerald-50/90 p-1.5 rounded-lg border border-emerald-300 text-center">
-            <span class="text-[9px] font-bold text-emerald-800 block">സെയിൽസ്</span>
-            <h3 id="repTotalSale" class="text-xs font-black text-emerald-700">0</h3>
+          <div class="bg-emerald-50/90 p-1 rounded-lg border border-emerald-300 text-center">
+            <span class="text-[8.5px] font-bold text-emerald-800 block">സെയിൽസ്</span>
+            <h3 id="repTotalSale" class="text-[11px] font-black text-emerald-700">0</h3>
           </div>
-          <div class="bg-blue-50/90 p-1.5 rounded-lg border border-blue-300 text-center">
-            <span class="text-[9px] font-bold text-blue-800 uppercase block">പർച്ചേസ്</span>
-            <h3 id="repTotalPurchase" class="text-xs font-black text-blue-700">0</h3>
+          <div class="bg-blue-50/90 p-1 rounded-lg border border-blue-300 text-center">
+            <span class="text-[8.5px] font-bold text-blue-800 uppercase block">പർച്ചേസ്</span>
+            <h3 id="repTotalPurchase" class="text-[11px] font-black text-blue-700">0</h3>
           </div>
-          <div class="bg-amber-50/90 p-1.5 rounded-lg border border-amber-300 text-center">
-            <span class="text-[9px] font-bold text-amber-800 uppercase block">എക്സ്പെൻസ്</span>
-            <h3 id="repTotalExpense" class="text-xs font-black text-amber-700">0</h3>
+          <div class="bg-amber-50/90 p-1 rounded-lg border border-amber-300 text-center">
+            <span class="text-[8.5px] font-bold text-amber-800 uppercase block">എക്സ്പെൻസ്</span>
+            <h3 id="repTotalExpense" class="text-[11px] font-black text-amber-700">0</h3>
           </div>
-          <div class="bg-teal-50/90 p-1.5 rounded-lg border border-teal-300 text-center">
-            <span class="text-[9px] font-bold text-teal-800 uppercase block">കസ്റ്റമർ ബാക്കി</span>
-            <h3 id="repCustBal" class="text-[10px] font-extrabold text-teal-900 leading-tight">0</h3>
+          <div class="bg-teal-50/90 p-1 rounded-lg border border-teal-300 text-center">
+            <span class="text-[8.5px] font-bold text-teal-800 uppercase block">കസ്റ്റമർ ബാക്കി</span>
+            <h3 id="repCustBal" class="text-[9.5px] font-extrabold text-teal-900 leading-tight">0</h3>
           </div>
-          <div class="bg-rose-50/90 p-1.5 rounded-lg border border-rose-300 text-center">
-            <span class="text-[9px] font-bold text-rose-800 uppercase block">വെണ്ടർ ബാക്കി</span>
-            <h3 id="repVendorBal" class="text-[10px] font-extrabold text-rose-900 leading-tight">0</h3>
+          <div class="bg-rose-50/90 p-1 rounded-lg border border-rose-300 text-center">
+            <span class="text-[8.5px] font-bold text-rose-800 uppercase block">വെണ്ടർ ബാക്കി</span>
+            <h3 id="repVendorBal" class="text-[9.5px] font-extrabold text-rose-900 leading-tight">0</h3>
           </div>
-          <div class="bg-purple-50/90 p-1.5 rounded-lg border border-purple-300 text-center">
-            <span class="text-[9px] font-bold text-purple-800 uppercase block">സാലറി ബാക്കി</span>
-            <h3 id="repSalaryBal" class="text-[10px] font-extrabold text-purple-900 leading-tight">0</h3>
+          <div class="bg-purple-50/90 p-1 rounded-lg border border-purple-300 text-center">
+            <span class="text-[8.5px] font-bold text-purple-800 uppercase block">സാലറി ബാക്കി</span>
+            <h3 id="repSalaryBal" class="text-[9.5px] font-extrabold text-purple-900 leading-tight">0</h3>
           </div>
-          <div class="bg-slate-100 p-1.5 rounded-lg border border-slate-300 text-center">
-            <span class="text-[9px] font-bold text-slate-700 uppercase block">ലിക്വിഡ് ഫണ്ട്</span>
-            <h3 id="repLiquidBal" class="text-[10px] font-extrabold text-slate-900 leading-tight">0</h3>
+          <div class="bg-slate-100 p-1 rounded-lg border border-slate-300 text-center">
+            <span class="text-[8.5px] font-bold text-slate-700 uppercase block">ലിക്വിഡ് ഫണ്ട്</span>
+            <h3 id="repLiquidBal" class="text-[9.5px] font-extrabold text-slate-900 leading-tight">0</h3>
           </div>
         </div>
 
-        <!-- EXCEL-STYLE CONTINUOUS TABLES WITH TOTALS -->
-        <div class="space-y-2 border-t pt-2">
+        <!-- CONTINUOUS 2-COLUMN FLOW CONTAINER -->
+        <div class="report-continuous-flow border-t pt-1.5">
           
-          <div class="bg-slate-50 p-2 rounded-xl border border-emerald-200 space-y-1.5">
-            <h3 class="font-extrabold text-emerald-900 text-xs flex items-center justify-between border-b pb-1">
+          <!-- BLOCK 1: SALES -->
+          <div class="report-block bg-slate-50 p-2 rounded-xl border border-emerald-200 space-y-1">
+            <h3 class="font-extrabold text-emerald-900 text-[11px] flex items-center justify-between border-b pb-0.5">
               <span>🛒 സെയിൽസ് ഇടപാടുകൾ</span>
-              <span id="salesGrandBadge" class="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">ആകെ: 0</span>
+              <span id="salesGrandBadge" class="text-[9.5px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
             </h3>
             
-            <div class="space-y-1">
-              <span class="text-[10px] font-extrabold text-emerald-800 uppercase block">💵 ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
+            <div class="space-y-0.5">
+              <span class="text-[9px] font-extrabold text-emerald-800 uppercase block">💵 ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
               <div id="repCashSalesList" class="overflow-x-auto"></div>
             </div>
 
-            <div class="space-y-1 pt-1 border-t border-emerald-200/60">
-              <span class="text-[10px] font-extrabold text-amber-800 uppercase block">🛒 ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
+            <div class="space-y-0.5 pt-1 border-t border-emerald-200/60">
+              <span class="text-[9px] font-extrabold text-amber-800 uppercase block">🛒 ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
               <div id="repCreditSalesList" class="overflow-x-auto"></div>
             </div>
           </div>
 
-          <div class="bg-slate-50 p-2 rounded-xl border border-blue-200 space-y-1.5">
-            <h3 class="font-extrabold text-blue-900 text-xs flex items-center justify-between border-b pb-1">
+          <!-- BLOCK 2: PURCHASES -->
+          <div class="report-block bg-slate-50 p-2 rounded-xl border border-blue-200 space-y-1">
+            <h3 class="font-extrabold text-blue-900 text-[11px] flex items-center justify-between border-b pb-0.5">
               <span>🚚 പർച്ചേസ് ഇടപാടുകൾ</span>
-              <span id="purchaseGrandBadge" class="text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded">ആകെ: 0</span>
+              <span id="purchaseGrandBadge" class="text-[9.5px] font-black bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
             </h3>
 
-            <div class="space-y-1">
-              <span class="text-[10px] font-extrabold text-blue-800 uppercase block">💵 ക്യാഷ് പർച്ചേസ് (Cash Vendors)</span>
+            <div class="space-y-0.5">
+              <span class="text-[9px] font-extrabold text-blue-800 uppercase block">💵 ക്യാഷ് പർച്ചേസ് (Cash Vendors)</span>
               <div id="repCashPurchasesList" class="overflow-x-auto"></div>
             </div>
 
-            <div class="space-y-1 pt-1 border-t border-blue-200/60">
-              <span class="text-[10px] font-extrabold text-indigo-800 uppercase block">🚚 ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
+            <div class="space-y-0.5 pt-1 border-t border-blue-200/60">
+              <span class="text-[9px] font-extrabold text-indigo-800 uppercase block">🚚 ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
               <div id="repCreditPurchasesList" class="overflow-x-auto"></div>
             </div>
           </div>
 
-          <div class="bg-slate-50 p-2 rounded-xl border border-purple-200 space-y-1">
-            <h3 class="font-extrabold text-purple-950 text-xs flex items-center justify-between border-b pb-1">
-              <span>👥 സാലറി നൽകിയത് (സ്റ്റാഫ് ആകെ തുക)</span>
+          <!-- BLOCK 3: SALARY -->
+          <div class="report-block bg-slate-50 p-2 rounded-xl border border-purple-200 space-y-1">
+            <h3 class="font-extrabold text-purple-950 text-[11px] flex items-center justify-between border-b pb-0.5">
+              <span>👥 സാലറി നൽകിയത് (സ്റ്റാഫ് ആകെ)</span>
             </h3>
             <div id="repSalariesList" class="overflow-x-auto"></div>
           </div>
 
-          <div class="bg-slate-50 p-2 rounded-xl border border-amber-200 space-y-1">
-            <h3 class="font-extrabold text-amber-950 text-xs flex items-center justify-between border-b pb-1">
+          <!-- BLOCK 4: EXPENSES -->
+          <div class="report-block bg-slate-50 p-2 rounded-xl border border-amber-200 space-y-1">
+            <h3 class="font-extrabold text-amber-950 text-[11px] flex items-center justify-between border-b pb-0.5">
               <span>⚡ ചിലവുകൾ (ഇനം തിരിച്ചുള്ള ആകെ)</span>
             </h3>
             <div id="repExpensesList" class="overflow-x-auto"></div>
@@ -615,33 +628,33 @@
       </div>
 
       <!-- STATEMENT PRINT CONTAINER -->
-      <div id="statementPrintContainer" class="hidden space-y-3 text-xs sm:text-sm">
-        <div class="text-center border-b pb-2 flex justify-between items-center">
+      <div id="statementPrintContainer" class="hidden space-y-2 text-xs sm:text-sm">
+        <div class="text-center border-b pb-1 flex justify-between items-center">
           <div>
-            <h2 id="statementShopName" class="text-xs sm:text-base font-black text-slate-900 uppercase">ALNASSR</h2>
-            <p id="statHeaderTitle" class="text-[11px] font-bold text-indigo-800">ACCOUNT STATEMENT</p>
+            <h2 id="statementShopName" class="text-xs sm:text-sm font-black text-slate-900 uppercase">ALNASSR</h2>
+            <p id="statHeaderTitle" class="text-[10px] font-bold text-indigo-800">ACCOUNT STATEMENT</p>
           </div>
-          <div class="text-right text-[11px] text-slate-600 font-bold">
+          <div class="text-right text-[10px] text-slate-600 font-bold">
             <p id="statPeriodLabel">Statement Month</p>
           </div>
         </div>
 
-        <div id="statBannerGrid" class="bg-indigo-50 p-2 rounded-xl border border-indigo-200 grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs font-bold text-slate-800">
+        <div id="statBannerGrid" class="bg-indigo-50 p-1.5 rounded-xl border border-indigo-200 grid grid-cols-2 sm:grid-cols-4 gap-1 text-xs font-bold text-slate-800">
           <div>
-            <span class="text-[9px] text-slate-500 block uppercase font-bold">Old Opening</span>
-            <span id="statOpeningBalText" class="text-slate-900 text-xs sm:text-sm">0</span>
+            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Old Opening</span>
+            <span id="statOpeningBalText" class="text-slate-900 text-xs">0</span>
           </div>
           <div>
-            <span class="text-[9px] text-slate-500 block uppercase font-bold">Month Sales/Bills</span>
-            <span id="statMonthSalesText" class="text-amber-700 text-xs sm:text-sm">0</span>
+            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Month Sales/Bills</span>
+            <span id="statMonthSalesText" class="text-amber-700 text-xs">0</span>
           </div>
           <div>
-            <span class="text-[9px] text-slate-500 block uppercase font-bold">Month Paid/Coll</span>
-            <span id="statMonthPaidText" class="text-emerald-700 text-xs sm:text-sm">0</span>
+            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Month Paid/Coll</span>
+            <span id="statMonthPaidText" class="text-emerald-700 text-xs">0</span>
           </div>
           <div>
-            <span class="text-[9px] text-slate-500 block uppercase font-bold">Net Balance Due</span>
-            <span id="statClosingBalText" class="text-indigo-900 text-xs sm:text-sm font-black">0</span>
+            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Net Balance Due</span>
+            <span id="statClosingBalText" class="text-indigo-900 text-xs font-black">0</span>
           </div>
         </div>
 
@@ -1057,7 +1070,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // QUICK CLEAR INPUTS
     function clearCustomerInput() {
       const inp = document.getElementById("saleCustomerInput");
       if (inp) {
@@ -1165,7 +1177,6 @@
       }
     }
 
-    // DYNAMIC INPUT CELLS (SALES)
     function renderSaleInputs(type) {
       const box = document.getElementById("saleAmountsContainer");
       if (!box) return;
@@ -1224,7 +1235,6 @@
       }
     }
 
-    // DYNAMIC INPUT CELLS (PURCHASE)
     function renderPurchaseInputs(type) {
       const box = document.getElementById("purAmountsContainer");
       if (!box) return;
@@ -1283,7 +1293,6 @@
       }
     }
 
-    // SALARY ENGINE & LIVE BALANCE CALCULATION
     function getCycleStartDate(joinDate, cycleIndex) {
       let d = new Date(joinDate.getFullYear(), joinDate.getMonth() + cycleIndex, joinDate.getDate());
       let expectedMonth = (joinDate.getMonth() + cycleIndex) % 12;
@@ -1404,7 +1413,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // MODAL HANDLERS
     function openNewCustomerModal() {
       document.getElementById("newCustName").value = "";
       document.getElementById("newCustOpening").value = "";
@@ -1476,7 +1484,6 @@
       onUnifiedPartySelected();
     }
 
-    // OFFLINE QUEUE ENGINE
     function getOfflineQueue() {
       try {
         return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`)) || [];
@@ -1527,7 +1534,6 @@
       }
     }
 
-    // TRANSACTION SAVING
     async function saveSaleEntry() {
       let rawName = document.getElementById("saleCustomerInput").value.trim().toUpperCase();
       if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
@@ -1699,7 +1705,6 @@
       onUnifiedPartySelected();
     }
 
-    // DASHBOARD & LIVE LIQUID FUNDS RENDER
     function renderQuickTotalsAndRecent() {
       const selectedDate = getSelectedDate();
       let saleTotal = 0, purTotal = 0, expTotal = 0;
@@ -1753,7 +1758,6 @@
       document.getElementById("liveHandCash").innerText = `💵 ക്യാഷ്: ${curCash.toLocaleString('en-IN')}`;
       document.getElementById("liveBankCash").innerText = `🏦 ബാങ്ക്: ${curBank.toLocaleString('en-IN')}`;
 
-      // POPULATE RECENT LIST
       const listContainer = document.getElementById("todayRecentList");
       if (dateFilteredList.length === 0) {
         listContainer.innerHTML = `<div class="py-6 text-center text-slate-400">തിരഞ്ഞെടുത്ത തീയതിയിൽ എൻട്രികൾ ഒന്നും ഇല്ല</div>`;
@@ -1817,7 +1821,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // EDIT TRANSACTION WORKFLOW
     function requestEdit(id) {
       if (String(id).startsWith('temp_')) {
         alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. ഇത് നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
@@ -1911,7 +1914,6 @@
       alert("ഇടപാട് വിജയകരമായി തിരുത്തി!");
     }
 
-    // 2 DAYS DELETE RULE ENGINE
     function requestDelete(id) {
       if (String(id).startsWith('temp_')) {
         alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
@@ -2004,7 +2006,7 @@
     }
 
     // ========================================================
-    // REPORTS & STATEMENTS ENGINE (PARITY WITH INDEX.HTML)
+    // REPORTS & STATEMENTS ENGINE WITH NAME TRUNCATION
     // ========================================================
     function openReportModal() {
       const modal = document.getElementById("reportModal");
@@ -2043,12 +2045,12 @@
       const repFilterMonth = document.getElementById("repFilterMonth");
       const repFilterLabel = document.getElementById("repFilterLabel");
 
-      if (repDailyBtn) repDailyBtn.className = "px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
-      if (repMonthlyBtn) repMonthlyBtn.className = "px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
-      if (repStatBtn) repStatBtn.className = "px-2.5 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
+      if (repDailyBtn) repDailyBtn.className = "px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
+      if (repMonthlyBtn) repMonthlyBtn.className = "px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
+      if (repStatBtn) repStatBtn.className = "px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
 
       if (mode === 'daily') {
-        if (repDailyBtn) repDailyBtn.className = "px-2.5 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black";
+        if (repDailyBtn) repDailyBtn.className = "px-2 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black";
         if (reportDateSelectorBar) reportDateSelectorBar.classList.remove("hidden");
         if (repFilterDate) repFilterDate.classList.remove("hidden");
         if (repFilterMonth) repFilterMonth.classList.add("hidden");
@@ -2058,7 +2060,7 @@
         if (reportPrintContainer) reportPrintContainer.classList.remove("hidden");
         renderReportData('daily');
       } else if (mode === 'monthly') {
-        if (repMonthlyBtn) repMonthlyBtn.className = "px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow transition cursor-pointer font-black";
+        if (repMonthlyBtn) repMonthlyBtn.className = "px-2 py-1 rounded-lg bg-blue-600 text-white shadow transition cursor-pointer font-black";
         if (reportDateSelectorBar) reportDateSelectorBar.classList.remove("hidden");
         if (repFilterDate) repFilterDate.classList.add("hidden");
         if (repFilterMonth) repFilterMonth.classList.remove("hidden");
@@ -2068,7 +2070,7 @@
         if (reportPrintContainer) reportPrintContainer.classList.remove("hidden");
         renderReportData('monthly');
       } else if (mode === 'statement') {
-        if (repStatBtn) repStatBtn.className = "px-2.5 py-1 rounded-lg bg-indigo-600 text-white shadow transition cursor-pointer font-black";
+        if (repStatBtn) repStatBtn.className = "px-2 py-1 rounded-lg bg-indigo-600 text-white shadow transition cursor-pointer font-black";
         if (reportDateSelectorBar) reportDateSelectorBar.classList.add("hidden");
         if (statementControlBar) statementControlBar.classList.remove("hidden");
         if (statementPrintContainer) statementPrintContainer.classList.remove("hidden");
@@ -2084,6 +2086,12 @@
 
     function onReportMonthChanged() {
       renderReportData('monthly');
+    }
+
+    function formatShortName(name) {
+      if (!name) return '';
+      let s = String(name).trim();
+      return s.length > 17 ? s.substring(0, 16) + '..' : s;
     }
 
     function renderReportData(mode) {
@@ -2262,7 +2270,7 @@
       const cashSalesArr = Object.values(cashSalesMap);
       let rCSCash = 0, rCSBank = 0, rCSTotal = 0;
       let cashSalesHtml = `
-        <table class="w-full text-[11px] text-center border-collapse">
+        <table class="w-full text-center border-collapse">
           <thead>
             <tr class="bg-emerald-100 text-slate-900 font-black border-b">
               <th class="p-1 text-left">പേര്</th>
@@ -2274,13 +2282,13 @@
           <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (cashSalesArr.length === 0) {
-        cashSalesHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        cashSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         cashSalesArr.forEach(s => {
           rCSCash += s.cash; rCSBank += s.bank; rCSTotal += s.total;
           cashSalesHtml += `
             <tr>
-              <td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${s.name}</td>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td>
               <td class="p-1 text-emerald-800">${s.cash}</td>
               <td class="p-1 text-blue-800">${s.bank}</td>
               <td class="p-1 text-right font-black text-slate-950">${s.total}</td>
@@ -2291,7 +2299,7 @@
       cashSalesHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-emerald-50 text-emerald-950 font-black border-t-2">
+            <tr class="bg-emerald-50 text-emerald-950 font-black border-t">
               <td class="p-1 text-left uppercase">ആകെ:</td>
               <td class="p-1">${rCSCash}</td>
               <td class="p-1">${rCSBank}</td>
@@ -2306,7 +2314,7 @@
       const creditSalesArr = Object.values(creditSalesMap);
       let rCrSCash = 0, rCrSBank = 0, rCrSCr = 0;
       let creditSalesHtml = `
-        <table class="w-full text-[11px] text-center border-collapse">
+        <table class="w-full text-center border-collapse">
           <thead>
             <tr class="bg-amber-100 text-slate-900 font-black border-b">
               <th class="p-1 text-left">പേര്</th>
@@ -2318,13 +2326,13 @@
           <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (creditSalesArr.length === 0) {
-        creditSalesHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        creditSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         creditSalesArr.forEach(s => {
           rCrSCash += s.cash; rCrSBank += s.bank; rCrSCr += s.cr;
           creditSalesHtml += `
             <tr>
-              <td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${s.name}</td>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td>
               <td class="p-1 text-emerald-800">${s.cash}</td>
               <td class="p-1 text-blue-800">${s.bank}</td>
               <td class="p-1 text-right font-black text-amber-900">${s.cr}</td>
@@ -2335,7 +2343,7 @@
       creditSalesHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-amber-50 text-amber-950 font-black border-t-2">
+            <tr class="bg-amber-50 text-amber-950 font-black border-t">
               <td class="p-1 text-left uppercase">ആകെ:</td>
               <td class="p-1">${rCrSCash}</td>
               <td class="p-1">${rCrSBank}</td>
@@ -2350,7 +2358,7 @@
       const cashPurArr = Object.values(cashPurMap);
       let rCPCash = 0, rCPBank = 0, rCPTotal = 0;
       let cashPurHtml = `
-        <table class="w-full text-[11px] text-center border-collapse">
+        <table class="w-full text-center border-collapse">
           <thead>
             <tr class="bg-blue-100 text-slate-900 font-black border-b">
               <th class="p-1 text-left">വെണ്ടർ</th>
@@ -2362,13 +2370,13 @@
           <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (cashPurArr.length === 0) {
-        cashPurHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        cashPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         cashPurArr.forEach(p => {
           rCPCash += p.cash; rCPBank += p.bank; rCPTotal += p.total;
           cashPurHtml += `
             <tr>
-              <td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${p.name}</td>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td>
               <td class="p-1 text-blue-800">${p.cash}</td>
               <td class="p-1 text-indigo-800">${p.bank}</td>
               <td class="p-1 text-right font-black text-slate-950">${p.total}</td>
@@ -2379,7 +2387,7 @@
       cashPurHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-blue-50 text-blue-950 font-black border-t-2">
+            <tr class="bg-blue-50 text-blue-950 font-black border-t">
               <td class="p-1 text-left uppercase">ആകെ:</td>
               <td class="p-1">${rCPCash}</td>
               <td class="p-1">${rCPBank}</td>
@@ -2394,7 +2402,7 @@
       const creditPurArr = Object.values(creditPurMap);
       let rCrPCash = 0, rCrPBank = 0, rCrPCr = 0;
       let creditPurHtml = `
-        <table class="w-full text-[11px] text-center border-collapse">
+        <table class="w-full text-center border-collapse">
           <thead>
             <tr class="bg-indigo-100 text-slate-900 font-black border-b">
               <th class="p-1 text-left">വെണ്ടർ</th>
@@ -2406,13 +2414,13 @@
           <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (creditPurArr.length === 0) {
-        creditPurHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        creditPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         creditPurArr.forEach(p => {
           rCrPCash += p.cash; rCrPBank += p.bank; rCrPCr += p.cr;
           creditPurHtml += `
             <tr>
-              <td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${p.name}</td>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td>
               <td class="p-1 text-blue-800">${p.cash}</td>
               <td class="p-1 text-indigo-800">${p.bank}</td>
               <td class="p-1 text-right font-black text-indigo-950">${p.cr}</td>
@@ -2423,7 +2431,7 @@
       creditPurHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-indigo-50 text-indigo-950 font-black border-t-2">
+            <tr class="bg-indigo-50 text-indigo-950 font-black border-t">
               <td class="p-1 text-left uppercase">ആകെ:</td>
               <td class="p-1">${rCrPCash}</td>
               <td class="p-1">${rCrPBank}</td>
@@ -2438,7 +2446,7 @@
       const salArr = Object.values(salariesMap);
       let rSalCash = 0, rSalBank = 0, rSalTotal = 0;
       let salHtml = `
-        <table class="w-full text-[11px] text-center border-collapse">
+        <table class="w-full text-center border-collapse">
           <thead>
             <tr class="bg-purple-100 text-slate-900 font-black border-b">
               <th class="p-1 text-left">സ്റ്റാഫ്</th>
@@ -2450,13 +2458,13 @@
           <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (salArr.length === 0) {
-        salHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        salHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         salArr.forEach(s => {
           rSalCash += s.cash; rSalBank += s.bank; rSalTotal += s.total;
           salHtml += `
             <tr>
-              <td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${s.name}</td>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td>
               <td class="p-1 text-purple-800">${s.cash}</td>
               <td class="p-1 text-blue-800">${s.bank}</td>
               <td class="p-1 text-right font-black text-purple-950">${s.total}</td>
@@ -2467,7 +2475,7 @@
       salHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-purple-50 text-purple-950 font-black border-t-2">
+            <tr class="bg-purple-50 text-purple-950 font-black border-t">
               <td class="p-1 text-left uppercase">ആകെ:</td>
               <td class="p-1">${rSalCash}</td>
               <td class="p-1">${rSalBank}</td>
@@ -2482,7 +2490,7 @@
       const expArr = Object.values(expensesMap);
       let rExpCash = 0, rExpBank = 0, rExpTotal = 0;
       let expHtml = `
-        <table class="w-full text-[11px] text-center border-collapse">
+        <table class="w-full text-center border-collapse">
           <thead>
             <tr class="bg-amber-100 text-slate-900 font-black border-b">
               <th class="p-1 text-left">ഇനം</th>
@@ -2494,13 +2502,13 @@
           <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (expArr.length === 0) {
-        expHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ചിലവുകൾ ഇല്ല</td></tr>`;
+        expHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ചിലവുകൾ ഇല്ല</td></tr>`;
       } else {
         expArr.forEach(e => {
           rExpCash += e.cash; rExpBank += e.bank; rExpTotal += e.total;
           expHtml += `
             <tr>
-              <td class="p-1 text-left font-black text-slate-900 truncate" title="${e.name}">${e.name}</td>
+              <td class="p-1 text-left font-black text-slate-900 truncate" title="${e.name}">${formatShortName(e.name)}</td>
               <td class="p-1 text-amber-800">${e.cash}</td>
               <td class="p-1 text-blue-800">${e.bank}</td>
               <td class="p-1 text-right font-black text-slate-950">${e.total}</td>
@@ -2511,7 +2519,7 @@
       expHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-amber-50 text-amber-950 font-black border-t-2">
+            <tr class="bg-amber-50 text-amber-950 font-black border-t">
               <td class="p-1 text-left uppercase">ആകെ:</td>
               <td class="p-1">${rExpCash}</td>
               <td class="p-1">${rExpBank}</td>
@@ -2539,7 +2547,6 @@
       };
     }
 
-    // STATEMENT GENERATOR
     function populateStatementPartyDatalist() {
       const type = document.getElementById("statPartyType").value;
       const dl = document.getElementById("statPartyDatalist");
@@ -2797,7 +2804,7 @@
               totalSalesOrBills += monthlySalary;
               statementRows.push({
                 date: cycleDateStr,
-                desc: `മാസ ശമ്പളം (Monthly Salary Accrued - Cycle ${k})`,
+                desc: `മാസ ശമ്പളം (Cycle ${k})`,
                 cash: 0,
                 bank: 0,
                 bill: monthlySalary,
@@ -2817,7 +2824,7 @@
               totalSalesOrBills += proRataDue;
               statementRows.push({
                 date: stopStr,
-                desc: `സ്റ്റോപ്പ് സെറ്റിൽമെന്റ് ശമ്പളം (Pro-rata Days Salary)`,
+                desc: `സ്റ്റോപ്പ് സെറ്റിൽമെന്റ് ശമ്പളം`,
                 cash: 0,
                 bank: 0,
                 bill: proRataDue,
@@ -2941,31 +2948,31 @@
 
       if (isAgentMode) {
         tableHtml = `
-          <table class="w-full text-[11px] border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+          <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
             <thead>
               <tr class="bg-indigo-900 text-white font-black text-center border-b">
-                <th class="p-1.5 w-6">#</th>
-                <th class="p-1.5 w-2/6 text-left">Customer</th>
-                <th class="p-1.5 w-1/6">Opening</th>
-                <th class="p-1.5 w-1/6">Sales</th>
-                <th class="p-1.5 w-1/6">Paid</th>
-                <th class="p-1.5 w-1/6 bg-indigo-950">Due</th>
+                <th class="p-1 w-6">#</th>
+                <th class="p-1 w-2/6 text-left">Customer</th>
+                <th class="p-1 w-1/6">Opening</th>
+                <th class="p-1 w-1/6">Sales</th>
+                <th class="p-1 w-1/6">Paid</th>
+                <th class="p-1 w-1/6 bg-indigo-950">Due</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 font-bold">
         `;
         if (agentCustomersSummary.length === 0) {
-          tableHtml += `<tr><td colspan="6" class="p-3 text-center text-slate-400 font-bold">No customers found >= 10</td></tr>`;
+          tableHtml += `<tr><td colspan="6" class="p-2 text-center text-slate-400 font-bold">No customers found >= 10</td></tr>`;
         } else {
           agentCustomersSummary.forEach((r, idx) => {
             tableHtml += `
               <tr class="text-center hover:bg-slate-50">
-                <td class="p-1.5 text-slate-500">${idx + 1}</td>
-                <td class="p-1.5 text-left text-slate-900 truncate" title="${r.name}">${r.name}</td>
-                <td class="p-1.5 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-amber-700">${r.sales.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 font-black text-indigo-900 bg-indigo-50/50">${r.closing.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-slate-500">${idx + 1}</td>
+                <td class="p-1 text-left text-slate-900 truncate" title="${r.name}">${formatShortName(r.name)}</td>
+                <td class="p-1 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-amber-700">${r.sales.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
+                <td class="p-1 font-black text-indigo-900 bg-indigo-50/50">${r.closing.toLocaleString('en-IN')}</td>
               </tr>
             `;
           });
@@ -2973,43 +2980,43 @@
         tableHtml += `
             </tbody>
             <tfoot>
-              <tr class="bg-indigo-100 text-indigo-950 font-black text-center border-t-2 border-indigo-200">
-                <td colspan="2" class="p-1.5 text-left uppercase">TOTAL AGENT ROUTE:</td>
-                <td class="p-1.5">${openingBal.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-amber-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-indigo-900 bg-indigo-200">${runningBal.toLocaleString('en-IN')}</td>
+              <tr class="bg-indigo-100 text-indigo-950 font-black text-center border-t">
+                <td colspan="2" class="p-1 text-left uppercase">TOTAL AGENT ROUTE:</td>
+                <td class="p-1">${openingBal.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-amber-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-indigo-900 bg-indigo-200">${runningBal.toLocaleString('en-IN')}</td>
               </tr>
             </tfoot>
           </table>
         `;
       } else if (isAllVendorsMode) {
         tableHtml = `
-          <table class="w-full text-[11px] border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+          <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
             <thead>
               <tr class="bg-blue-900 text-white font-black text-center border-b">
-                <th class="p-1.5 w-6">#</th>
-                <th class="p-1.5 w-2/6 text-left">Vendor</th>
-                <th class="p-1.5 w-1/6">Opening</th>
-                <th class="p-1.5 w-1/6">Purchase</th>
-                <th class="p-1.5 w-1/6">Paid</th>
-                <th class="p-1.5 w-1/6 bg-blue-950">Payable</th>
+                <th class="p-1 w-6">#</th>
+                <th class="p-1 w-2/6 text-left">Vendor</th>
+                <th class="p-1 w-1/6">Opening</th>
+                <th class="p-1 w-1/6">Purchase</th>
+                <th class="p-1 w-1/6">Paid</th>
+                <th class="p-1 w-1/6 bg-blue-950">Payable</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 font-bold">
         `;
         if (vendorsConsolidatedSummary.length === 0) {
-          tableHtml += `<tr><td colspan="6" class="p-3 text-center text-slate-400 font-bold">No credit vendors found >= 10</td></tr>`;
+          tableHtml += `<tr><td colspan="6" class="p-2 text-center text-slate-400 font-bold">No credit vendors found >= 10</td></tr>`;
         } else {
           vendorsConsolidatedSummary.forEach((r, idx) => {
             tableHtml += `
               <tr class="text-center hover:bg-slate-50">
-                <td class="p-1.5 text-slate-500">${idx + 1}</td>
-                <td class="p-1.5 text-left text-slate-900 truncate" title="${r.name}">${r.name}</td>
-                <td class="p-1.5 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-blue-700">${r.purchases.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 font-black text-rose-700 bg-rose-50/50">${r.closing.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-slate-500">${idx + 1}</td>
+                <td class="p-1 text-left text-slate-900 truncate" title="${r.name}">${formatShortName(r.name)}</td>
+                <td class="p-1 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-blue-700">${r.purchases.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
+                <td class="p-1 font-black text-rose-700 bg-rose-50/50">${r.closing.toLocaleString('en-IN')}</td>
               </tr>
             `;
           });
@@ -3017,43 +3024,43 @@
         tableHtml += `
             </tbody>
             <tfoot>
-              <tr class="bg-blue-100 text-blue-950 font-black text-center border-t-2 border-blue-200">
-                <td colspan="2" class="p-1.5 text-left uppercase">TOTAL ALL VENDORS:</td>
-                <td class="p-1.5">${openingBal.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-blue-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
-                <td class="p-1.5 text-rose-800 bg-rose-200">${runningBal.toLocaleString('en-IN')}</td>
+              <tr class="bg-blue-100 text-blue-950 font-black text-center border-t">
+                <td colspan="2" class="p-1 text-left uppercase">TOTAL ALL VENDORS:</td>
+                <td class="p-1">${openingBal.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-blue-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-rose-800 bg-rose-200">${runningBal.toLocaleString('en-IN')}</td>
               </tr>
             </tfoot>
           </table>
         `;
       } else {
         tableHtml = `
-          <table class="w-full text-[11px] border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+          <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
             <thead>
               <tr class="bg-indigo-900 text-white font-black text-center border-b">
-                <th class="p-1.5 w-1/5 text-left">Date</th>
-                <th class="p-1.5 w-2/5 text-left">Particulars</th>
-                <th class="p-1.5 w-1/5">Paid</th>
-                <th class="p-1.5 w-1/5">Bill</th>
-                <th class="p-1.5 w-1/5">Balance</th>
+                <th class="p-1 w-1/5 text-left">Date</th>
+                <th class="p-1 w-2/5 text-left">Particulars</th>
+                <th class="p-1 w-1/5">Paid</th>
+                <th class="p-1 w-1/5">Bill</th>
+                <th class="p-1 w-1/5">Balance</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 font-bold">
         `;
         if (statementRows.length === 0) {
-          tableHtml += `<tr><td colspan="5" class="p-3 text-center text-slate-400 font-bold">No transactions recorded for this month</td></tr>`;
+          tableHtml += `<tr><td colspan="5" class="p-2 text-center text-slate-400 font-bold">No transactions recorded for this month</td></tr>`;
         } else {
           statementRows.forEach(r => {
             let payStr = (r.cash + r.bank > 0) ? (r.cash > 0 && r.bank > 0 ? `C:${r.cash} B:${r.bank}` : `${r.cash + r.bank}`) : '-';
             let billStr = (r.bill > 0) ? `${r.bill}` : '-';
             tableHtml += `
               <tr class="text-center hover:bg-slate-50">
-                <td class="p-1.5 text-left text-slate-600 whitespace-nowrap">${r.date}</td>
-                <td class="p-1.5 text-left text-slate-900 truncate whitespace-nowrap" title="${r.desc}">${r.desc}</td>
-                <td class="p-1.5 text-emerald-700 whitespace-nowrap">${payStr}</td>
-                <td class="p-1.5 text-amber-700 whitespace-nowrap">${billStr}</td>
-                <td class="p-1.5 font-black text-slate-900 whitespace-nowrap">${r.bal.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-left text-slate-600 whitespace-nowrap">${r.date}</td>
+                <td class="p-1 text-left text-slate-900 truncate whitespace-nowrap" title="${r.desc}">${formatShortName(r.desc)}</td>
+                <td class="p-1 text-emerald-700 whitespace-nowrap">${payStr}</td>
+                <td class="p-1 text-amber-700 whitespace-nowrap">${billStr}</td>
+                <td class="p-1 font-black text-slate-900 whitespace-nowrap">${r.bal.toLocaleString('en-IN')}</td>
               </tr>
             `;
           });
@@ -3061,9 +3068,9 @@
         tableHtml += `
             </tbody>
             <tfoot>
-              <tr class="bg-indigo-100 text-indigo-950 font-black text-center border-t-2 border-indigo-200">
-                <td colspan="4" class="p-1.5 text-left uppercase">NET CLOSING BALANCE</td>
-                <td class="p-1.5 text-indigo-900 font-black">${runningBal.toLocaleString('en-IN')}</td>
+              <tr class="bg-indigo-100 text-indigo-950 font-black text-center border-t">
+                <td colspan="4" class="p-1 text-left uppercase">NET CLOSING BALANCE</td>
+                <td class="p-1 text-indigo-900 font-black">${runningBal.toLocaleString('en-IN')}</td>
               </tr>
             </tfoot>
           </table>
@@ -3087,7 +3094,6 @@
       };
     }
 
-    // WHATSAPP SHARE
     function shareActiveReportWhatsApp() {
       if (currentReportMode === 'statement') {
         if (!currentStatementDataForWA) return alert("Generate statement before sharing!");
