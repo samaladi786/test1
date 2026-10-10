@@ -76,7 +76,7 @@
         size: A4 portrait;
         margin: 4mm 6mm;
       }
-      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #masterModal, #editMasterModal, #staffDepositModal, #transferModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
+      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #employeeStopModal, #masterModal, #editMasterModal, #staffDepositModal, #transferModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
         display: none !important;
       }
       body {
@@ -163,7 +163,7 @@
         <p class="text-xs text-slate-500 mt-1">ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ നൽകുക</p>
       </div>
 
-     <form onsubmit="event.preventDefault(); verifyLogin();" class="space-y-4">
+      <form onsubmit="event.preventDefault(); verifyLogin();" class="space-y-4">
         <input 
           type="password" 
           inputmode="numeric" 
@@ -988,7 +988,75 @@
     </div>
   </div>
 
-  <!-- 7. CASH / BANK TRANSFER MODAL -->
+  <!-- 7. EMPLOYEE STOP & FINAL SETTLEMENT MODAL -->
+  <div id="employeeStopModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-rose-900 flex items-center gap-1.5">🛑 ജീവനക്കാരന്റെ അക്കൗണ്ട് സെറ്റിൽമെന്റ്</h3>
+        <button onclick="closeEmployeeStopModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <input type="hidden" id="stopEmpOriginalName" />
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ജീവനക്കാരന്റെ പേര്:</label>
+          <input type="text" id="stopEmpNameDisplay" readonly class="w-full p-2 rounded-xl border bg-slate-100 font-black text-slate-800" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">മാസ ശമ്പളം:</label>
+            <input type="text" id="stopEmpSalaryDisplay" readonly class="w-full p-2 rounded-xl border bg-slate-100 font-bold text-slate-800" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">ജോയിനിങ് തീയതി:</label>
+            <input type="text" id="stopEmpJoinDisplay" readonly class="w-full p-2 rounded-xl border bg-slate-100 font-bold text-slate-800" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-black text-rose-800 mb-0.5">ജോലി നിർത്തിയ തീയതി (Stop Date):</label>
+          <input type="date" id="stopEmpDateInput" onchange="calculateLiveStopSettlement()" class="w-full p-2 rounded-xl border-2 border-rose-300 bg-rose-50/50 font-black text-rose-950 outline-none cursor-pointer" />
+        </div>
+
+        <!-- LIVE CALCULATION BREAKDOWN CARD -->
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1.5 font-bold text-[11px]">
+          <div class="flex justify-between text-slate-600">
+            <span>അവസാന മാസത്തെ ദിവസങ്ങൾ:</span>
+            <span id="calcWorkedDays" class="font-black text-slate-800">0 ദിവസം</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>അവസാന മാസ ദിവസ ശമ്പളം:</span>
+            <span id="calcDailyRate" class="font-black text-slate-800">0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>അവസാന മാസ ശമ്പളം (Pro-rata):</span>
+            <span id="calcProRata" class="font-black text-purple-700">0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-700 border-t pt-1">
+            <span>ആകെ അർഹതപ്പെട്ട ശമ്പളം:</span>
+            <span id="calcTotalAccrued" class="font-black text-slate-900">0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-700">
+            <span>ഇതുവരെ നൽകിയ അഡ്വാൻസ്/തുക:</span>
+            <span id="calcTotalPaid" class="font-black text-emerald-700">0.00</span>
+          </div>
+          <div class="flex justify-between text-xs font-black border-t-2 pt-1.5 text-rose-900 bg-rose-100/60 p-1.5 rounded-xl">
+            <span>കൊടുത്തു തീർക്കേണ്ട ബാക്കി:</span>
+            <span id="calcFinalDue">0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeEmployeeStopModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" id="btnConfirmEmpStop" onclick="saveEmployeeStopSettlement()" class="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow cursor-pointer">ജോലി നിർത്തുക</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. CASH / BANK TRANSFER MODAL -->
   <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1018,7 +1086,7 @@
     </div>
   </div>
 
-  <!-- 8. STAFF DEPOSIT MODAL -->
+  <!-- 9. STAFF DEPOSIT MODAL -->
   <div id="staffDepositModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1053,7 +1121,7 @@
     </div>
   </div>
 
-  <!-- 9. EDIT TRANSACTION MODAL -->
+  <!-- 10. EDIT TRANSACTION MODAL -->
   <div id="editTransactionModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1092,7 +1160,7 @@
     </div>
   </div>
 
-  <!-- 10. PIN VERIFY MODAL -->
+  <!-- 11. PIN VERIFY MODAL -->
   <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
       <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
@@ -1105,7 +1173,7 @@
     </div>
   </div>
 
-  <!-- 11. TODAY'S SALES BREAKDOWN MODAL -->
+  <!-- 12. TODAY'S SALES BREAKDOWN MODAL -->
   <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1126,7 +1194,7 @@
     </div>
   </div>
 
-  <!-- 12. TODAY'S PURCHASES BREAKDOWN MODAL -->
+  <!-- 13. TODAY'S PURCHASES BREAKDOWN MODAL -->
   <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1147,7 +1215,7 @@
     </div>
   </div>
 
-  <!-- 13. TODAY'S EXPENSES BREAKDOWN MODAL -->
+  <!-- 14. TODAY'S EXPENSES BREAKDOWN MODAL -->
   <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1314,7 +1382,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const isLogged = sessionStorage.getItem("ALNASSR_LOGGED_IN") === "true";
-      const userRole = sessionStorage.getItem("ALNASSR_USER_ROLE");
+      const userRole = sessionStorage.getItem("ALNASSR_MOBILE_ROLE") || sessionStorage.getItem("ALNASSR_USER_ROLE");
 
       const dtInput = document.getElementById("mobileFilterDate");
       if (dtInput) dtInput.value = getSaudiBusinessDate();
@@ -1340,7 +1408,7 @@
       if (window.lucide) lucide.createIcons();
     });
 
- function verifyLogin() {
+    function verifyLogin() {
       try {
         const input = document.getElementById("loginPasswordInput");
         if (!input) return;
@@ -1363,18 +1431,18 @@
           return;
         }
 
-        // സെഷൻ വിവരങ്ങൾ സേവ് ചെയ്യുക
         sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
         sessionStorage.setItem("ALNASSR_ACTIVE_PIN", enteredPin);
 
         if (isMaster) {
           sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
+          sessionStorage.setItem("ALNASSR_MOBILE_ROLE", "admin");
         } else {
           sessionStorage.setItem("ALNASSR_USER_ROLE", "shop");
+          sessionStorage.setItem("ALNASSR_MOBILE_ROLE", "shop");
           sessionStorage.setItem("ALNASSR_ACTIVE_SHOP_ID", matchedShop.id);
         }
 
-        // ലോഗിൻ സ്ക്രീൻ പൂർണ്ണമായി നീക്കം ചെയ്യുക
         const loginEl = document.getElementById("loginScreen");
         if (loginEl) {
           loginEl.style.display = "none";
@@ -1382,7 +1450,6 @@
           loginEl.classList.remove("flex");
         }
 
-        // സിസ്റ്റം ലോഡ് ചെയ്യുക
         if (isMaster) {
           applyRolePermissions("admin");
           initMultiShopSystem();
@@ -1413,15 +1480,16 @@
         if (staticTitle) staticTitle.classList.remove("hidden");
       }
     }
+
     function logoutApp() {
       sessionStorage.clear();
       window.location.replace(window.location.pathname);
     }
 
     function goToDesktopPortal() {
-      const userRole = sessionStorage.getItem("ALNASSR_USER_ROLE");
+      const userRole = sessionStorage.getItem("ALNASSR_MOBILE_ROLE") || sessionStorage.getItem("ALNASSR_USER_ROLE");
       if (userRole === 'admin') {
-        window.location.href = "index.html";
+        window.open("index.html", "_blank");
         return;
       }
       pendingAction = 'open_desktop_portal';
@@ -1444,7 +1512,7 @@
         if (sel) sel.appendChild(opt);
       });
 
-      const role = sessionStorage.getItem("ALNASSR_USER_ROLE");
+      const role = sessionStorage.getItem("ALNASSR_MOBILE_ROLE") || sessionStorage.getItem("ALNASSR_USER_ROLE");
       if (role === 'shop') {
         currentShopId = forceShopId || sessionStorage.getItem("ALNASSR_ACTIVE_SHOP_ID") || SHOPS[0].id;
       } else {
@@ -1752,7 +1820,7 @@
       }
     }
 
-    // SALARY ENGINE & LIVE BALANCE CALCULATION (LOOP-SAFE & CRASH-PROOF)
+    // SALARY ENGINE & LIVE BALANCE CALCULATION
     function getCycleStartDate(joinDate, cycleIndex) {
       let d = new Date(joinDate.getFullYear(), joinDate.getMonth() + cycleIndex, joinDate.getDate());
       let expectedMonth = (joinDate.getMonth() + cycleIndex) % 12;
@@ -1957,6 +2025,108 @@
     }
 
     // ========================================================
+    // EMPLOYEE STOP & FINAL SETTLEMENT LOGIC
+    // ========================================================
+    function openEmployeeStopModal(empName) {
+      const emp = employeesList.find(e => e.name === empName);
+      if (!emp) return alert("ജീവനക്കാരനെ കണ്ടെത്താനായില്ല!");
+
+      document.getElementById("stopEmpOriginalName").value = emp.name;
+      document.getElementById("stopEmpNameDisplay").value = emp.name;
+      document.getElementById("stopEmpSalaryDisplay").value = emp.monthly_salary || 0;
+      document.getElementById("stopEmpJoinDisplay").value = emp.joining_date || '-';
+
+      const stopInput = document.getElementById("stopEmpDateInput");
+      stopInput.value = (emp.status === 'stopped' && emp.stop_date) ? cleanDate(emp.stop_date) : getSaudiBusinessDate();
+
+      const btn = document.getElementById("btnConfirmEmpStop");
+      if (emp.status === 'stopped') {
+        btn.innerText = "വീണ്ടും ആക്ടീവാക്കുക (Re-activate)";
+        btn.className = "flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer";
+      } else {
+        btn.innerText = "ജോലി നിർത്തുക (Stop)";
+        btn.className = "flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow cursor-pointer";
+      }
+
+      calculateLiveStopSettlement();
+      document.getElementById("employeeStopModal").classList.remove("hidden");
+    }
+
+    function closeEmployeeStopModal() {
+      document.getElementById("employeeStopModal").classList.add("hidden");
+    }
+
+    function calculateLiveStopSettlement() {
+      const empName = document.getElementById("stopEmpOriginalName").value;
+      const emp = employeesList.find(e => e.name === empName);
+      if (!emp) return;
+
+      const stopDateStr = document.getElementById("stopEmpDateInput").value || getSaudiBusinessDate();
+      const monthlySalary = parseFloat(emp.monthly_salary) || 0;
+      const joinD = parseToDateObj(emp.joining_date);
+      const targetD = parseToDateObj(stopDateStr);
+
+      let monthsDiff = (targetD.getFullYear() - joinD.getFullYear()) * 12 + (targetD.getMonth() - joinD.getMonth());
+      if (targetD.getDate() < joinD.getDate()) monthsDiff--;
+      let k = Math.max(0, monthsDiff);
+      while (k < 360) {
+        let nextCycleStart = getCycleStartDate(joinD, k + 1);
+        if (targetD >= nextCycleStart) k++;
+        else break;
+      }
+
+      let currentCycleStart = getCycleStartDate(joinD, k);
+      let diffMs = targetD.getTime() - currentCycleStart.getTime();
+      let daysWorked = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1);
+
+      let daysInMonth = new Date(targetD.getFullYear(), targetD.getMonth() + 1, 0).getDate();
+      let dailyRate = monthlySalary > 0 ? (monthlySalary / daysInMonth) : 0;
+      let proRata = Math.round(dailyRate * daysWorked * 100) / 100;
+
+      const tempEmp = { ...emp, status: 'stopped', stop_date: stopDateStr };
+      const totalAccrued = calculateEmployeeAccruedSalary(tempEmp, stopDateStr);
+      const finalDue = calculateEmployeePendingBalance(tempEmp, stopDateStr);
+      const totalPaid = totalAccrued - finalDue;
+
+      document.getElementById("calcWorkedDays").innerText = `${daysWorked} ദിവസം`;
+      document.getElementById("calcDailyRate").innerText = dailyRate.toFixed(2);
+      document.getElementById("calcProRata").innerText = proRata.toLocaleString('en-IN');
+      document.getElementById("calcTotalAccrued").innerText = totalAccrued.toLocaleString('en-IN');
+      document.getElementById("calcTotalPaid").innerText = totalPaid.toLocaleString('en-IN');
+      document.getElementById("calcFinalDue").innerText = finalDue.toLocaleString('en-IN');
+    }
+
+    async function saveEmployeeStopSettlement() {
+      const empName = document.getElementById("stopEmpOriginalName").value;
+      const emp = employeesList.find(e => e.name === empName);
+      if (!emp) return;
+
+      const isCurrentlyStopped = (emp.status === 'stopped');
+      const stopDate = document.getElementById("stopEmpDateInput").value;
+
+      let payload = {};
+      if (isCurrentlyStopped) {
+        if (!confirm(`'${emp.name}' എന്ന ജീവനക്കാരനെ വീണ്ടും ജോലിയിൽ തിരികെ പ്രവേശിപ്പിക്കണമോ?`)) return;
+        payload = { status: 'active', stop_date: null };
+      } else {
+        if (!confirm(`'${emp.name}' എന്ന ജീവനക്കാരന്റെ ജോലി ${stopDate} തീയതിയിൽ അവസാനിപ്പിക്കണമോ?`)) return;
+        payload = { status: 'stopped', stop_date: stopDate };
+      }
+
+      if (navigator.onLine && supabaseClient) {
+        if (emp.id) await supabaseClient.from('employees').update(payload).eq('id', emp.id);
+        else await supabaseClient.from('employees').update(payload).eq('name', emp.name);
+      }
+
+      Object.assign(emp, payload);
+      localStorage.setItem(`ALNASSR_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
+
+      closeEmployeeStopModal();
+      renderActiveMasterList();
+      alert("വിവരങ്ങൾ അപ്‌ഡേറ്റ് ചെയ്തു!");
+    }
+
+    // ========================================================
     // MASTER MANAGEMENT (CUSTOMERS / VENDORS / STAFF / AGENTS)
     // ========================================================
     function openMasterModal() {
@@ -2087,7 +2257,7 @@
               <tr class="bg-purple-100/70 text-slate-900 font-black border-b">
                 <th class="p-2">സ്റ്റാഫ് പേര്</th>
                 <th class="p-2 text-center">ശമ്പളം</th>
-                <th class="p-2 text-center">ജോയിനിങ് തീയതി</th>
+                <th class="p-2 text-center">സ്റ്റാറ്റസ്</th>
                 <th class="p-2 text-right">തുടക്ക ബാക്കി</th>
                 <th class="p-2 text-right">⚙️ നടപടി</th>
               </tr>
@@ -2097,13 +2267,15 @@
         if (list.length === 0) html += `<tr><td colspan="5" class="p-4 text-center text-slate-400">ജീവനക്കാർ ആരും ഇല്ല</td></tr>`;
         else {
           list.forEach(e => {
+            const isStopped = (e.status === 'stopped');
             html += `
-              <tr class="hover:bg-slate-100/60">
+              <tr class="hover:bg-slate-100/60 ${isStopped ? 'bg-rose-50/60' : ''}">
                 <td class="p-2 font-black text-slate-900">${e.name}</td>
                 <td class="p-2 text-center text-purple-900">${(parseFloat(e.monthly_salary) || 0).toLocaleString('en-IN')}</td>
-                <td class="p-2 text-center text-slate-600">${e.joining_date || '-'}</td>
+                <td class="p-2 text-center text-[10px]"><span class="px-2 py-0.5 rounded ${isStopped ? 'bg-rose-100 text-rose-800 font-black' : 'bg-emerald-100 text-emerald-800'}">${isStopped ? 'സ്റ്റോപ്പ്' : 'ആക്ടീവ്'}</span></td>
                 <td class="p-2 text-right text-slate-800">${(parseFloat(e.opening_advance || e.opening_balance) || 0).toLocaleString('en-IN')}</td>
                 <td class="p-2 text-right whitespace-nowrap">
+                  <button onclick="openEmployeeStopModal('${e.name}')" title="ജോലി നിർത്തൽ / സെറ്റിൽമെന്റ്" class="p-1 text-rose-600 hover:text-rose-800 cursor-pointer font-black text-sm">🛑</button>
                   <button onclick="openEditMasterItem('employee', '${e.name}')" title="തിരുത്തുക" class="p-1 text-blue-600 hover:text-blue-800 cursor-pointer">✏️</button>
                   <button onclick="deleteMasterItem('employee', '${e.name}')" title="ഡിലീറ്റ്" class="p-1 text-rose-600 hover:text-rose-800 cursor-pointer">🗑️</button>
                 </td>
@@ -2805,7 +2977,6 @@
       document.getElementById("unifiedPartyInput").value = "";
       onUnifiedPartySelected();
     }
-
     // HOME DASHBOARD TOTALS (ZERO-FIX IMPLEMENTED)
     function renderQuickTotalsAndRecent() {
       const selectedDate = getSelectedDate();
@@ -3112,7 +3283,7 @@
       pendingAction = null;
     }
 
-    // VERIFY PIN (DESKTOP LOGIN ROLE FIX IMPLEMENTED)
+    // VERIFY PIN (ROLE-SEPARATION: OPENS DESKTOP IN NEW TAB SAFELY)
     async function verifyPinAndExecute() {
       const pinVal = document.getElementById("pinInput").value.trim();
       const sessionPin = sessionStorage.getItem("ALNASSR_ACTIVE_PIN");
@@ -3121,10 +3292,9 @@
 
       if (pendingAction === 'open_desktop_portal') {
         if (pinVal === masterPin) {
-          sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
           sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
           closePinModal();
-          window.location.href = "index.html";
+          window.open("index.html", "_blank"); // ഡെസ്ക്ടോപ്പ് പുതിയ ടാബിൽ തുറക്കുന്നു
         } else {
           alert("അഡ്മിൻ മാസ്റ്റർ പിൻ തെറ്റാണ്!");
           document.getElementById("pinInput").value = "";
