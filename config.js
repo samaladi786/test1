@@ -35,8 +35,8 @@ window.SHOPS_CONFIG = [
   },
   {
     id: 'shop3',
-    name: 'MUSAD', //[cite: 1]
-    tagline: 'Musad Supermarket', //[cite: 1]
+    name: 'TAJ SPORTS', //[cite: 1]
+    tagline: 'TAJ SPORTS', //[cite: 1]
     url: 'https://garpkohthpeirdhcwthk.supabase.co', //[cite: 1]
     key: 'sb_publishable_TNhOZnpYuthYHmSJSlyhaw_R6RS1jcY', //[cite: 1]
     pin: '3333', //[cite: 1]
@@ -47,8 +47,8 @@ window.SHOPS_CONFIG = [
   },
   {
     id: 'shop4',
-    name: 'TAJ', //[cite: 1]
-    tagline: 'Taj Supermarket', //[cite: 1]
+    name: 'MUSAD SPORTS', //[cite: 1]
+    tagline: 'MUSAD SPORTS', //[cite: 1]
     url: 'https://mwxbakqoipcwblhukrfs.supabase.co', //[cite: 1]
     key: 'sb_publishable_OfuR1PeffNa4NWUhpwV3gg_pwqovQZT', //[cite: 1]
     pin: '2222', //[cite: 1]
