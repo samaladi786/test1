@@ -188,7 +188,7 @@
   <header id="mobileAppHeader" class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-3 py-2.5 transition-all duration-300">
     <div class="flex items-center justify-between gap-2">
       
-      <!-- LEFT: SHOP LOGO & SHOP SELECTOR DROPDOWN (FULL SPACE PRESERVED) -->
+      <!-- LEFT: SHOP LOGO & SHOP SELECTOR DROPDOWN -->
       <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
         <div id="shopLogoBox" class="w-9 h-9 rounded-xl bg-white/10 p-0.5 flex items-center justify-center border border-white/20 shrink-0 overflow-hidden shadow-sm">
           <img id="shopLogoImg" src="icon-192.png" alt="Shop Logo" class="w-full h-full object-contain rounded-lg" onerror="this.style.display='none'; document.getElementById('shopDefaultIcon').classList.remove('hidden');" />
@@ -209,7 +209,7 @@
 
       <!-- RIGHT: ACTION CONTROLS -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <!-- DESKTOP MASTER BUTTON (VISIBLE ON PC) -->
+        <!-- DESKTOP MASTER BUTTON (VISIBLE ONLY ON PC) -->
         <button onclick="openMasterModal()" title="മാസ്റ്റർ ഐറ്റങ്ങൾ (Customer, Vendor, Staff, Agent)" class="hidden lg:flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-bold touch-btn cursor-pointer">
           <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-400"></i>
           <span>മാസ്റ്റർ</span>
@@ -220,7 +220,6 @@
           <span class="hidden sm:inline">പോർട്ടൽ</span>
         </a>
 
-        <!-- REPORT BUTTON -->
         <button onclick="openReportModal()" title="റിപ്പോർട്ടുകൾ & സ്റ്റേറ്റ്മെന്റ്" class="px-2.5 py-1.5 bg-violet-700 hover:bg-violet-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
           <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
           <span>റിപ്പോർട്ട്</span>
@@ -453,16 +452,10 @@
 
     </div>
 
-    <!-- BOTTOM SECTION: CLICKABLE CARDS -->
+    <!-- BOTTOM SECTION: CLICKABLE CARDS (ORDER: 1. PURCHASE ➔ 2. CHILAV ➔ 3. SALES) -->
     <div class="space-y-2 pt-2">
       <div class="grid grid-cols-3 gap-1.5 text-center">
-        <div onclick="openTodaySalesModal()" class="bg-emerald-900/90 hover:bg-emerald-800 text-white rounded-2xl p-2 border border-emerald-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
-          <span class="text-[9px] text-emerald-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
-            സെയിൽസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
-          </span>
-          <span id="quickSaleTotal" class="text-xs font-black">0</span>
-        </div>
-
+        <!-- 1. PURCHASE CARD -->
         <div onclick="openTodayPurchaseModal()" class="bg-blue-900/90 hover:bg-blue-800 text-white rounded-2xl p-2 border border-blue-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
           <span class="text-[9px] text-blue-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
             പർച്ചേസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
@@ -470,11 +463,20 @@
           <span id="quickPurTotal" class="text-xs font-black">0</span>
         </div>
 
+        <!-- 2. EXPENSE CARD -->
         <div onclick="openTodayExpenseModal()" class="bg-amber-900/90 hover:bg-amber-800 text-white rounded-2xl p-2 border border-amber-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
           <span class="text-[9px] text-amber-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
             ചിലവ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
           </span>
           <span id="quickExpTotal" class="text-xs font-black">0</span>
+        </div>
+
+        <!-- 3. SALES CARD -->
+        <div onclick="openTodaySalesModal()" class="bg-emerald-900/90 hover:bg-emerald-800 text-white rounded-2xl p-2 border border-emerald-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
+          <span class="text-[9px] text-emerald-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
+            സെയിൽസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
+          </span>
+          <span id="quickSaleTotal" class="text-xs font-black">0</span>
         </div>
       </div>
 
@@ -528,14 +530,15 @@
       <span>മാസ്റ്റർ</span>
     </button>
   </nav>
+  <!-- ======================================================== -->
+  <!-- PART 2: ALL MODALS & POPUPS (REPORT, MASTER, BREAKDOWNS) -->
+  <!-- ======================================================== -->
 
-  <!-- ======================================================== -->
-  <!-- MODAL: REPORTS & STATEMENTS (COMPLETE POPUP) -->
-  <!-- ======================================================== -->
+  <!-- 1. REPORTS & STATEMENTS MODAL -->
   <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-4xl w-full bg-white p-3 sm:p-5 shadow-2xl rounded-3xl border space-y-2.5 my-auto max-h-[96vh] overflow-y-auto relative">
       
-      <!-- STICKY TOP MODAL CONTROLS -->
+      <!-- STICKY TOP CONTROLS -->
       <div class="sticky top-0 bg-white/95 backdrop-blur-sm border-b pb-2 pt-1 z-30 flex items-center justify-between no-print">
         <div class="flex flex-wrap items-center gap-1.5">
           <h3 class="text-xs sm:text-sm font-bold text-slate-800">📊 ബിസിനസ്സ് റിപ്പോർട്ട് & സ്റ്റേറ്റ്മെന്റ്</h3>
@@ -594,7 +597,7 @@
         </div>
       </div>
 
-      <!-- PRINTABLE REPORT CONTENT -->
+      <!-- PRINTABLE REPORT CONTAINER -->
       <div id="reportPrintContainer" class="space-y-2 text-xs sm:text-sm">
         <div class="text-center border-b pb-1.5 flex justify-between items-center">
           <div>
@@ -606,6 +609,7 @@
           </div>
         </div>
 
+        <!-- 8 SUMMARY CARDS -->
         <div class="grid grid-cols-4 sm:grid-cols-8 gap-1 font-bold">
           <div class="bg-slate-200/90 p-1.5 rounded-lg border border-slate-400 text-center">
             <span class="text-[8.5px] font-black text-slate-800 block uppercase">തുടക്ക ഫണ്ട്</span>
@@ -636,11 +640,12 @@
             <h3 id="repSalaryBal" class="text-[10px] font-black text-purple-900 leading-tight">0</h3>
           </div>
           <div class="bg-slate-100 p-1.5 rounded-lg border border-slate-300 text-center">
-            <span class="text-[8.5px] font-black text-slate-800 uppercase block">ലിക്വിഡ് ഫണ്ട്</span>
+            <span class="text-[8.5px] font-black text-slate-800 block uppercase">ലിക്വിഡ് ഫണ്ട്</span>
             <h3 id="repLiquidBal" class="text-[10px] font-black text-slate-900 leading-tight">0</h3>
           </div>
         </div>
 
+        <!-- 2-COLUMN FLOW TABLES -->
         <div class="report-continuous-flow border-t pt-1.5">
           <div class="report-block bg-slate-50 p-2 rounded-xl border border-emerald-200 space-y-1">
             <h3 class="font-extrabold text-emerald-900 text-[11px] flex items-center justify-between border-b pb-0.5">
@@ -687,6 +692,7 @@
           </div>
         </div>
 
+        <!-- PRINT SIGNATURE BLOCK -->
         <div class="pt-5 mt-4 border-t-2 border-slate-900 flex justify-between items-end text-[10.5px] font-black">
           <div class="text-left space-y-6">
             <div>...................................................................<br>ഷോപ്പ് ഇൻ-ചാർജ് ഒപ്പ്</div>
@@ -744,7 +750,7 @@
         </div>
       </div>
 
-      <!-- BOTTOM CLOSE & PRINT ACTIONS -->
+      <!-- MODAL BOTTOM ACTIONS -->
       <div class="pt-2 no-print flex gap-2 justify-center flex-wrap border-t">
         <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
           🖨️ PDF ആയി സേവ് / പ്രിന്റ്
@@ -759,7 +765,7 @@
     </div>
   </div>
 
-  <!-- MODAL: MASTER MANAGEMENT -->
+  <!-- 2. MASTER RECORDS MODAL -->
   <div id="masterModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-3xl w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[94vh] overflow-y-auto relative">
       
@@ -811,7 +817,7 @@
     </div>
   </div>
 
-  <!-- MODAL: EDIT MASTER ITEM (NAME, CASH/CREDIT, AGENT, OPENING, SALARY) -->
+  <!-- 3. EDIT MASTER ITEM MODAL (SUPPORTS CASH/CREDIT TOGGLE & AGENT) -->
   <div id="editMasterModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -828,7 +834,7 @@
           <input type="text" id="editMasterName" oninput="this.value = this.value.toUpperCase();" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold uppercase-input outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
-        <!-- CASH / CREDIT TYPE TOGGLE FOR CUSTOMER & VENDOR -->
+        <!-- CASH / CREDIT SELECTOR -->
         <div id="editMasterPartyTypeBox" class="hidden">
           <label class="block font-bold text-slate-700 mb-0.5">ഇടപാട് തരം (Account Type):</label>
           <select id="editMasterPartyType" class="w-full p-2.5 rounded-xl border bg-slate-50 font-black outline-none focus:ring-2 focus:ring-emerald-500">
@@ -865,7 +871,7 @@
     </div>
   </div>
 
-  <!-- MODAL: NEW CREDIT CUSTOMER -->
+  <!-- 4. NEW CUSTOMER MODAL -->
   <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -901,7 +907,7 @@
     </div>
   </div>
 
-  <!-- MODAL: NEW VENDOR -->
+  <!-- 5. NEW VENDOR MODAL -->
   <div id="newVendorModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -932,7 +938,7 @@
     </div>
   </div>
 
-  <!-- MODAL: NEW EMPLOYEE -->
+  <!-- 6. NEW EMPLOYEE MODAL -->
   <div id="newEmployeeModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -966,7 +972,7 @@
     </div>
   </div>
 
-  <!-- MODAL: CASH / BANK TRANSFER -->
+  <!-- 7. CASH / BANK TRANSFER MODAL -->
   <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
@@ -996,7 +1002,7 @@
     </div>
   </div>
 
-  <!-- MODAL: STAFF DEPOSIT -->
+  <!-- 8. STAFF DEPOSIT MODAL -->
   <div id="staffDepositModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1031,7 +1037,7 @@
     </div>
   </div>
 
-  <!-- MODAL: EDIT TRANSACTION -->
+  <!-- 9. EDIT TRANSACTION MODAL -->
   <div id="editTransactionModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1070,7 +1076,7 @@
     </div>
   </div>
 
-  <!-- PIN VERIFY MODAL -->
+  <!-- 10. PIN VERIFY MODAL -->
   <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
       <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
@@ -1083,7 +1089,7 @@
     </div>
   </div>
 
-  <!-- POPUP MODALS FOR DETAILS -->
+  <!-- 11. TODAY'S SALES BREAKDOWN MODAL -->
   <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1104,6 +1110,7 @@
     </div>
   </div>
 
+  <!-- 12. TODAY'S PURCHASES BREAKDOWN MODAL -->
   <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1124,6 +1131,7 @@
     </div>
   </div>
 
+  <!-- 13. TODAY'S EXPENSES BREAKDOWN MODAL -->
   <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1144,7 +1152,7 @@
     </div>
   </div>
   <!-- ======================================================== -->
-  <!-- PART 2: COMPLETE JAVASCRIPT LOGIC ENGINE -->
+  <!-- PART 3: COMPLETE JAVASCRIPT LOGIC ENGINE -->
   <!-- ======================================================== -->
   <script>
     let SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : [];
@@ -1169,7 +1177,7 @@
     let currentStatementDataForWA = null;
     let currentMasterTab = 'customer';
 
-    // PREVENT BACK-FORWARD CACHE (BFCACHE) POLLUTION
+    // PREVENT BACK-FORWARD CACHE (BFCACHE)
     window.addEventListener('pageshow', function (event) {
       if (event.persisted) {
         window.location.reload();
@@ -2763,6 +2771,1073 @@
       document.getElementById("expSalNote").value = "";
       document.getElementById("unifiedPartyInput").value = "";
       onUnifiedPartySelected();
+    }
+
+    // REPORTS & STATEMENTS ENGINE
+    function openReportModal() {
+      const modal = document.getElementById("reportModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.style.display = "flex";
+      }
+
+      const dashDate = document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate();
+      if (document.getElementById("repFilterDate")) document.getElementById("repFilterDate").value = dashDate;
+      if (document.getElementById("repFilterMonth")) document.getElementById("repFilterMonth").value = dashDate.substring(0, 7);
+      if (document.getElementById("statMonth")) document.getElementById("statMonth").value = dashDate.substring(0, 7);
+
+      switchReportMode(currentReportMode || 'daily');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeReportModal() {
+      const modal = document.getElementById("reportModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+      }
+    }
+
+    function switchReportMode(mode) {
+      currentReportMode = mode;
+      const repDailyBtn = document.getElementById("repDailyBtn");
+      const repMonthlyBtn = document.getElementById("repMonthlyBtn");
+      const repStatBtn = document.getElementById("repStatBtn");
+      const statementControlBar = document.getElementById("statementControlBar");
+      const statementPrintContainer = document.getElementById("statementPrintContainer");
+      const reportPrintContainer = document.getElementById("reportPrintContainer");
+      const reportDateSelectorBar = document.getElementById("reportDateSelectorBar");
+      const repFilterDate = document.getElementById("repFilterDate");
+      const repFilterMonth = document.getElementById("repFilterMonth");
+      const repFilterLabel = document.getElementById("repFilterLabel");
+
+      if (repDailyBtn) repDailyBtn.className = "px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
+      if (repMonthlyBtn) repMonthlyBtn.className = "px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
+      if (repStatBtn) repStatBtn.className = "px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
+
+      if (mode === 'daily') {
+        if (repDailyBtn) repDailyBtn.className = "px-2 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black";
+        if (reportDateSelectorBar) reportDateSelectorBar.classList.remove("hidden");
+        if (repFilterDate) repFilterDate.classList.remove("hidden");
+        if (repFilterMonth) repFilterMonth.classList.add("hidden");
+        if (repFilterLabel) repFilterLabel.innerText = "📅 തീയതി മാറ്റുക:";
+        if (statementControlBar) statementControlBar.classList.add("hidden");
+        if (statementPrintContainer) statementPrintContainer.classList.add("hidden");
+        if (reportPrintContainer) reportPrintContainer.classList.remove("hidden");
+        renderReportData('daily');
+      } else if (mode === 'monthly') {
+        if (repMonthlyBtn) repMonthlyBtn.className = "px-2 py-1 rounded-lg bg-blue-600 text-white shadow transition cursor-pointer font-black";
+        if (reportDateSelectorBar) reportDateSelectorBar.classList.remove("hidden");
+        if (repFilterDate) repFilterDate.classList.add("hidden");
+        if (repFilterMonth) repFilterMonth.classList.remove("hidden");
+        if (repFilterLabel) repFilterLabel.innerText = "📅 മാസം മാറ്റുക:";
+        if (statementControlBar) statementControlBar.classList.add("hidden");
+        if (statementPrintContainer) statementPrintContainer.classList.add("hidden");
+        if (reportPrintContainer) reportPrintContainer.classList.remove("hidden");
+        renderReportData('monthly');
+      } else if (mode === 'statement') {
+        if (repStatBtn) repStatBtn.className = "px-2 py-1 rounded-lg bg-indigo-600 text-white shadow transition cursor-pointer font-black";
+        if (reportDateSelectorBar) reportDateSelectorBar.classList.add("hidden");
+        if (statementControlBar) statementControlBar.classList.remove("hidden");
+        if (statementPrintContainer) statementPrintContainer.classList.remove("hidden");
+        if (reportPrintContainer) reportPrintContainer.classList.add("hidden");
+        populateStatementPartyDatalist();
+        generateStatement();
+      }
+    }
+
+    function onReportDateChanged() { renderReportData('daily'); }
+    function onReportMonthChanged() { renderReportData('monthly'); }
+
+    function formatShortName(name) {
+      if (!name) return '';
+      let s = String(name).trim();
+      return s.length > 17 ? s.substring(0, 16) + '..' : s;
+    }
+
+    function renderReportData(mode) {
+      let targetDate = document.getElementById("repFilterDate")?.value || getSaudiBusinessDate();
+      let targetMonth = document.getElementById("repFilterMonth")?.value || targetDate.substring(0, 7);
+
+      let titleText = "";
+      let dateBadgeText = "";
+      let dateCondition;
+      let isBeforeTargetCondition;
+      let isTargetOrBeforeCondition;
+
+      if (mode === 'daily') {
+        dateCondition = (dStr) => cleanDate(dStr) === targetDate;
+        isBeforeTargetCondition = (dStr) => cleanDate(dStr) < targetDate;
+        isTargetOrBeforeCondition = (dStr) => cleanDate(dStr) <= targetDate;
+        titleText = "ഡെയ്‌ലി റിപ്പോർട്ട് (Daily Report)";
+        dateBadgeText = `തീയതി: ${targetDate}`;
+      } else {
+        dateCondition = (dStr) => cleanDate(dStr).startsWith(targetMonth);
+        isBeforeTargetCondition = (dStr) => cleanDate(dStr) < `${targetMonth}-01`;
+        isTargetOrBeforeCondition = (dStr) => cleanDate(dStr).substring(0, 7) <= targetMonth;
+        titleText = `മന്ത്ലി റിപ്പോർട്ട് (${targetMonth})`;
+        dateBadgeText = `മാസം: ${targetMonth}`;
+      }
+
+      const repModeTitle = document.getElementById("reportModeTitle");
+      const repDateBadge = document.getElementById("reportDateBadgeLabel");
+      if (repModeTitle) repModeTitle.innerText = titleText;
+      if (repDateBadge) repDateBadge.innerText = dateBadgeText;
+
+      let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
+      const offlineQueue = getOfflineQueue();
+      offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+
+      let totSale = 0, totPur = 0, totExp = 0, totSal = 0;
+      let cashSalesMap = {};
+      let creditSalesMap = {};
+      let cashPurMap = {};
+      let creditPurMap = {};
+      let salariesMap = {};
+      let expensesMap = {};
+
+      let custCashReceipt = 0, custBankReceipt = 0;
+      let vendCashPay = 0, vendBankPay = 0;
+
+      let dayOpeningCash = openingSettings.openingCash;
+      let dayOpeningBank = openingSettings.openingBank;
+      let targetClosingCash = openingSettings.openingCash;
+      let targetClosingBank = openingSettings.openingBank;
+
+      allTx.forEach(t => {
+        if (!t) return;
+        const tDate = cleanDate(t.date);
+
+        if (isBeforeTargetCondition(tDate)) {
+          dayOpeningCash += (parseFloat(t.cash_amount) || 0);
+          dayOpeningBank += (parseFloat(t.bank_amount) || 0);
+        }
+
+        if (isTargetOrBeforeCondition(tDate)) {
+          targetClosingCash += (parseFloat(t.cash_amount) || 0);
+          targetClosingBank += (parseFloat(t.bank_amount) || 0);
+        }
+
+        if (dateCondition(t.date)) {
+          if (t.type === 'sale') {
+            let cCash = Math.abs(parseFloat(t.cash_amount) || 0);
+            let cBank = Math.abs(parseFloat(t.bank_amount) || 0);
+            let cCr = parseFloat(t.credit_amount) || 0;
+            let rawName = t.party_name || "Unknown";
+            let cleanN = cleanPartyName(rawName);
+
+            let cust = (customersList || []).find(c => c && cleanPartyName(c.name) === cleanN);
+            let isCreditCust = cust && (cust.type || '').toLowerCase() === 'credit';
+
+            if (isCreditCust) {
+              totSale += cCr;
+              custCashReceipt += cCash;
+              custBankReceipt += cBank;
+              if (!creditSalesMap[rawName]) creditSalesMap[rawName] = { name: rawName, cash: 0, bank: 0, cr: 0 };
+              creditSalesMap[rawName].cash += cCash;
+              creditSalesMap[rawName].bank += cBank;
+              creditSalesMap[rawName].cr += cCr;
+            } else {
+              let lineTotal = cCash + cBank + cCr;
+              totSale += lineTotal;
+              if (!cashSalesMap[rawName]) cashSalesMap[rawName] = { name: rawName, cash: 0, bank: 0, total: 0 };
+              cashSalesMap[rawName].cash += cCash;
+              cashSalesMap[rawName].bank += cBank;
+              cashSalesMap[rawName].total += lineTotal;
+            }
+          } else if (t.type === 'purchase') {
+            let pCash = Math.abs(parseFloat(t.cash_amount) || 0);
+            let pBank = Math.abs(parseFloat(t.bank_amount) || 0);
+            let pCr = parseFloat(t.credit_amount) || 0;
+            let rawName = t.party_name || "Unknown";
+            let cleanN = cleanPartyName(rawName);
+
+            let vend = (vendorsList || []).find(v => v && cleanPartyName(v.name) === cleanN);
+            let isCreditVend = vend && (vend.type || '').toLowerCase() === 'credit';
+
+            if (isCreditVend) {
+              totPur += pCr;
+              vendCashPay += pCash;
+              vendBankPay += pBank;
+              if (!creditPurMap[rawName]) creditPurMap[rawName] = { name: rawName, cash: 0, bank: 0, cr: 0 };
+              creditPurMap[rawName].cash += pCash;
+              creditPurMap[rawName].bank += pBank;
+              creditPurMap[rawName].cr += pCr;
+            } else {
+              let lineTotal = pCash + pBank + pCr;
+              totPur += lineTotal;
+              if (!cashPurMap[rawName]) cashPurMap[rawName] = { name: rawName, cash: 0, bank: 0, total: 0 };
+              cashPurMap[rawName].cash += pCash;
+              cashPurMap[rawName].bank += pBank;
+              cashPurMap[rawName].total += lineTotal;
+            }
+          } else if (t.type === 'expense') {
+            let eC = Math.abs(parseFloat(t.cash_amount) || 0);
+            let eB = Math.abs(parseFloat(t.bank_amount) || 0);
+            let lineTotal = eC + eB;
+            totExp += lineTotal;
+
+            let rawExp = t.party_name || "Expense";
+            let cleanExp = rawExp.split(' (')[0].trim();
+            if (!expensesMap[cleanExp]) expensesMap[cleanExp] = { name: cleanExp, cash: 0, bank: 0, total: 0 };
+            expensesMap[cleanExp].cash += eC;
+            expensesMap[cleanExp].bank += eB;
+            expensesMap[cleanExp].total += lineTotal;
+          } else if (t.type === 'salary') {
+            let rawC = parseFloat(t.cash_amount) || 0;
+            let rawB = parseFloat(t.bank_amount) || 0;
+
+            if (rawC <= 0 && rawB <= 0) {
+              let posC = Math.abs(rawC);
+              let posB = Math.abs(rawB);
+              let lineTotal = posC + posB;
+              totSal += lineTotal;
+
+              let rawSal = t.party_name || "Staff";
+              let cleanStaff = rawSal.replace(/^Staff:\s*/i, "").split(' -')[0].trim();
+              if (!salariesMap[cleanStaff]) salariesMap[cleanStaff] = { name: cleanStaff, cash: 0, bank: 0, total: 0 };
+              salariesMap[cleanStaff].cash += posC;
+              salariesMap[cleanStaff].bank += posB;
+              salariesMap[cleanStaff].total += lineTotal;
+            }
+          }
+        }
+      });
+
+      let totalCustOutstanding = 0;
+      (customersList || []).forEach(cust => {
+        if (cust && (cust.type || '').toLowerCase() === 'credit') {
+          let bal = parseFloat(cust.opening_balance) || 0;
+          let cName = cleanPartyName(cust.name);
+          allTx.forEach(t => {
+            if (t && t.type === 'sale' && cleanPartyName(t.party_name) === cName) {
+              bal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
+            }
+          });
+          totalCustOutstanding += bal;
+        }
+      });
+
+      let totalVendOutstanding = 0;
+      (vendorsList || []).forEach(vend => {
+        if (vend && (vend.type || '').toLowerCase() === 'credit') {
+          let bal = parseFloat(vend.opening_balance) || 0;
+          let vName = cleanPartyName(vend.name);
+          allTx.forEach(t => {
+            if (t && t.type === 'purchase' && cleanPartyName(t.party_name) === vName) {
+              bal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
+            }
+          });
+          totalVendOutstanding += bal;
+        }
+      });
+
+      let totalEmpPending = 0;
+      (employeesList || []).forEach(emp => {
+        totalEmpPending += calculateEmployeePendingBalance(emp, targetDate);
+      });
+
+      let totalDayOpening = dayOpeningCash + dayOpeningBank;
+      let totalTargetClosing = targetClosingCash + targetClosingBank;
+
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+      setVal("repOpeningLiquidBal", totalDayOpening.toLocaleString('en-IN'));
+      setVal("repTotalSale", totSale.toLocaleString('en-IN'));
+      setVal("repTotalPurchase", totPur.toLocaleString('en-IN'));
+      setVal("repTotalExpense", (totExp + totSal).toLocaleString('en-IN'));
+      setVal("repCustBal", totalCustOutstanding.toLocaleString('en-IN'));
+      setVal("repVendorBal", totalVendOutstanding.toLocaleString('en-IN'));
+      setVal("repSalaryBal", totalEmpPending.toLocaleString('en-IN'));
+      setVal("repLiquidBal", totalTargetClosing.toLocaleString('en-IN'));
+
+      setVal("salesGrandBadge", `ആകെ: ${totSale.toLocaleString('en-IN')}`);
+      setVal("purchaseGrandBadge", `ആകെ: ${totPur.toLocaleString('en-IN')}`);
+
+      // TABLES IN MODAL
+      const cashSalesArr = Object.values(cashSalesMap);
+      let rCSCash = 0, rCSBank = 0, rCSTotal = 0;
+      let cashSalesHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-emerald-100 text-slate-900 font-black border-b"><th class="p-1 text-left">പേര്</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
+      if (cashSalesArr.length === 0) cashSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      else {
+        cashSalesArr.forEach(s => {
+          rCSCash += s.cash; rCSBank += s.bank; rCSTotal += s.total;
+          cashSalesHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td><td class="p-1 text-emerald-800">${s.cash}</td><td class="p-1 text-blue-800">${s.bank}</td><td class="p-1 text-right font-black text-slate-950">${s.total}</td></tr>`;
+        });
+      }
+      cashSalesHtml += `</tbody><tfoot><tr class="bg-emerald-50 text-emerald-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCSCash}</td><td class="p-1">${rCSBank}</td><td class="p-1 text-right text-slate-950">${rCSTotal}</td></tr></tfoot></table>`;
+      const repCS = document.getElementById("repCashSalesList");
+      if (repCS) repCS.innerHTML = cashSalesHtml;
+
+      const creditSalesArr = Object.values(creditSalesMap);
+      let rCrSCash = 0, rCrSBank = 0, rCrSCr = 0;
+      let creditSalesHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-amber-100 text-slate-900 font-black border-b"><th class="p-1 text-left">പേര്</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ക്രെഡിറ്റ്</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
+      if (creditSalesArr.length === 0) creditSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      else {
+        creditSalesArr.forEach(s => {
+          rCrSCash += s.cash; rCrSBank += s.bank; rCrSCr += s.cr;
+          creditSalesHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td><td class="p-1 text-emerald-800">${s.cash}</td><td class="p-1 text-blue-800">${s.bank}</td><td class="p-1 text-right font-black text-amber-900">${s.cr}</td></tr>`;
+        });
+      }
+      creditSalesHtml += `</tbody><tfoot><tr class="bg-amber-50 text-amber-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCrSCash}</td><td class="p-1">${rCrSBank}</td><td class="p-1 text-right text-amber-950">${rCrSCr}</td></tr></tfoot></table>`;
+      const repCrS = document.getElementById("repCreditSalesList");
+      if (repCrS) repCrS.innerHTML = creditSalesHtml;
+
+      const cashPurArr = Object.values(cashPurMap);
+      let rCPCash = 0, rCPBank = 0, rCPTotal = 0;
+      let cashPurHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-blue-100 text-slate-900 font-black border-b"><th class="p-1 text-left">വെണ്ടർ</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
+      if (cashPurArr.length === 0) cashPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      else {
+        cashPurArr.forEach(p => {
+          rCPCash += p.cash; rCPBank += p.bank; rCPTotal += p.total;
+          cashPurHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td><td class="p-1 text-blue-800">${p.cash}</td><td class="p-1 text-indigo-800">${p.bank}</td><td class="p-1 text-right font-black text-slate-950">${p.total}</td></tr>`;
+        });
+      }
+      cashPurHtml += `</tbody><tfoot><tr class="bg-blue-50 text-blue-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCPCash}</td><td class="p-1">${rCPBank}</td><td class="p-1 text-right text-slate-950">${rCPTotal}</td></tr></tfoot></table>`;
+      const repCP = document.getElementById("repCashPurchasesList");
+      if (repCP) repCP.innerHTML = cashPurHtml;
+
+      const creditPurArr = Object.values(creditPurMap);
+      let rCrPCash = 0, rCrPBank = 0, rCrPCr = 0;
+      let creditPurHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-indigo-100 text-slate-900 font-black border-b"><th class="p-1 text-left">വെണ്ടർ</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ക്രെഡിറ്റ്</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
+      if (creditPurArr.length === 0) creditPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      else {
+        creditPurArr.forEach(p => {
+          rCrPCash += p.cash; rCrPBank += p.bank; rCrPCr += p.cr;
+          creditPurHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td><td class="p-1 text-blue-800">${p.cash}</td><td class="p-1 text-indigo-800">${p.bank}</td><td class="p-1 text-right font-black text-indigo-950">${p.cr}</td></tr>`;
+        });
+      }
+      creditPurHtml += `</tbody><tfoot><tr class="bg-indigo-50 text-indigo-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCrPCash}</td><td class="p-1">${rCrPBank}</td><td class="p-1 text-right text-indigo-950">${rCrPCr}</td></tr></tfoot></table>`;
+      const repCrP = document.getElementById("repCreditPurchasesList");
+      if (repCrP) repCrP.innerHTML = creditPurHtml;
+
+      const salArr = Object.values(salariesMap);
+      let rSalCash = 0, rSalBank = 0, rSalTotal = 0;
+      let salHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-purple-100 text-slate-900 font-black border-b"><th class="p-1 text-left">സ്റ്റാഫ്</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
+      if (salArr.length === 0) salHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
+      else {
+        salArr.forEach(s => {
+          rSalCash += s.cash; rSalBank += s.bank; rSalTotal += s.total;
+          salHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td><td class="p-1 text-purple-800">${s.cash}</td><td class="p-1 text-blue-800">${s.bank}</td><td class="p-1 text-right font-black text-purple-950">${s.total}</td></tr>`;
+        });
+      }
+      salHtml += `</tbody><tfoot><tr class="bg-purple-50 text-purple-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rSalCash}</td><td class="p-1">${rSalBank}</td><td class="p-1 text-right text-purple-950">${rSalTotal}</td></tr></tfoot></table>`;
+      const repSal = document.getElementById("repSalariesList");
+      if (repSal) repSal.innerHTML = salHtml;
+
+      const expArr = Object.values(expensesMap);
+      let rExpCash = 0, rExpBank = 0, rExpTotal = 0;
+      let expHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-amber-100 text-slate-900 font-black border-b"><th class="p-1 text-left">ഇനം</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
+      if (expArr.length === 0) expHtml += `<tr><td colspan="2" class="p-1 text-center text-slate-400">ചിലവുകൾ ഇല്ല</td></tr>`;
+      else {
+        expArr.forEach(e => {
+          rExpCash += e.cash; rExpBank += e.bank; rExpTotal += e.total;
+          expHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${e.name}">${formatShortName(e.name)}</td><td class="p-1 text-amber-800">${e.cash}</td><td class="p-1 text-blue-800">${e.bank}</td><td class="p-1 text-right font-black text-slate-950">${e.total}</td></tr>`;
+        });
+      }
+      expHtml += `</tbody><tfoot><tr class="bg-amber-50 text-amber-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rExpCash}</td><td class="p-1">${rExpBank}</td><td class="p-1 text-right text-slate-950">${rExpTotal}</td></tr></tfoot></table>`;
+      const repExp = document.getElementById("repExpensesList");
+      if (repExp) repExp.innerHTML = expHtml;
+
+      currentReportDataForWA = {
+        shopName: currentShop.name,
+        title: titleText,
+        dateLabel: dateBadgeText,
+        sale: totSale.toLocaleString('en-IN'),
+        purchase: totPur.toLocaleString('en-IN'),
+        expense: (totExp + totSal).toLocaleString('en-IN'),
+        cash: targetClosingCash.toLocaleString('en-IN'),
+        bank: targetClosingBank.toLocaleString('en-IN'),
+        custPaid: (custCashReceipt + custBankReceipt).toLocaleString('en-IN'),
+        custBal: totalCustOutstanding.toLocaleString('en-IN'),
+        vendorPaid: (vendCashPay + vendBankPay).toLocaleString('en-IN'),
+        vendorBal: totalVendOutstanding.toLocaleString('en-IN'),
+        empBal: totalEmpPending.toLocaleString('en-IN')
+      };
+    }
+
+    // STATEMENT ENGINE WITH ALL CUSTOMERS / AGENT SUPPORT
+    function populateStatementPartyDatalist() {
+      const type = document.getElementById("statPartyType").value;
+      const dl = document.getElementById("statPartyDatalist");
+      const inp = document.getElementById("statPartyInput");
+      dl.innerHTML = "";
+      if (inp) inp.value = "";
+
+      let firstParty = "";
+      if (type === 'customer') {
+        const creditCustomers = (customersList || []).filter(c => c && (c.type || '').toLowerCase() === 'credit');
+        dl.innerHTML += `<option value="ALL CUSTOMERS">`;
+        creditCustomers.forEach(c => {
+          if (c && c.name) dl.innerHTML += `<option value="${c.name.toUpperCase()}">`;
+        });
+        if (inp) inp.value = "ALL CUSTOMERS";
+      } else if (type === 'vendor') {
+        dl.innerHTML += `<option value="ALL VENDORS">`;
+        vendorsList.forEach(v => {
+          if (v && v.name) dl.innerHTML += `<option value="${v.name.toUpperCase()}">`;
+        });
+        if (inp) inp.value = "ALL VENDORS";
+      } else if (type === 'employee') {
+        employeesList.forEach(em => {
+          if (em && em.name) {
+            let label = em.status === 'stopped' ? `${em.name.toUpperCase()} (Stopped)` : em.name.toUpperCase();
+            dl.innerHTML += `<option value="${label}">`;
+            if (!firstParty) firstParty = label;
+          }
+        });
+        if (inp && firstParty) inp.value = firstParty;
+      } else if (type === 'agent') {
+        let allAgentNames = new Set();
+        (agentsList || []).forEach(a => { if (a && a.name) allAgentNames.add(a.name.trim().toUpperCase()); });
+        (customersList || []).forEach(c => { 
+          if (c && c.agent_id) {
+            const ag = agentsList.find(a => String(a.id) === String(c.agent_id));
+            if (ag && ag.name) allAgentNames.add(ag.name.trim().toUpperCase());
+          }
+        });
+
+        allAgentNames.forEach(ag => {
+          dl.innerHTML += `<option value="${ag}">`;
+          if (!firstParty) firstParty = ag;
+        });
+        if (inp && firstParty) inp.value = firstParty;
+      }
+
+      generateStatement();
+    }
+
+    function generateStatement() {
+      const type = document.getElementById("statPartyType").value;
+      const partyVal = (document.getElementById("statPartyInput")?.value || "").trim().toUpperCase();
+      const monthVal = (document.getElementById("statMonth")?.value || "").trim();
+
+      if (!partyVal || !monthVal) return;
+
+      const fromDate = `${monthVal}-01`;
+      const toDate = `${monthVal}-31`;
+
+      let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
+      const offlineQueue = getOfflineQueue();
+      offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+      allTx.sort((a, b) => (cleanDate(a.date) || '').localeCompare(cleanDate(b.date) || ''));
+
+      let partyName = partyVal;
+      let openingBal = 0;
+      let runningBal = 0;
+      let totalSalesOrBills = 0;
+      let totalPaidOrCollected = 0;
+      let statementRows = [];
+      let isAgentMode = (type === 'agent');
+      let isAllVendorsMode = (type === 'vendor' && (partyVal === 'ALL VENDORS' || partyVal === 'ALL'));
+      let isAllCustomersMode = (type === 'customer' && (partyVal === 'ALL CUSTOMERS' || partyVal === 'ALL'));
+      let agentCustomersSummary = [];
+      let vendorsConsolidatedSummary = [];
+      let customersConsolidatedSummary = [];
+
+      if (type === 'customer' && !isAllCustomersMode) {
+        const custClean = cleanPartyName(partyVal);
+        const cust = customersList.find(c => c && cleanPartyName(c.name) === custClean);
+        partyName = cust ? cust.name.toUpperCase() : partyVal;
+        openingBal = parseFloat(cust?.opening_balance) || 0;
+
+        allTx.forEach(t => {
+          let tDate = cleanDate(t.date);
+          if (t && cleanPartyName(t.party_name) === custClean && t.type === 'sale') {
+            if (tDate < fromDate) {
+              openingBal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
+            }
+          }
+        });
+
+        runningBal = openingBal;
+
+        allTx.forEach(t => {
+          let tDate = cleanDate(t.date);
+          if (t && cleanPartyName(t.party_name) === custClean && t.type === 'sale') {
+            if (tDate >= fromDate && tDate <= toDate) {
+              const debit = parseFloat(t.credit_amount) || 0;
+              const credit = (parseFloat(t.cash_amount) || 0) + (parseFloat(t.bank_amount) || 0);
+              totalSalesOrBills += debit;
+              totalPaidOrCollected += credit;
+              runningBal += debit - credit;
+
+              statementRows.push({
+                date: tDate,
+                desc: debit > 0 ? 'Credit Sale Bill' : 'Collection Receipt',
+                cash: parseFloat(t.cash_amount) || 0,
+                bank: parseFloat(t.bank_amount) || 0,
+                bill: debit,
+                bal: runningBal
+              });
+            }
+          }
+        });
+      } else if (isAllCustomersMode) {
+        partyName = `TOTAL CREDIT CUSTOMERS MONTHLY STATEMENT`;
+        let totalCustOpening = 0;
+        let totalCustSales = 0;
+        let totalCustPaid = 0;
+        let totalCustClosing = 0;
+
+        const creditCustomers = (customersList || []).filter(c => c && (c.type || '').toLowerCase() === 'credit');
+
+        creditCustomers.forEach(cust => {
+          let custOpeningBal = parseFloat(cust.opening_balance) || 0;
+          let periodCredit = 0;
+          let periodCash = 0;
+          let periodBank = 0;
+          let cName = cleanPartyName(cust.name);
+
+          allTx.forEach(t => {
+            if (t && cleanPartyName(t.party_name) === cName && t.type === 'sale') {
+              const tDate = cleanDate(t.date);
+              const cr = parseFloat(t.credit_amount) || 0;
+              const ca = Math.abs(parseFloat(t.cash_amount) || 0);
+              const ba = Math.abs(parseFloat(t.bank_amount) || 0);
+
+              if (tDate < fromDate) {
+                custOpeningBal += (cr - ca - ba);
+              } else if (tDate.startsWith(monthVal)) {
+                periodCredit += cr;
+                periodCash += ca;
+                periodBank += ba;
+              }
+            }
+          });
+
+          const periodPaid = periodCash + periodBank;
+          const custClosingBal = custOpeningBal + periodCredit - periodPaid;
+
+          const hasActivityOrBalance = (
+            Math.abs(custOpeningBal) > 0.01 ||
+            periodCredit > 0.01 ||
+            periodPaid > 0.01 ||
+            Math.abs(custClosingBal) > 0.01
+          );
+          if (!hasActivityOrBalance) return;
+
+          totalCustOpening += custOpeningBal;
+          totalCustSales += periodCredit;
+          totalCustPaid += periodPaid;
+          totalCustClosing += custClosingBal;
+
+          customersConsolidatedSummary.push({
+            name: cust.name,
+            opening: custOpeningBal,
+            sales: periodCredit,
+            cash: periodCash,
+            bank: periodBank,
+            paid: periodPaid,
+            closing: custClosingBal
+          });
+        });
+
+        customersConsolidatedSummary.sort((a, b) => b.closing - a.closing);
+
+        openingBal = totalCustOpening;
+        totalSalesOrBills = totalCustSales;
+        totalPaidOrCollected = totalCustPaid;
+        runningBal = totalCustClosing;
+      } else if (type === 'vendor' && !isAllVendorsMode) {
+        const vendClean = cleanPartyName(partyVal);
+        const vend = vendorsList.find(v => v && cleanPartyName(v.name) === vendClean);
+        partyName = vend ? vend.name.toUpperCase() : partyVal;
+        openingBal = parseFloat(vend?.opening_balance) || 0;
+
+        allTx.forEach(t => {
+          let tDate = cleanDate(t.date);
+          if (t && cleanPartyName(t.party_name) === vendClean && t.type === 'purchase') {
+            if (tDate < fromDate) {
+              openingBal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
+            }
+          }
+        });
+
+        runningBal = openingBal;
+
+        allTx.forEach(t => {
+          let tDate = cleanDate(t.date);
+          if (t && cleanPartyName(t.party_name) === vendClean && t.type === 'purchase') {
+            if (tDate >= fromDate && tDate <= toDate) {
+              const debit = parseFloat(t.credit_amount) || 0;
+              const paid = Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+              totalSalesOrBills += debit;
+              totalPaidOrCollected += paid;
+              runningBal += debit - paid;
+
+              statementRows.push({
+                date: tDate,
+                desc: debit > 0 ? 'Credit Purchase' : 'Payment Disbursed',
+                cash: Math.abs(parseFloat(t.cash_amount) || 0),
+                bank: Math.abs(parseFloat(t.bank_amount) || 0),
+                bill: debit,
+                bal: runningBal
+              });
+            }
+          }
+        });
+      } else if (isAllVendorsMode) {
+        partyName = `TOTAL VENDORS MONTHLY STATEMENT`;
+        let totalVendOpening = 0;
+        let totalVendPurchases = 0;
+        let totalVendPaid = 0;
+        let totalVendClosing = 0;
+
+        const creditVendors = vendorsList.filter(v => v && (v.type === 'credit' || !v.type));
+
+        creditVendors.forEach(vend => {
+          let vendOpeningBal = parseFloat(vend.opening_balance) || 0;
+          let periodCredit = 0;
+          let periodCash = 0;
+          let periodBank = 0;
+          let vName = cleanPartyName(vend.name);
+
+          allTx.forEach(t => {
+            if (t && cleanPartyName(t.party_name) === vName && t.type === 'purchase') {
+              const tDate = cleanDate(t.date);
+              const cr = parseFloat(t.credit_amount) || 0;
+              const ca = Math.abs(parseFloat(t.cash_amount) || 0);
+              const ba = Math.abs(parseFloat(t.bank_amount) || 0);
+
+              if (tDate < fromDate) {
+                vendOpeningBal += (cr - ca - ba);
+              } else if (tDate.startsWith(monthVal)) {
+                periodCredit += cr;
+                periodCash += ca;
+                periodBank += ba;
+              }
+            }
+          });
+
+          const periodPaid = periodCash + periodBank;
+          const vendClosingBal = vendOpeningBal + periodCredit - periodPaid;
+
+          const hasMin10 = (
+            Math.abs(vendOpeningBal) >= 10 ||
+            periodCredit >= 10 ||
+            periodPaid >= 10 ||
+            Math.abs(vendClosingBal) >= 10
+          );
+          if (!hasMin10) return;
+
+          totalVendOpening += vendOpeningBal;
+          totalVendPurchases += periodCredit;
+          totalVendPaid += periodPaid;
+          totalVendClosing += vendClosingBal;
+
+          vendorsConsolidatedSummary.push({
+            name: vend.name,
+            opening: vendOpeningBal,
+            purchases: periodCredit,
+            cash: periodCash,
+            bank: periodBank,
+            paid: periodPaid,
+            closing: vendClosingBal
+          });
+        });
+
+        vendorsConsolidatedSummary.sort((a, b) => b.closing - a.closing);
+
+        openingBal = totalVendOpening;
+        totalSalesOrBills = totalVendPurchases;
+        totalPaidOrCollected = totalVendPaid;
+        runningBal = totalVendClosing;
+
+      } else if (type === 'employee') {
+        const cleanEmpName = cleanPartyName(partyVal);
+        const emp = employeesList.find(e => e && cleanPartyName(e.name) === cleanEmpName);
+        partyName = emp ? emp.name.toUpperCase() : partyVal;
+
+        if (emp) {
+          const selYear = parseInt(monthVal.split('-')[0]);
+          const selMonth = parseInt(monthVal.split('-')[1]) - 1;
+
+          const priorMonthEnd = new Date(selYear, selMonth, 0);
+          const y = priorMonthEnd.getFullYear();
+          const m = String(priorMonthEnd.getMonth() + 1).padStart(2, '0');
+          const d = String(priorMonthEnd.getDate()).padStart(2, '0');
+          const priorDateStr = `${y}-${m}-${d}`;
+
+          openingBal = calculateEmployeePendingBalance(emp, priorDateStr);
+          runningBal = openingBal;
+
+          const monthlySalary = parseFloat(emp.monthly_salary) || 0;
+          const joinD = parseToDateObj(emp.joining_date);
+
+          const isStopped = (emp.status === 'stopped' || emp.status === 'left');
+          const stopStr = (isStopped && emp.stop_date) ? cleanDate(emp.stop_date) : null;
+
+          for (let k = 1; k <= 120; k++) {
+            let cycleDateObj = getCycleStartDate(joinD, k);
+            let cy = cycleDateObj.getFullYear();
+            let cm = String(cycleDateObj.getMonth() + 1).padStart(2, '0');
+            let cd = String(cycleDateObj.getDate()).padStart(2, '0');
+            let cycleDateStr = `${cy}-${cm}-${cd}`;
+
+            if (cycleDateStr.startsWith(monthVal)) {
+              if (stopStr && cycleDateStr > stopStr) continue;
+
+              totalSalesOrBills += monthlySalary;
+              statementRows.push({
+                date: cycleDateStr,
+                desc: `മാസ ശമ്പളം (Cycle ${k})`,
+                cash: 0,
+                bank: 0,
+                bill: monthlySalary,
+                isAccrual: true
+              });
+            }
+          }
+
+          if (isStopped && stopStr && stopStr.startsWith(monthVal)) {
+            let totalToStop = calculateEmployeeAccruedSalary(emp, stopStr);
+            let totalBeforeMonth = calculateEmployeeAccruedSalary(emp, priorDateStr);
+
+            let addedInCycleBills = statementRows.filter(r => r.isAccrual).reduce((sum, r) => sum + r.bill, 0);
+            let proRataDue = totalToStop - totalBeforeMonth - addedInCycleBills;
+
+            if (proRataDue > 0) {
+              totalSalesOrBills += proRataDue;
+              statementRows.push({
+                date: stopStr,
+                desc: `സ്റ്റോപ്പ് സെറ്റിൽമെന്റ് ശമ്പളം`,
+                cash: 0,
+                bank: 0,
+                bill: proRataDue,
+                isAccrual: true
+              });
+            }
+          }
+
+          allTx.forEach(t => {
+            if (t && t.type === 'salary' && cleanPartyName(t.party_name).includes(cleanEmpName)) {
+              let tDate = cleanDate(t.date);
+              if (tDate >= fromDate && tDate <= toDate) {
+                let rawC = parseFloat(t.cash_amount) || 0;
+                let rawB = parseFloat(t.bank_amount) || 0;
+                let isStaffInflow = (rawC > 0 || rawB > 0);
+
+                if (isStaffInflow) {
+                  let inAmt = rawC + rawB;
+                  totalSalesOrBills += inAmt;
+                  statementRows.push({
+                    date: tDate,
+                    desc: t.party_name.replace(/^Staff:\s*/i, ""),
+                    cash: 0,
+                    bank: 0,
+                    bill: inAmt,
+                    isAccrual: false
+                  });
+                } else {
+                  const paid = Math.abs(rawC) + Math.abs(rawB);
+                  totalPaidOrCollected += paid;
+                  statementRows.push({
+                    date: tDate,
+                    desc: t.party_name.replace(/^Staff:\s*/i, ""),
+                    cash: Math.abs(rawC),
+                    bank: Math.abs(rawB),
+                    bill: 0,
+                    isAccrual: false
+                  });
+                }
+              }
+            }
+          });
+
+          statementRows.sort((a, b) => a.date.localeCompare(b.date));
+          statementRows.forEach(r => {
+            const debit = r.bill || 0;
+            const credit = (r.cash || 0) + (r.bank || 0);
+            runningBal += debit - credit;
+            r.bal = runningBal;
+          });
+        }
+      } else if (type === 'agent') {
+        partyName = `ROUTE AGENT: ${partyVal}`;
+        const matchedAgent = (agentsList || []).find(a => a && a.name && a.name.trim().toUpperCase() === partyVal);
+        const agentId = matchedAgent ? String(matchedAgent.id) : null;
+
+        const agentCustomers = customersList.filter(c => {
+          if (!c) return false;
+          if (agentId && String(c.agent_id) === agentId) return true;
+          const ag = (c.agent_name || c.agent || '').trim().toUpperCase();
+          if (ag && matchedAgent && ag === matchedAgent.name.toUpperCase()) return true;
+          return false;
+        });
+
+        let totalAgentOpening = 0;
+        let totalAgentSales = 0;
+        let totalAgentPaid = 0;
+        let totalAgentClosing = 0;
+
+        agentCustomers.forEach(cust => {
+          let custOpeningBal = parseFloat(cust.opening_balance) || 0;
+          let periodCredit = 0;
+          let periodCash = 0;
+          let periodBank = 0;
+          let cName = cleanPartyName(cust.name);
+
+          allTx.forEach(t => {
+            if (t && t.type === 'sale' && cleanPartyName(t.party_name) === cName) {
+              const tDate = cleanDate(t.date);
+              const cr = parseFloat(t.credit_amount) || 0;
+              const ca = Math.abs(parseFloat(t.cash_amount) || 0);
+              const ba = Math.abs(parseFloat(t.bank_amount) || 0);
+
+              if (tDate < fromDate) {
+                custOpeningBal += (cr - ca - ba);
+              } else if (tDate.startsWith(monthVal)) {
+                periodCredit += cr;
+                periodCash += ca;
+                periodBank += ba;
+              }
+            }
+          });
+
+          const periodPaid = periodCash + periodBank;
+          const custClosingBal = custOpeningBal + periodCredit - periodPaid;
+
+          const hasMin10 = (
+            Math.abs(custOpeningBal) >= 10 ||
+            periodCredit >= 10 ||
+            periodPaid >= 10 ||
+            Math.abs(custClosingBal) >= 10
+          );
+          if (!hasMin10) return;
+
+          totalAgentOpening += custOpeningBal;
+          totalAgentSales += periodCredit;
+          totalAgentPaid += periodPaid;
+          totalAgentClosing += custClosingBal;
+
+          agentCustomersSummary.push({
+            name: cust.name,
+            opening: custOpeningBal,
+            sales: periodCredit,
+            cash: periodCash,
+            bank: periodBank,
+            paid: periodPaid,
+            closing: custClosingBal
+          });
+        });
+
+        agentCustomersSummary.sort((a, b) => b.closing - a.closing);
+
+        openingBal = totalAgentOpening;
+        totalSalesOrBills = totalAgentSales;
+        totalPaidOrCollected = totalAgentPaid;
+        runningBal = totalAgentClosing;
+      }
+
+      const statHead = document.getElementById("statHeaderTitle");
+      const statPeriod = document.getElementById("statPeriodLabel");
+      const statOpen = document.getElementById("statOpeningBalText");
+      const statSales = document.getElementById("statMonthSalesText");
+      const statPaid = document.getElementById("statMonthPaidText");
+      const statClose = document.getElementById("statClosingBalText");
+
+      if (statHead) statHead.innerText = `${partyName} - MONTHLY STATEMENT`;
+      if (statPeriod) statPeriod.innerText = `Period: ${monthVal}`;
+      if (statOpen) statOpen.innerText = `${openingBal.toLocaleString('en-IN')}`;
+      if (statSales) statSales.innerText = `${totalSalesOrBills.toLocaleString('en-IN')}`;
+      if (statPaid) statPaid.innerText = `${totalPaidOrCollected.toLocaleString('en-IN')}`;
+      if (statClose) statClose.innerText = `${runningBal.toLocaleString('en-IN')}`;
+
+      let tableHtml = "";
+
+      if (isAllCustomersMode) {
+        tableHtml = `
+          <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+            <thead>
+              <tr class="bg-emerald-900 text-white font-black text-center border-b">
+                <th class="p-1 w-6">#</th>
+                <th class="p-1 w-2/6 text-left">Customer</th>
+                <th class="p-1 w-1/6">Opening</th>
+                <th class="p-1 w-1/6">Credit Sales</th>
+                <th class="p-1 w-1/6">Paid / Coll</th>
+                <th class="p-1 w-1/6 bg-emerald-950">Due</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-bold">
+        `;
+        if (customersConsolidatedSummary.length === 0) {
+          tableHtml += `<tr><td colspan="6" class="p-2 text-center text-slate-400 font-bold">No active credit customers found</td></tr>`;
+        } else {
+          customersConsolidatedSummary.forEach((r, idx) => {
+            tableHtml += `
+              <tr class="text-center hover:bg-slate-50">
+                <td class="p-1 text-slate-500">${idx + 1}</td>
+                <td class="p-1 text-left text-slate-900 truncate" title="${r.name}">${formatShortName(r.name)}</td>
+                <td class="p-1 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-amber-700">${r.sales.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
+                <td class="p-1 font-black text-emerald-900 bg-emerald-50/50">${r.closing.toLocaleString('en-IN')}</td>
+              </tr>
+            `;
+          });
+        }
+        tableHtml += `
+            </tbody>
+            <tfoot>
+              <tr class="bg-emerald-100 text-emerald-950 font-black text-center border-t">
+                <td colspan="2" class="p-1 text-left uppercase">TOTAL ALL CREDIT CUSTOMERS:</td>
+                <td class="p-1">${openingBal.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-amber-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-900 bg-emerald-200">${runningBal.toLocaleString('en-IN')}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else if (isAgentMode) {
+        tableHtml = `
+          <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+            <thead>
+              <tr class="bg-indigo-900 text-white font-black text-center border-b">
+                <th class="p-1 w-6">#</th>
+                <th class="p-1 w-2/6 text-left">Customer</th>
+                <th class="p-1 w-1/6">Opening</th>
+                <th class="p-1 w-1/6">Sales</th>
+                <th class="p-1 w-1/6">Paid</th>
+                <th class="p-1 w-1/6 bg-indigo-950">Due</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-bold">
+        `;
+        if (agentCustomersSummary.length === 0) {
+          tableHtml += `<tr><td colspan="6" class="p-2 text-center text-slate-400 font-bold">No customers found >= 10</td></tr>`;
+        } else {
+          agentCustomersSummary.forEach((r, idx) => {
+            tableHtml += `
+              <tr class="text-center hover:bg-slate-50">
+                <td class="p-1 text-slate-500">${idx + 1}</td>
+                <td class="p-1 text-left text-slate-900 truncate" title="${r.name}">${formatShortName(r.name)}</td>
+                <td class="p-1 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-amber-700">${r.sales.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
+                <td class="p-1 font-black text-indigo-900 bg-indigo-50/50">${r.closing.toLocaleString('en-IN')}</td>
+              </tr>
+            `;
+          });
+        }
+        tableHtml += `
+            </tbody>
+            <tfoot>
+              <tr class="bg-indigo-100 text-indigo-950 font-black text-center border-t">
+                <td colspan="2" class="p-1 text-left uppercase">TOTAL AGENT ROUTE:</td>
+                <td class="p-1">${openingBal.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-amber-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-indigo-900 bg-indigo-200">${runningBal.toLocaleString('en-IN')}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else if (isAllVendorsMode) {
+        tableHtml = `
+          <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+            <thead>
+              <tr class="bg-blue-900 text-white font-black text-center border-b">
+                <th class="p-1 w-6">#</th>
+                <th class="p-1 w-2/6 text-left">Vendor</th>
+                <th class="p-1 w-1/6">Opening</th>
+                <th class="p-1 w-1/6">Purchase</th>
+                <th class="p-1 w-1/6">Paid</th>
+                <th class="p-1 w-1/6 bg-blue-950">Payable</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-bold">
+        `;
+        if (vendorsConsolidatedSummary.length === 0) {
+          tableHtml += `<tr><td colspan="6" class="p-2 text-center text-slate-400 font-bold">No credit vendors found >= 10</td></tr>`;
+        } else {
+          vendorsConsolidatedSummary.forEach((r, idx) => {
+            tableHtml += `
+              <tr class="text-center hover:bg-slate-50">
+                <td class="p-1 text-slate-500">${idx + 1}</td>
+                <td class="p-1 text-left text-slate-900 truncate" title="${r.name}">${formatShortName(r.name)}</td>
+                <td class="p-1 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-blue-700">${r.purchases.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
+                <td class="p-1 font-black text-rose-700 bg-rose-50/50">${r.closing.toLocaleString('en-IN')}</td>
+              </tr>
+            `;
+          });
+        }
+        tableHtml += `
+            </tbody>
+            <tfoot>
+              <tr class="bg-blue-100 text-blue-950 font-black text-center border-t">
+                <td colspan="2" class="p-1 text-left uppercase">TOTAL ALL VENDORS:</td>
+                <td class="p-1">${openingBal.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-blue-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-rose-800 bg-rose-200">${runningBal.toLocaleString('en-IN')}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else {
+        tableHtml = `
+          <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+            <thead>
+              <tr class="bg-indigo-900 text-white font-black text-center border-b">
+                <th class="p-1 w-1/5 text-left">Date</th>
+                <th class="p-1 w-2/5 text-left">Particulars</th>
+                <th class="p-1 w-1/5">Paid</th>
+                <th class="p-1 w-1/5">Bill</th>
+                <th class="p-1 w-1/5">Balance</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-bold">
+        `;
+        if (statementRows.length === 0) {
+          tableHtml += `<tr><td colspan="5" class="p-2 text-center text-slate-400 font-bold">No transactions recorded for this month</td></tr>`;
+        } else {
+          statementRows.forEach(r => {
+            let payStr = (r.cash + r.bank > 0) ? (r.cash > 0 && r.bank > 0 ? `C:${r.cash} B:${r.bank}` : `${r.cash + r.bank}`) : '-';
+            let billStr = (r.bill > 0) ? `${r.bill}` : '-';
+            tableHtml += `
+              <tr class="text-center hover:bg-slate-50">
+                <td class="p-1 text-left text-slate-600 whitespace-nowrap">${r.date}</td>
+                <td class="p-1 text-left text-slate-900 truncate whitespace-nowrap" title="${r.desc}">${formatShortName(r.desc)}</td>
+                <td class="p-1 text-emerald-700 whitespace-nowrap">${payStr}</td>
+                <td class="p-1 text-amber-700 whitespace-nowrap">${billStr}</td>
+                <td class="p-1 font-black text-slate-900 whitespace-nowrap">${r.bal.toLocaleString('en-IN')}</td>
+              </tr>
+            `;
+          });
+        }
+        tableHtml += `
+            </tbody>
+            <tfoot>
+              <tr class="bg-indigo-100 text-indigo-950 font-black text-center border-t">
+                <td colspan="4" class="p-1 text-left uppercase">NET CLOSING BALANCE</td>
+                <td class="p-1 text-indigo-900 font-black">${runningBal.toLocaleString('en-IN')}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      }
+
+      const statTable = document.getElementById("statTableContainer");
+      if (statTable) statTable.innerHTML = tableHtml;
+
+      currentStatementDataForWA = {
+        partyName: partyName,
+        type: type,
+        month: monthVal,
+        openingBal: openingBal,
+        totalSales: totalSalesOrBills,
+        totalPaid: totalPaidOrCollected,
+        closingBal: runningBal,
+        rows: statementRows,
+        agentSummary: agentCustomersSummary,
+        vendorSummary: vendorsConsolidatedSummary,
+        customerSummary: customersConsolidatedSummary,
+        isAllVendors: isAllVendorsMode,
+        isAllCustomers: isAllCustomersMode
+      };
     }
 
     function shareActiveReportWhatsApp() {
