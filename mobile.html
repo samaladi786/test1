@@ -1402,6 +1402,17 @@
       }
     }
 
+    function applyRolePermissions(role) {
+      const switcher = document.getElementById("shopSelectorWrapper");
+      const staticTitle = document.getElementById("shopStaticTitle");
+      if (role === 'admin') {
+        if (switcher) switcher.classList.remove("hidden");
+        if (staticTitle) staticTitle.classList.add("hidden");
+      } else {
+        if (switcher) switcher.classList.add("hidden");
+        if (staticTitle) staticTitle.classList.remove("hidden");
+      }
+    }
     function logoutApp() {
       sessionStorage.clear();
       window.location.replace(window.location.pathname);
