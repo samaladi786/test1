@@ -16,18 +16,14 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- COMMON CONFIG FILE -->
+  <!-- COMMON CENTRAL CONFIG FILE -->
   <script src="config.js"></script>
-  <!-- COMMON CONFIG FILE -->
-  <script src="config.js?v=4"></script>
 
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
   </script>
-
-  <style>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
@@ -38,7 +34,7 @@
     /* CONTINUOUS 2-COLUMN FLOW */
     .report-continuous-flow {
       column-count: 2;
-      column-gap: 12px;
+      column-gap: 14px;
     }
     .report-block {
       break-inside: auto;
@@ -49,7 +45,7 @@
       page-break-inside: avoid;
     }
 
-    /* A4 PRINT STYLES */
+    /* ENHANCED BOLD A4 PRINT STYLES */
     @media print {
       @page {
         size: A4 portrait;
@@ -89,28 +85,37 @@
       }
       .report-continuous-flow {
         column-count: 2 !important;
-        column-gap: 14px !important;
+        column-gap: 16px !important;
       }
       #reportPrintContainer, #statementPrintContainer {
-        font-size: 13px !important;
-        line-height: 1.35 !important;
+        font-size: 14px !important;
+        line-height: 1.4 !important;
+        color: #000 !important;
       }
       #reportPrintContainer table, #statementPrintContainer table {
-        font-size: 11.5px !important;
+        font-size: 13px !important;
         width: 100% !important;
+        border-collapse: collapse !important;
       }
       #reportPrintContainer th, #statementPrintContainer th {
-        font-size: 11.5px !important;
-        padding: 5px 4px !important;
-        font-weight: 800 !important;
+        font-size: 13.5px !important;
+        padding: 6px 5px !important;
+        font-weight: 900 !important;
+        color: #000 !important;
+        border-bottom: 2px solid #000 !important;
       }
       #reportPrintContainer td, #statementPrintContainer td {
-        font-size: 11px !important;
-        padding: 4px 4px !important;
+        font-size: 13px !important;
+        padding: 5px 5px !important;
+        font-weight: 700 !important;
+        color: #000 !important;
       }
       #reportPrintContainer tfoot td, #statementPrintContainer tfoot td {
-        font-size: 11.5px !important;
-        padding: 5px 4px !important;
+        font-size: 13.5px !important;
+        padding: 6px 5px !important;
+        font-weight: 900 !important;
+        color: #000 !important;
+        border-top: 2px solid #000 !important;
       }
     }
   </style>
@@ -124,7 +129,7 @@
         <i data-lucide="lock" class="w-7 h-7"></i>
       </div>
       <div>
-        <h2 class="text-base font-extrabold text-slate-800">റൂഗാമ POS പോർട്ടൽ</h2>
+        <h2 class="text-base font-extrabold text-slate-800">ALNASSR POS പോർട്ടൽ</h2>
         <p class="text-xs text-slate-500 mt-1">തുടരാൻ ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ നൽകുക</p>
       </div>
 
@@ -174,8 +179,13 @@
       </div>
       
       <div class="flex flex-wrap items-center gap-2">
+        <!-- NEW EXTERNAL REPORT PORTAL BUTTON -->
+        <a id="extReportPortalBtn" href="https://samaladi786.github.io/report" target="_blank" title="റിപ്പോർട്ട് പോർട്ടൽ" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer transition">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i> റിപ്പോർട്ട് പോർട്ടൽ
+        </a>
+
         <!-- MASTER PORTAL BUTTON (master.html-ലേക്ക് പോകാനുള്ള ലിങ്ക്) -->
-        <a href="master.html" title="മാസ്റ്റർ എൻട്രികളും റിപ്പോർട്ടുകളും" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer transition">
+        <a href="master.html" title="മാസ്റ്റർ എൻട്രികളും റിപ്പോർട്ടുകളും" class="px-3 py-1.5 bg-indigo-800 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer transition">
           <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> മാസ്റ്റർ & റിപ്പോർട്ടുകൾ
         </a>
 
@@ -280,7 +290,7 @@
               <span class="text-[11px] font-black text-blue-900 uppercase block">ഇന്നത്തെ പർച്ചേസ് ഇടപാടുകൾ</span>
               <div class="flex items-baseline gap-1 mt-0.5">
                 <span class="text-xs font-bold text-blue-700">Total:</span>
-                <span id="todayPurCardTotal" class="text-lg font-black text-blue-900">₹ 0</span>
+                <span id="todayPurCardTotal" class="text-lg font-black text-blue-900">0</span>
               </div>
             </div>
             <div class="flex items-center gap-1 text-[11px] font-black text-blue-700 bg-white px-2.5 py-1.5 rounded-xl border border-blue-200 shadow-sm">
@@ -354,7 +364,7 @@
               <span class="text-[11px] font-black text-amber-900 uppercase block">ഇന്നത്തെ ചിലവുകൾ & സാലറി</span>
               <div class="flex items-baseline gap-1 mt-0.5">
                 <span class="text-xs font-bold text-amber-700">Total:</span>
-                <span id="todayExpCardTotal" class="text-lg font-black text-amber-900">₹ 0</span>
+                <span id="todayExpCardTotal" class="text-lg font-black text-amber-900">0</span>
               </div>
             </div>
             <div class="flex items-center gap-1 text-[11px] font-black text-amber-700 bg-white px-2.5 py-1.5 rounded-xl border border-amber-200 shadow-sm">
@@ -408,7 +418,7 @@
               <span class="text-[11px] font-black text-emerald-900 uppercase block">ഇന്നത്തെ സെയിൽസ് ഇടപാടുകൾ</span>
               <div class="flex items-baseline gap-1 mt-0.5">
                 <span class="text-xs font-bold text-emerald-700">Total:</span>
-                <span id="todaySaleCardTotal" class="text-lg font-black text-emerald-900">₹ 0</span>
+                <span id="todaySaleCardTotal" class="text-lg font-black text-emerald-900">0</span>
               </div>
             </div>
             <div class="flex items-center gap-1 text-[11px] font-black text-emerald-700 bg-white px-2.5 py-1.5 rounded-xl border border-emerald-200 shadow-sm">
@@ -446,7 +456,7 @@
           <i data-lucide="arrow-down-left" class="w-3.5 h-3.5 text-emerald-600"></i>
         </div>
         <div id="cardIncomeCombinedFormula" class="text-sm font-black text-emerald-700 tracking-tight">
-          Cash: 0 | Bank: 0 = ₹ 0
+          Cash: 0 | Bank: 0 = 0
         </div>
       </div>
 
@@ -456,7 +466,7 @@
           <i data-lucide="shopping-cart" class="w-3.5 h-3.5 text-blue-600"></i>
         </div>
         <div id="cardPurchaseCombinedFormula" class="text-sm font-black text-blue-700 tracking-tight">
-          Cash: 0 | Bank: 0 = ₹ 0
+          Cash: 0 | Bank: 0 = 0
         </div>
       </div>
 
@@ -466,7 +476,7 @@
           <i data-lucide="receipt" class="w-3.5 h-3.5 text-amber-600"></i>
         </div>
         <div id="cardExpSalCombinedFormula" class="text-sm font-black text-amber-700 tracking-tight">
-          Cash: 0 | Bank: 0 = ₹ 0
+          Cash: 0 | Bank: 0 = 0
         </div>
       </div>
     </div>
@@ -474,13 +484,15 @@
   </main>
 
   <!-- ======================================================== -->
-  <!-- MODAL: TODAY'S PURCHASES POPUP -->
+  <!-- MODALS -->
   <!-- ======================================================== -->
+
+  <!-- MODAL: TODAY'S PURCHASES POPUP -->
   <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto no-print backdrop-blur-sm">
     <div class="max-w-2xl w-full bg-white p-4 sm:p-6 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
         <h3 class="text-sm font-extrabold text-blue-900 flex items-center gap-1.5">
-          <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> ഇന്നത്തെ പർച്ചേസ് ഇടപാടുകൾ (Purchase Breakdown)
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> ഇന്നത്തെ പർച്ചേസ് ഇടപാടുകൾ
         </h3>
         <button onclick="closeTodayPurchaseModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
       </div>
@@ -503,14 +515,12 @@
     </div>
   </div>
 
-  <!-- ======================================================== -->
   <!-- MODAL: TODAY'S EXPENSES & SALARIES POPUP -->
-  <!-- ======================================================== -->
   <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto no-print backdrop-blur-sm">
     <div class="max-w-2xl w-full bg-white p-4 sm:p-6 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
         <h3 class="text-sm font-extrabold text-amber-900 flex items-center gap-1.5">
-          <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ഇന്നത്തെ ചിലവുകൾ & സാലറി (Outflow Breakdown)
+          <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ഇന്നത്തെ ചിലവുകൾ & സാലറി
         </h3>
         <button onclick="closeTodayExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
       </div>
@@ -533,14 +543,12 @@
     </div>
   </div>
 
-  <!-- ======================================================== -->
   <!-- MODAL: TODAY'S SALES POPUP -->
-  <!-- ======================================================== -->
   <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto no-print backdrop-blur-sm">
-    <div class="max-w-2xl w-full bg-white p-4 sm:p-6 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[92vh] overflow-y-auto">
+    <div class="max-w-2xl w-full bg-white p-4 sm:p-6 shadow-2xl border space-y-3.5 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
         <h3 class="text-sm font-extrabold text-emerald-900 flex items-center gap-1.5">
-          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> ഇന്നത്തെ സെയിൽസ് ഇടപാടുകൾ (Sales Breakdown)
+          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> ഇന്നത്തെ സെയിൽസ് ഇടപാടുകൾ
         </h3>
         <button onclick="closeTodaySalesModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
       </div>
@@ -563,7 +571,7 @@
     </div>
   </div>
 
-  <!-- MODAL 1: NEW CREDIT VENDOR MODAL -->
+  <!-- MODAL: NEW CREDIT VENDOR -->
   <div id="newVendorModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 no-print backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -579,7 +587,7 @@
           <input type="text" id="newVendName" placeholder="വെണ്ടർ പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
         </div>
         <div>
-          <label class="block font-bold text-slate-700 mb-0.5">ഓൾഡ് ബാലൻസ് / കൊടുക്കാനുള്ളത് (₹):</label>
+          <label class="block font-bold text-slate-700 mb-0.5">ഓൾഡ് ബാലൻസ് / കൊടുക്കാനുള്ളത്:</label>
           <input type="number" step="any" id="newVendOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
         </div>
       </div>
@@ -591,7 +599,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: NEW CREDIT CUSTOMER MODAL -->
+  <!-- MODAL: NEW CREDIT CUSTOMER -->
   <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 no-print backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -615,7 +623,7 @@
           <input type="text" id="newCustAgentCustom" placeholder="പുതിയ ഏജന്റ് പേര് ടൈപ്പ് ചെയ്യുക..." class="hidden w-full mt-1.5 p-2 rounded-xl border bg-white font-bold outline-none focus:border-emerald-500" />
         </div>
         <div>
-          <label class="block font-bold text-slate-700 mb-0.5">ഓൾഡ് ബാലൻസ് / കിട്ടാനുള്ളത് (₹):</label>
+          <label class="block font-bold text-slate-700 mb-0.5">ഓൾഡ് ബാലൻസ് / കിട്ടാനുള്ളത്:</label>
           <input type="number" step="any" id="newCustOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500" />
         </div>
       </div>
@@ -627,7 +635,7 @@
     </div>
   </div>
 
-  <!-- MODAL 3: NEW PARTY MASTER (EXPENSE VS EMPLOYEE) -->
+  <!-- MODAL: NEW PARTY (EXPENSE VS EMPLOYEE) -->
   <div id="newPartyModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 no-print backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -685,7 +693,7 @@
     </div>
   </div>
 
-  <!-- MODAL: STOP / LEAVE EMPLOYEE SETTLEMENT MODAL -->
+  <!-- MODAL: STOP / LEAVE EMPLOYEE SETTLEMENT -->
   <div id="stopEmployeeModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 no-print backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -708,11 +716,11 @@
           </div>
           <div class="flex justify-between text-slate-600">
             <span>മാസ ശമ്പളം:</span>
-            <span id="stopEmpSalaryInfo" class="font-bold text-slate-900">₹ 0</span>
+            <span id="stopEmpSalaryInfo" class="font-bold text-slate-900">0</span>
           </div>
           <div class="flex justify-between text-purple-700 font-extrabold pt-1 border-t">
             <span>ഇപ്പോഴത്തെ ബാലൻസ്:</span>
-            <span id="stopEmpLiveBalInfo">₹ 0</span>
+            <span id="stopEmpLiveBalInfo">0</span>
           </div>
         </div>
 
@@ -733,15 +741,15 @@
         <div id="stopSettlementPreview" class="hidden bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-rose-900 space-y-1 font-bold">
           <div class="flex justify-between text-[11px]">
             <span>ആകെ അർഹമായ സാലറി:</span>
-            <span id="previewAccruedSal">₹ 0</span>
+            <span id="previewAccruedSal">0</span>
           </div>
           <div class="flex justify-between text-[11px]">
             <span>വാങ്ങിയ തുക (Cash+Bank):</span>
-            <span id="previewPaidAmt">₹ 0</span>
+            <span id="previewPaidAmt">0</span>
           </div>
           <div class="flex justify-between text-xs font-black pt-1 border-t border-rose-300">
             <span>ഫൈനൽ സെറ്റിൽമെന്റ് ബാലൻസ്:</span>
-            <span id="previewFinalBal">₹ 0</span>
+            <span id="previewFinalBal">0</span>
           </div>
         </div>
       </div>
@@ -753,7 +761,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: CASH / BANK TRANSFER MODAL -->
+  <!-- MODAL: CASH / BANK TRANSFER -->
   <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-4 no-print backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
@@ -783,7 +791,7 @@
     </div>
   </div>
 
-  <!-- MODAL 5: FULL REPORTS & MONTHLY STATEMENT MODAL -->
+  <!-- MODAL: FULL REPORTS & MONTHLY STATEMENT -->
   <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-4xl w-full bg-white p-4 sm:p-6 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[95vh] overflow-y-auto">
       
@@ -849,7 +857,7 @@
       <div id="reportPrintContainer" class="space-y-3 text-xs sm:text-sm">
         <div class="text-center border-b pb-2 flex justify-between items-center">
           <div>
-            <h2 id="reportPageShopName" class="text-sm sm:text-base font-black text-slate-900 uppercase">റൂഗാമ സൂപ്പർ മാർക്കറ്റ്</h2>
+            <h2 id="reportPageShopName" class="text-sm sm:text-base font-black text-slate-900 uppercase">ALNASSR</h2>
             <p id="reportModeTitle" class="text-[11px] sm:text-xs font-bold text-slate-600">ഡെയ്‌ലി റിപ്പോർട്ട്</p>
           </div>
           <div class="text-right text-[11px] sm:text-xs text-slate-600 font-bold">
@@ -858,7 +866,7 @@
         </div>
 
         <!-- 7 MINI SUMMARY CARDS -->
-        <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+        <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5 font-bold">
           <div class="bg-emerald-50/90 p-2 rounded-lg border border-emerald-300 text-center">
             <span class="text-[10px] font-bold text-emerald-800 block">സെയിൽസ്</span>
             <h3 id="repTotalSale" class="text-xs sm:text-sm font-black text-emerald-700">0</h3>
@@ -889,7 +897,7 @@
           </div>
         </div>
 
-        <!-- CONTINUOUS 2-COLUMN FLOW CONTAINER -->
+        <!-- CONTINUOUS 2-COLUMN FLOW CONTAINER (ENHANCED READABILITY) -->
         <div class="report-continuous-flow border-t pt-2">
           
           <div class="report-block bg-slate-50 p-2.5 rounded-xl border border-emerald-200 space-y-2">
@@ -947,7 +955,7 @@
       <div id="statementPrintContainer" class="hidden space-y-3 text-xs sm:text-sm">
         <div class="text-center border-b pb-2 flex justify-between items-center">
           <div>
-            <h2 id="statementShopName" class="text-sm sm:text-base font-black text-slate-900 uppercase">RUGAMA SUPERMARKET</h2>
+            <h2 id="statementShopName" class="text-sm sm:text-base font-black text-slate-900 uppercase">ALNASSR</h2>
             <p id="statHeaderTitle" class="text-xs font-bold text-indigo-800">ACCOUNT STATEMENT</p>
           </div>
           <div class="text-right text-xs text-slate-600 font-bold">
@@ -1002,9 +1010,7 @@
     </div>
   </div>
 
-  <!-- ========================================================== -->
-  <!-- JAVASCRIPT ENGINE (PART 1) -->
-  <!-- ========================================================== -->
+  <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
     let SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG) && window.SHOPS_CONFIG.length > 0)
       ? window.SHOPS_CONFIG
@@ -1081,11 +1087,11 @@
 
       if (!enteredPin) return alert("ദയവായി പിൻ നൽകുക!");
 
-      // എ. മാസ്റ്റർ പിൻ പരിശോധിക്കുന്നു (Super Admin)
+      // മാസ്റ്റർ പിൻ പരിശോധിക്കുന്നു (Super Admin)
       if (window.MASTER_PIN && enteredPin === String(window.MASTER_PIN)) {
-        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
-        sessionStorage.setItem("RUGAMA_USER_ROLE", "admin");
-        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+        sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
+        sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
+        sessionStorage.setItem("ALNASSR_ACTIVE_PIN", enteredPin);
 
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("admin");
@@ -1093,13 +1099,13 @@
         return;
       }
 
-      // ബി. ഷോപ്പ് പിൻ പരിശോധിക്കുന്നു (Staff Mode)
+      // ഷോപ്പ് പിൻ പരിശോധിക്കുന്നു (Staff Mode)
       const matchedShop = (SHOPS || []).find(s => String(s.pin) === enteredPin);
       if (matchedShop) {
-        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
-        sessionStorage.setItem("RUGAMA_USER_ROLE", "shop");
-        sessionStorage.setItem("RUGAMA_ACTIVE_SHOP_ID", matchedShop.id);
-        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+        sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
+        sessionStorage.setItem("ALNASSR_USER_ROLE", "shop");
+        sessionStorage.setItem("ALNASSR_ACTIVE_SHOP_ID", matchedShop.id);
+        sessionStorage.setItem("ALNASSR_ACTIVE_PIN", enteredPin);
 
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("shop");
@@ -1125,10 +1131,10 @@
     }
 
     function logoutApp() {
-      sessionStorage.removeItem("RUGAMA_LOGGED_IN");
-      sessionStorage.removeItem("RUGAMA_USER_ROLE");
-      sessionStorage.removeItem("RUGAMA_ACTIVE_SHOP_ID");
-      sessionStorage.removeItem("RUGAMA_ACTIVE_PIN");
+      sessionStorage.removeItem("ALNASSR_LOGGED_IN");
+      sessionStorage.removeItem("ALNASSR_USER_ROLE");
+      sessionStorage.removeItem("ALNASSR_ACTIVE_SHOP_ID");
+      sessionStorage.removeItem("ALNASSR_ACTIVE_PIN");
 
       document.getElementById("loginScreen").classList.remove("hidden");
       const inp = document.getElementById("loginPasswordInput");
@@ -1155,11 +1161,11 @@
         if (sel) sel.appendChild(opt);
       });
 
-      const role = sessionStorage.getItem("RUGAMA_USER_ROLE");
+      const role = sessionStorage.getItem("ALNASSR_USER_ROLE");
       if (role === 'shop') {
-        currentShopId = forceShopId || sessionStorage.getItem("RUGAMA_ACTIVE_SHOP_ID") || SHOPS[0].id;
+        currentShopId = forceShopId || sessionStorage.getItem("ALNASSR_ACTIVE_SHOP_ID") || SHOPS[0].id;
       } else {
-        const savedShopId = localStorage.getItem("RUGAMA_SELECTED_SHOP_ID");
+        const savedShopId = localStorage.getItem("ALNASSR_SELECTED_SHOP_ID");
         const matched = SHOPS.find(s => s.id === savedShopId);
         currentShopId = matched ? matched.id : SHOPS[0].id;
       }
@@ -1173,7 +1179,7 @@
       if (!currentShop) return;
 
       currentShopId = currentShop.id;
-      localStorage.setItem("RUGAMA_SELECTED_SHOP_ID", currentShopId);
+      localStorage.setItem("ALNASSR_SELECTED_SHOP_ID", currentShopId);
 
       safeSetText("shopStaticTitle", currentShop.name);
       safeSetText("shopTagline", currentShop.tagline || 'ഡെസ്ക്ടോപ്പ് ക്വിക്ക് POS');
@@ -1249,11 +1255,11 @@
 
     // OFFLINE QUEUE
     function getOfflineQueue() {
-      try { return JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_OFFLINE_QUEUE`)) || []; } catch(e) { return []; }
+      try { return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_OFFLINE_QUEUE`)) || []; } catch(e) { return []; }
     }
 
     function saveOfflineQueue(queue) {
-      localStorage.setItem(`RUGAMA_${currentShopId}_OFFLINE_QUEUE`, JSON.stringify(queue));
+      localStorage.setItem(`ALNASSR_${currentShopId}_OFFLINE_QUEUE`, JSON.stringify(queue));
       updateNetworkUI();
     }
 
@@ -1308,8 +1314,8 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const isLogged = sessionStorage.getItem("RUGAMA_LOGGED_IN") === "true";
-      const userRole = sessionStorage.getItem("RUGAMA_USER_ROLE");
+      const isLogged = sessionStorage.getItem("ALNASSR_LOGGED_IN") === "true";
+      const userRole = sessionStorage.getItem("ALNASSR_USER_ROLE");
 
       if (isLogged) {
         document.getElementById("loginScreen").classList.add("hidden");
@@ -1321,6 +1327,12 @@
           const inp = document.getElementById("loginPasswordInput");
           if (inp) inp.focus();
         }, 300);
+      }
+
+      // External Report Portal Link Setup
+      const reportBtn = document.getElementById("extReportPortalBtn");
+      if (reportBtn && window.GLOBAL_REPORT_PORTAL_URL) {
+        reportBtn.href = window.GLOBAL_REPORT_PORTAL_URL;
       }
 
       if (window.lucide) lucide.createIcons();
@@ -1351,7 +1363,7 @@
       }
     }
 
-    // MODAL OPENERS & CLOSERS
+    // MODAL CONTROLS
     function openTransferModal() { document.getElementById("transferModal").classList.remove("hidden"); }
     function closeTransferModal() { document.getElementById("transferModal").classList.add("hidden"); }
 
@@ -1460,7 +1472,7 @@
       }
     }
 
-    // 3. സേവിംഗ് ഫംഗ്ഷനുകൾ (TRANSACTION SAVING)
+    // 3. TRANSACTION SAVING
     async function executeTransactionInsert(payload, successMsg) {
       if (navigator.onLine && supabaseClient) {
         try {
@@ -1769,13 +1781,11 @@
       }
     }
 
-    // 5. പിൻ വെരിഫിക്കേഷൻ (PIN VERIFICATION FOR DELETE & ACTIONS)
     // 5. പിൻ വെരിഫിക്കേഷൻ (2-ദിവസത്തെ റൂളോടെയുള്ള ഡിലീറ്റ് സിസ്റ്റം)
     function requestPin(id) {
       pendingAction = 'delete';
       pendingDeleteId = id;
       
-      // ഡിലീറ്റ് ചെയ്യുന്ന ഇടപാടിന്റെ തീയതി പരിശോധിക്കുന്നു
       const txn = (transactionsList || []).find(t => String(t.id) === String(id));
       const todayStr = getLocalDateString();
       let isOlderThanLimit = false;
@@ -1784,7 +1794,6 @@
         const txnDateStr = cleanDate(txn.date);
         const limitDays = window.STAFF_DELETE_LIMIT_DAYS || 2;
         
-        // ഇന്നത്തെ തീയതിയും ട്രാൻസാക്ഷൻ തീയതിയും തമ്മിലുള്ള ദിവസ വ്യത്യാസം കാണുന്നു
         const dToday = parseToDateObj(todayStr);
         const dTxn = parseToDateObj(txnDateStr);
         const diffDays = Math.floor((dToday - dTxn) / (1000 * 60 * 60 * 24));
@@ -1823,7 +1832,7 @@
 
     async function verifyPinAndExecute() {
       const pinVal = document.getElementById("pinInput").value.trim();
-      const sessionPin = sessionStorage.getItem("RUGAMA_ACTIVE_PIN");
+      const sessionPin = sessionStorage.getItem("ALNASSR_ACTIVE_PIN");
       const masterPin = String(window.MASTER_PIN);
       const currentShopPin = currentShop ? String(currentShop.pin) : null;
 
@@ -1856,7 +1865,6 @@
           }
         }
 
-        // 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണെങ്കിൽ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ നിർബന്ധം!
         if (isOlderThanLimit) {
           if (pinVal !== masterPin) {
             alert("⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ള എൻട്രികൾ ഡിലീറ്റ് ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ തന്നെ നൽകണം!");
@@ -1864,7 +1872,6 @@
             return;
           }
         } else {
-          // 2 ദിവസത്തിനുള്ളിലുള്ളതാണെങ്കിൽ സ്റ്റാഫ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ മതിയാകും
           const isValidPin = (pinVal === sessionPin) || (pinVal === masterPin) || (pinVal === currentShopPin);
           if (!isValidPin) {
             alert("പിൻ തെറ്റാണ്! ശരിയായ പാസ്‌വേഡ് നൽകുക.");
@@ -1891,10 +1898,8 @@
         }
       }
     }
-    // PART 1 ENDS HERE -> ബാക്കി സാലറി എൻജിനും, ഡാഷ്‌ബോർഡും, റിപ്പോർട്ടുകളും PART 2-ൽ തുടരും
-    // ==========================================================
+
     // DROPDOWNS & INPUT RENDERING
-    // ==========================================================
     function renderSaleInputs(type) {
       const container = document.getElementById("saleFieldsContainer");
       if (type === 'credit') {
@@ -1984,7 +1989,7 @@
               liveBal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
             }
           });
-          document.getElementById("custOpeningInfo").innerText = `ലൈവ് ബാലൻസ് (കിട്ടാനുള്ളത്): ₹ ${liveBal.toLocaleString('en-IN')}`;
+          document.getElementById("custOpeningInfo").innerText = `ലൈവ് ബാലൻസ് (കിട്ടാനുള്ളത്): ${liveBal.toLocaleString('en-IN')}`;
           renderSaleInputs('credit');
         } else {
           document.getElementById("custOpeningInfo").innerText = `ക്യാഷ് കസ്റ്റമർ (ബാക്കി ബാധകമല്ല)`;
@@ -2015,7 +2020,7 @@
               liveBal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
             }
           });
-          document.getElementById("vendorOpeningInfo").innerText = `ലൈവ് ബാലൻസ് (കൊടുക്കാനുള്ളത്): ₹ ${liveBal.toLocaleString('en-IN')}`;
+          document.getElementById("vendorOpeningInfo").innerText = `ലൈവ് ബാലൻസ് (കൊടുക്കാനുള്ളത്): ${liveBal.toLocaleString('en-IN')}`;
           renderPurchaseInputs('credit');
         } else {
           document.getElementById("vendorOpeningInfo").innerText = `ക്യാഷ് വെണ്ടർ (ബാക്കി ബാധകമല്ല)`;
@@ -2098,7 +2103,7 @@
         const joinDate = emp.joining_date || "2026-01-01";
         
         infoEl.className = isStopped ? "text-[11px] font-black text-rose-700 block truncate mt-1" : "text-[11px] font-black text-purple-700 block truncate mt-1";
-        infoEl.innerText = `ലൈവ് ബാലൻസ്: ₹ ${liveBal.toLocaleString('en-IN')} (ശമ്പളം: ${emp.monthly_salary || 0} | ജോയിനിങ്: ${joinDate}${isStopped ? ' | സ്റ്റോപ്പ്: ' + emp.stop_date : ''})`;
+        infoEl.innerText = `ലൈവ് ബാലൻസ്: ${liveBal.toLocaleString('en-IN')} (ശമ്പളം: ${emp.monthly_salary || 0} | ജോയിനിങ്: ${joinDate}${isStopped ? ' | സ്റ്റോപ്പ്: ' + emp.stop_date : ''})`;
       } else {
         badge.className = "text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300";
         badge.innerText = "⚡ ചിലവ് (Expense)";
@@ -2121,15 +2126,15 @@
             let pendingBal = expOpening - totalPaid;
             if (pendingBal > 0) {
               infoEl.className = "text-[11px] font-black text-amber-700 block truncate mt-1";
-              infoEl.innerText = `കൊടുക്കാനുള്ള ബാക്കി തുക: ₹ ${pendingBal.toLocaleString('en-IN')} (ആകെ ബില്ല്: ₹ ${expOpening.toLocaleString('en-IN')})`;
+              infoEl.innerText = `കൊടുക്കാനുള്ള ബാക്കി തുക: ${pendingBal.toLocaleString('en-IN')} (ആകെ ബില്ല്: ${expOpening.toLocaleString('en-IN')})`;
             } else {
               infoEl.className = "text-[11px] font-black text-emerald-700 block truncate mt-1";
-              infoEl.innerText = `മുഴുവൻ നൽകി (ബാക്കി: ₹ 0 | ആകെ ബില്ല്: ₹ ${expOpening.toLocaleString('en-IN')})`;
+              infoEl.innerText = `മുഴുവൻ നൽകി (ബാക്കി: 0 | ആകെ ബില്ല്: ${expOpening.toLocaleString('en-IN')})`;
             }
           } else {
             infoEl.className = "text-[11px] font-black text-amber-700 block truncate mt-1";
             if (totalPaid > 0) {
-              infoEl.innerText = `ഇതുവരെ ചിലവായ ആകെ തുക: ₹ ${totalPaid.toLocaleString('en-IN')}`;
+              infoEl.innerText = `ഇതുവരെ ചിലവായ ആകെ തുക: ${totalPaid.toLocaleString('en-IN')}`;
             } else {
               infoEl.innerText = `ചിലവ് ഇനം: ${exp.name}`;
             }
@@ -2141,32 +2146,7 @@
       }
     }
 
-    // ==========================================================
     // DATA FETCHING & LOCAL CACHE
-    // ==========================================================
-    async function loadShopName() {
-      if (!supabaseClient) return;
-      try {
-        const { data } = await supabaseClient.from('app_settings').select('shop_name').eq('id', 1).single();
-        if (data && data.shop_name) {
-          safeSetText("headerShopName", data.shop_name);
-          safeSetText("reportPageShopName", data.shop_name);
-        }
-      } catch (e) {}
-    }
-
-    async function loadOpeningBalances() {
-      if (!supabaseClient) return;
-      try {
-        const { data } = await supabaseClient.from('app_settings').select('opening_cash, opening_bank').eq('id', 1).single();
-        if (data) {
-          openingSettings.openingCash = parseFloat(data.opening_cash) || 0;
-          openingSettings.openingBank = parseFloat(data.opening_bank) || 0;
-          if (typeof renderDashboard === 'function') renderDashboard();
-        }
-      } catch(e) {}
-    }
-
     async function fetchAllData(manual = false) {
       if (navigator.onLine && supabaseClient) {
         try {
@@ -2182,27 +2162,27 @@
 
           if (cRes.status === 'fulfilled' && cRes.value.data) {
             customersList = cRes.value.data;
-            localStorage.setItem(`RUGAMA_${currentShopId}_CUSTOMERS`, JSON.stringify(customersList));
+            localStorage.setItem(`ALNASSR_${currentShopId}_CUSTOMERS`, JSON.stringify(customersList));
           }
           if (vRes.status === 'fulfilled' && vRes.value.data) {
             vendorsList = vRes.value.data;
-            localStorage.setItem(`RUGAMA_${currentShopId}_VENDORS`, JSON.stringify(vendorsList));
+            localStorage.setItem(`ALNASSR_${currentShopId}_VENDORS`, JSON.stringify(vendorsList));
           }
           if (eRes.status === 'fulfilled' && eRes.value.data) {
             employeesList = eRes.value.data;
-            localStorage.setItem(`RUGAMA_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
+            localStorage.setItem(`ALNASSR_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
           }
           if (expRes.status === 'fulfilled' && expRes.value.data) {
             expensesMasterList = expRes.value.data;
-            localStorage.setItem(`RUGAMA_${currentShopId}_EXPENSES_MASTER`, JSON.stringify(expensesMasterList));
+            localStorage.setItem(`ALNASSR_${currentShopId}_EXPENSES_MASTER`, JSON.stringify(expensesMasterList));
           }
           if (tRes.status === 'fulfilled' && tRes.value.data) {
             transactionsList = tRes.value.data;
-            localStorage.setItem(`RUGAMA_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+            localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
           }
           if (agRes.status === 'fulfilled' && agRes.value.data) {
             agentsList = agRes.value.data;
-            localStorage.setItem(`RUGAMA_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
+            localStorage.setItem(`ALNASSR_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
           }
           if (setRes.status === 'fulfilled' && setRes.value.data && setRes.value.data.length > 0) {
             openingSettings.openingCash = parseFloat(setRes.value.data[0].opening_cash) || 0;
@@ -2228,18 +2208,16 @@
 
     function loadCachedData() {
       try {
-        customersList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_CUSTOMERS`)) || [];
-        vendorsList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_VENDORS`)) || [];
-        employeesList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_EMPLOYEES`)) || [];
-        expensesMasterList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_EXPENSES_MASTER`)) || [];
-        transactionsList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_TRANSACTIONS`)) || [];
-        agentsList = JSON.parse(localStorage.getItem(`RUGAMA_${currentShopId}_AGENTS`)) || [];
+        customersList = JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_CUSTOMERS`)) || [];
+        vendorsList = JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_VENDORS`)) || [];
+        employeesList = JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_EMPLOYEES`)) || [];
+        expensesMasterList = JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_EXPENSES_MASTER`)) || [];
+        transactionsList = JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_TRANSACTIONS`)) || [];
+        agentsList = JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_AGENTS`)) || [];
       } catch(e){}
     }
 
-    // ==========================================================
-    // SALARY ACCRUAL ENGINE & STOP EMPLOYEE CONTROLS
-    // ==========================================================
+    // SALARY ENGINE & PRO-RATA ACCRUALS
     function getCycleStartDate(joinDate, cycleIndex) {
       let d = new Date(joinDate.getFullYear(), joinDate.getMonth() + cycleIndex, joinDate.getDate());
       let expectedMonth = (joinDate.getMonth() + cycleIndex) % 12;
@@ -2365,15 +2343,15 @@
 
       if (!emp) {
         joinEl.innerText = "--";
-        salEl.innerText = "₹ 0";
-        safeSetText("stopEmpLiveBalInfo", "₹ 0");
+        salEl.innerText = "0";
+        safeSetText("stopEmpLiveBalInfo", "0");
         statusSel.value = "active";
         onStopStatusChange();
         return;
       }
 
       joinEl.innerText = emp.joining_date || "2026-01-01";
-      salEl.innerText = `₹ ${(parseFloat(emp.monthly_salary) || 0).toLocaleString('en-IN')}`;
+      salEl.innerText = `${(parseFloat(emp.monthly_salary) || 0).toLocaleString('en-IN')}`;
 
       const isStopped = (emp.status === 'stopped' || emp.status === 'left');
       statusSel.value = isStopped ? "stopped" : "active";
@@ -2399,7 +2377,7 @@
         const emp = (employeesList || []).find(e => String(e.id || e.name) === String(val));
         if (emp) {
           const liveBal = calculateEmployeePendingBalance(emp);
-          safeSetText("stopEmpLiveBalInfo", `₹ ${liveBal.toLocaleString('en-IN')}`);
+          safeSetText("stopEmpLiveBalInfo", `${liveBal.toLocaleString('en-IN')}`);
         }
       }
     }
@@ -2430,10 +2408,10 @@
       });
 
       const finalBal = accrued - paid;
-      safeSetText("previewAccruedSal", `₹ ${accrued.toLocaleString('en-IN')}`);
-      safeSetText("previewPaidAmt", `₹ ${paid.toLocaleString('en-IN')}`);
-      safeSetText("previewFinalBal", `₹ ${finalBal.toLocaleString('en-IN')}`);
-      safeSetText("stopEmpLiveBalInfo", `₹ ${finalBal.toLocaleString('en-IN')}`);
+      safeSetText("previewAccruedSal", `${accrued.toLocaleString('en-IN')}`);
+      safeSetText("previewPaidAmt", `${paid.toLocaleString('en-IN')}`);
+      safeSetText("previewFinalBal", `${finalBal.toLocaleString('en-IN')}`);
+      safeSetText("stopEmpLiveBalInfo", `${finalBal.toLocaleString('en-IN')}`);
     }
 
     async function saveEmployeeStopStatus() {
@@ -2458,7 +2436,7 @@
         }
       }
 
-      localStorage.setItem(`RUGAMA_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
+      localStorage.setItem(`ALNASSR_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
       populateDropdowns();
       onUnifiedPartySelected();
       if (typeof renderDashboard === 'function') renderDashboard();
@@ -2466,9 +2444,7 @@
       alert("ജീവനക്കാരന്റെ സ്റ്റാറ്റസ് അപ്ഡേറ്റ് ചെയ്തു!");
     }
 
-    // ==========================================================
-    // DASHBOARD RENDERING & MODAL LIST TABLES
-    // ==========================================================
+    // DASHBOARD RENDERING
     function renderDashboard() {
       let selectedDate = document.getElementById("filterDate")?.value || getLocalDateString();
 
@@ -2561,9 +2537,9 @@
         }
       });
 
-      safeSetText("todayPurCardTotal", `₹ ${totPur.toLocaleString('en-IN')}`);
-      safeSetText("todayExpCardTotal", `₹ ${totExp.toLocaleString('en-IN')}`);
-      safeSetText("todaySaleCardTotal", `₹ ${totSale.toLocaleString('en-IN')}`);
+      safeSetText("todayPurCardTotal", `${totPur.toLocaleString('en-IN')}`);
+      safeSetText("todayExpCardTotal", `${totExp.toLocaleString('en-IN')}`);
+      safeSetText("todaySaleCardTotal", `${totSale.toLocaleString('en-IN')}`);
 
       // 1. POPUP TABLES: PURCHASES
       let totCPCash = 0, totCPBank = 0, totCPTotal = 0;
@@ -2605,7 +2581,7 @@
               <td class="p-2 text-left uppercase">ആകെ:</td>
               <td class="p-2 text-blue-800">${totCPCash}</td>
               <td class="p-2 text-indigo-800">${totCPBank}</td>
-              <td class="p-2 text-slate-950 font-black">₹${totCPTotal}</td>
+              <td class="p-2 text-slate-950 font-black">${totCPTotal}</td>
               <td class="p-2"></td>
             </tr>
           </tfoot>
@@ -2652,7 +2628,7 @@
               <td class="p-2 text-left uppercase">ആകെ:</td>
               <td class="p-2 text-blue-800">${totCrPCash}</td>
               <td class="p-2 text-indigo-800">${totCrPBank}</td>
-              <td class="p-2 text-amber-900 font-black">₹${totCrPCr}</td>
+              <td class="p-2 text-amber-900 font-black">${totCrPCr}</td>
               <td class="p-2"></td>
             </tr>
           </tfoot>
@@ -2700,7 +2676,7 @@
               <td class="p-2 text-left uppercase">ആകെ:</td>
               <td class="p-2 text-amber-800">${totSalCash}</td>
               <td class="p-2 text-blue-800">${totSalBank}</td>
-              <td class="p-2 text-purple-950 font-black">₹${totSalGrand}</td>
+              <td class="p-2 text-purple-950 font-black">${totSalGrand}</td>
               <td class="p-2"></td>
             </tr>
           </tfoot>
@@ -2747,7 +2723,7 @@
               <td class="p-2 text-left uppercase">ആകെ:</td>
               <td class="p-2 text-amber-800">${totExpCash}</td>
               <td class="p-2 text-blue-800">${totExpBank}</td>
-              <td class="p-2 text-amber-950 font-black">₹${totExpGrand}</td>
+              <td class="p-2 text-amber-950 font-black">${totExpGrand}</td>
               <td class="p-2"></td>
             </tr>
           </tfoot>
@@ -2795,7 +2771,7 @@
               <td class="p-2 text-left uppercase">ആകെ:</td>
               <td class="p-2 text-emerald-800">${totCSCash}</td>
               <td class="p-2 text-blue-800">${totCSBank}</td>
-              <td class="p-2 text-slate-950 font-black">₹${totCSGrand}</td>
+              <td class="p-2 text-slate-950 font-black">${totCSGrand}</td>
               <td class="p-2"></td>
             </tr>
           </tfoot>
@@ -2842,7 +2818,7 @@
               <td class="p-2 text-left uppercase">ആകെ:</td>
               <td class="p-2 text-emerald-800">${totCrSCash}</td>
               <td class="p-2 text-blue-800">${totCrSBank}</td>
-              <td class="p-2 text-amber-900 font-black">₹${totCrSGrand}</td>
+              <td class="p-2 text-amber-900 font-black">${totCrSGrand}</td>
               <td class="p-2"></td>
             </tr>
           </tfoot>
@@ -2900,9 +2876,7 @@
       safeSetText("cardBankBalance", `🏦 ബാങ്ക് ബാലൻസ്: ${curBank.toLocaleString('en-IN')}`);
     }
 
-    // ==========================================================
-    // REPORT MODAL ENGINE & NAVIGATION
-    // ==========================================================
+    // REPORT ENGINE
     function openReportModal() {
       const modal = document.getElementById("reportModal");
       if (modal) {
@@ -2987,9 +2961,6 @@
       renderReportData('monthly');
     }
 
-    // ==========================================================
-    // REPORT DATA RENDERER (DAILY & MONTHLY)
-    // ==========================================================
     function renderReportData(mode) {
       let targetDate = document.getElementById("repFilterDate")?.value || document.getElementById("filterDate")?.value || getLocalDateString();
       let targetMonth = document.getElementById("repFilterMonth")?.value || targetDate.substring(0, 7);
@@ -3159,35 +3130,35 @@
       safeSetText("repSalaryBal", totalEmpPending.toLocaleString('en-IN'));
       safeSetText("repLiquidBal", totalLiquid.toLocaleString('en-IN'));
 
-      safeSetText("salesGrandBadge", `ആകെ: ₹${totSale.toLocaleString('en-IN')}`);
-      safeSetText("purchaseGrandBadge", `ആകെ: ₹${totPur.toLocaleString('en-IN')}`);
+      safeSetText("salesGrandBadge", `ആകെ: ${totSale.toLocaleString('en-IN')}`);
+      safeSetText("purchaseGrandBadge", `ആകെ: ${totPur.toLocaleString('en-IN')}`);
 
-      // 1. Cash Sales Table
+      // 1. Cash Sales Table (Crisp & Bold)
       const cashSalesArr = Object.values(cashSalesMap);
       let rCSCash = 0, rCSBank = 0, rCSTotal = 0;
       let cashSalesHtml = `
-        <table class="w-full text-[10px] text-center border-collapse">
+        <table class="w-full text-xs text-center border-collapse">
           <thead>
-            <tr class="bg-emerald-100 text-slate-800 font-bold border-b">
-              <th class="p-1 text-left">പേര്</th>
-              <th class="p-1">ക്യാഷ്</th>
-              <th class="p-1">ബാങ്ക്</th>
-              <th class="p-1 text-right">ആകെ</th>
+            <tr class="bg-emerald-100 text-slate-900 font-black border-b">
+              <th class="p-1.5 text-left">പേര്</th>
+              <th class="p-1.5">ക്യാഷ്</th>
+              <th class="p-1.5">ബാങ്ക്</th>
+              <th class="p-1.5 text-right">ആകെ</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (cashSalesArr.length === 0) {
-        cashSalesHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        cashSalesHtml += `<tr><td colspan="4" class="p-2 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         cashSalesArr.forEach(s => {
           rCSCash += s.cash; rCSBank += s.bank; rCSTotal += s.total;
           cashSalesHtml += `
             <tr>
-              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${s.name}">${s.name}</td>
-              <td class="p-1 text-emerald-700">${s.cash}</td>
-              <td class="p-1 text-blue-700">${s.bank}</td>
-              <td class="p-1 text-right font-bold text-slate-900">${s.total}</td>
+              <td class="p-1.5 text-left font-black text-slate-900 truncate" title="${s.name}">${s.name}</td>
+              <td class="p-1.5 text-emerald-800">${s.cash}</td>
+              <td class="p-1.5 text-blue-800">${s.bank}</td>
+              <td class="p-1.5 text-right font-black text-slate-950">${s.total}</td>
             </tr>
           `;
         });
@@ -3195,11 +3166,11 @@
       cashSalesHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-emerald-50 text-emerald-950 font-black border-t">
-              <td class="p-1 text-left uppercase">ആകെ:</td>
-              <td class="p-1">${rCSCash}</td>
-              <td class="p-1">${rCSBank}</td>
-              <td class="p-1 text-right">₹${rCSTotal}</td>
+            <tr class="bg-emerald-50 text-emerald-950 font-black border-t-2">
+              <td class="p-1.5 text-left uppercase">ആകെ:</td>
+              <td class="p-1.5">${rCSCash}</td>
+              <td class="p-1.5">${rCSBank}</td>
+              <td class="p-1.5 text-right text-slate-950">${rCSTotal}</td>
             </tr>
           </tfoot>
         </table>
@@ -3210,28 +3181,28 @@
       const creditSalesArr = Object.values(creditSalesMap);
       let rCrSCash = 0, rCrSBank = 0, rCrSCr = 0;
       let creditSalesHtml = `
-        <table class="w-full text-[10px] text-center border-collapse">
+        <table class="w-full text-xs text-center border-collapse">
           <thead>
-            <tr class="bg-amber-100 text-slate-800 font-bold border-b">
-              <th class="p-1 text-left">പേര്</th>
-              <th class="p-1">ക്യാഷ്</th>
-              <th class="p-1">ബാങ്ക്</th>
-              <th class="p-1 text-right">ക്രെഡിറ്റ്</th>
+            <tr class="bg-amber-100 text-slate-900 font-black border-b">
+              <th class="p-1.5 text-left">പേര്</th>
+              <th class="p-1.5">ക്യാഷ്</th>
+              <th class="p-1.5">ബാങ്ക്</th>
+              <th class="p-1.5 text-right">ക്രെഡിറ്റ്</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (creditSalesArr.length === 0) {
-        creditSalesHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        creditSalesHtml += `<tr><td colspan="4" class="p-2 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         creditSalesArr.forEach(s => {
           rCrSCash += s.cash; rCrSBank += s.bank; rCrSCr += s.cr;
           creditSalesHtml += `
             <tr>
-              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${s.name}">${s.name}</td>
-              <td class="p-1 text-emerald-700">${s.cash}</td>
-              <td class="p-1 text-blue-700">${s.bank}</td>
-              <td class="p-1 text-right font-bold text-amber-700">${s.cr}</td>
+              <td class="p-1.5 text-left font-black text-slate-900 truncate" title="${s.name}">${s.name}</td>
+              <td class="p-1.5 text-emerald-800">${s.cash}</td>
+              <td class="p-1.5 text-blue-800">${s.bank}</td>
+              <td class="p-1.5 text-right font-black text-amber-900">${s.cr}</td>
             </tr>
           `;
         });
@@ -3239,11 +3210,11 @@
       creditSalesHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-amber-50 text-amber-950 font-black border-t">
-              <td class="p-1 text-left uppercase">ആകെ:</td>
-              <td class="p-1">${rCrSCash}</td>
-              <td class="p-1">${rCrSBank}</td>
-              <td class="p-1 text-right text-amber-900">₹${rCrSCr}</td>
+            <tr class="bg-amber-50 text-amber-950 font-black border-t-2">
+              <td class="p-1.5 text-left uppercase">ആകെ:</td>
+              <td class="p-1.5">${rCrSCash}</td>
+              <td class="p-1.5">${rCrSBank}</td>
+              <td class="p-1.5 text-right text-amber-950">${rCrSCr}</td>
             </tr>
           </tfoot>
         </table>
@@ -3254,28 +3225,28 @@
       const cashPurArr = Object.values(cashPurMap);
       let rCPCash = 0, rCPBank = 0, rCPTotal = 0;
       let cashPurHtml = `
-        <table class="w-full text-[10px] text-center border-collapse">
+        <table class="w-full text-xs text-center border-collapse">
           <thead>
-            <tr class="bg-blue-100 text-slate-800 font-bold border-b">
-              <th class="p-1 text-left">വെണ്ടർ</th>
-              <th class="p-1">ക്യാഷ്</th>
-              <th class="p-1">ബാങ്ക്</th>
-              <th class="p-1 text-right">ആകെ</th>
+            <tr class="bg-blue-100 text-slate-900 font-black border-b">
+              <th class="p-1.5 text-left">വെണ്ടർ</th>
+              <th class="p-1.5">ക്യാഷ്</th>
+              <th class="p-1.5">ബാങ്ക്</th>
+              <th class="p-1.5 text-right">ആകെ</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (cashPurArr.length === 0) {
-        cashPurHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        cashPurHtml += `<tr><td colspan="4" class="p-2 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         cashPurArr.forEach(p => {
           rCPCash += p.cash; rCPBank += p.bank; rCPTotal += p.total;
           cashPurHtml += `
             <tr>
-              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${p.name}">${p.name}</td>
-              <td class="p-1 text-blue-700">${p.cash}</td>
-              <td class="p-1 text-indigo-700">${p.bank}</td>
-              <td class="p-1 text-right font-bold text-slate-900">${p.total}</td>
+              <td class="p-1.5 text-left font-black text-slate-900 truncate" title="${p.name}">${p.name}</td>
+              <td class="p-1.5 text-blue-800">${p.cash}</td>
+              <td class="p-1.5 text-indigo-800">${p.bank}</td>
+              <td class="p-1.5 text-right font-black text-slate-950">${p.total}</td>
             </tr>
           `;
         });
@@ -3283,11 +3254,11 @@
       cashPurHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-blue-50 text-blue-950 font-black border-t">
-              <td class="p-1 text-left uppercase">ആകെ:</td>
-              <td class="p-1">${rCPCash}</td>
-              <td class="p-1">${rCPBank}</td>
-              <td class="p-1 text-right">₹${rCPTotal}</td>
+            <tr class="bg-blue-50 text-blue-950 font-black border-t-2">
+              <td class="p-1.5 text-left uppercase">ആകെ:</td>
+              <td class="p-1.5">${rCPCash}</td>
+              <td class="p-1.5">${rCPBank}</td>
+              <td class="p-1.5 text-right text-slate-950">${rCPTotal}</td>
             </tr>
           </tfoot>
         </table>
@@ -3298,28 +3269,28 @@
       const creditPurArr = Object.values(creditPurMap);
       let rCrPCash = 0, rCrPBank = 0, rCrPCr = 0;
       let creditPurHtml = `
-        <table class="w-full text-[10px] text-center border-collapse">
+        <table class="w-full text-xs text-center border-collapse">
           <thead>
-            <tr class="bg-indigo-100 text-slate-800 font-bold border-b">
-              <th class="p-1 text-left">വെണ്ടർ</th>
-              <th class="p-1">ക്യാഷ്</th>
-              <th class="p-1">ബാങ്ക്</th>
-              <th class="p-1 text-right">ക്രെഡിറ്റ്</th>
+            <tr class="bg-indigo-100 text-slate-900 font-black border-b">
+              <th class="p-1.5 text-left">വെണ്ടർ</th>
+              <th class="p-1.5">ക്യാഷ്</th>
+              <th class="p-1.5">ബാങ്ക്</th>
+              <th class="p-1.5 text-right">ക്രെഡിറ്റ്</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (creditPurArr.length === 0) {
-        creditPurHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        creditPurHtml += `<tr><td colspan="4" class="p-2 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         creditPurArr.forEach(p => {
           rCrPCash += p.cash; rCrPBank += p.bank; rCrPCr += p.cr;
           creditPurHtml += `
             <tr>
-              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${p.name}">${p.name}</td>
-              <td class="p-1 text-blue-700">${p.cash}</td>
-              <td class="p-1 text-indigo-700">${p.bank}</td>
-              <td class="p-1 text-right font-bold text-amber-700">${p.cr}</td>
+              <td class="p-1.5 text-left font-black text-slate-900 truncate" title="${p.name}">${p.name}</td>
+              <td class="p-1.5 text-blue-800">${p.cash}</td>
+              <td class="p-1.5 text-indigo-800">${p.bank}</td>
+              <td class="p-1.5 text-right font-black text-indigo-950">${p.cr}</td>
             </tr>
           `;
         });
@@ -3327,11 +3298,11 @@
       creditPurHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-indigo-50 text-indigo-950 font-black border-t">
-              <td class="p-1 text-left uppercase">ആകെ:</td>
-              <td class="p-1">${rCrPCash}</td>
-              <td class="p-1">${rCrPBank}</td>
-              <td class="p-1 text-right text-indigo-900">₹${rCrPCr}</td>
+            <tr class="bg-indigo-50 text-indigo-950 font-black border-t-2">
+              <td class="p-1.5 text-left uppercase">ആകെ:</td>
+              <td class="p-1.5">${rCrPCash}</td>
+              <td class="p-1.5">${rCrPBank}</td>
+              <td class="p-1.5 text-right text-indigo-950">${rCrPCr}</td>
             </tr>
           </tfoot>
         </table>
@@ -3342,28 +3313,28 @@
       const salArr = Object.values(salariesMap);
       let rSalCash = 0, rSalBank = 0, rSalTotal = 0;
       let salHtml = `
-        <table class="w-full text-[10px] text-center border-collapse">
+        <table class="w-full text-xs text-center border-collapse">
           <thead>
-            <tr class="bg-purple-100 text-slate-800 font-bold border-b">
-              <th class="p-1 text-left">സ്റ്റാഫ്</th>
-              <th class="p-1">ക്യാഷ്</th>
-              <th class="p-1">ബാങ്ക്</th>
-              <th class="p-1 text-right">ആകെ</th>
+            <tr class="bg-purple-100 text-slate-900 font-black border-b">
+              <th class="p-1.5 text-left">സ്റ്റാഫ്</th>
+              <th class="p-1.5">ക്യാഷ്</th>
+              <th class="p-1.5">ബാങ്ക്</th>
+              <th class="p-1.5 text-right">ആകെ</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (salArr.length === 0) {
-        salHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
+        salHtml += `<tr><td colspan="4" class="p-2 text-center text-slate-400">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
       } else {
         salArr.forEach(s => {
           rSalCash += s.cash; rSalBank += s.bank; rSalTotal += s.total;
           salHtml += `
             <tr>
-              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${s.name}">${s.name}</td>
-              <td class="p-1 text-purple-700">${s.cash}</td>
-              <td class="p-1 text-blue-700">${s.bank}</td>
-              <td class="p-1 text-right font-bold text-slate-900">${s.total}</td>
+              <td class="p-1.5 text-left font-black text-slate-900 truncate" title="${s.name}">${s.name}</td>
+              <td class="p-1.5 text-purple-800">${s.cash}</td>
+              <td class="p-1.5 text-blue-800">${s.bank}</td>
+              <td class="p-1.5 text-right font-black text-purple-950">${s.total}</td>
             </tr>
           `;
         });
@@ -3371,11 +3342,11 @@
       salHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-purple-50 text-purple-950 font-black border-t">
-              <td class="p-1 text-left uppercase">ആകെ:</td>
-              <td class="p-1">${rSalCash}</td>
-              <td class="p-1">${rSalBank}</td>
-              <td class="p-1 text-right">₹${rSalTotal}</td>
+            <tr class="bg-purple-50 text-purple-950 font-black border-t-2">
+              <td class="p-1.5 text-left uppercase">ആകെ:</td>
+              <td class="p-1.5">${rSalCash}</td>
+              <td class="p-1.5">${rSalBank}</td>
+              <td class="p-1.5 text-right text-purple-950">${rSalTotal}</td>
             </tr>
           </tfoot>
         </table>
@@ -3386,28 +3357,28 @@
       const expArr = Object.values(expensesMap);
       let rExpCash = 0, rExpBank = 0, rExpTotal = 0;
       let expHtml = `
-        <table class="w-full text-[10px] text-center border-collapse">
+        <table class="w-full text-xs text-center border-collapse">
           <thead>
-            <tr class="bg-amber-100 text-slate-800 font-bold border-b">
-              <th class="p-1 text-left">ഇനം</th>
-              <th class="p-1">ക്യാഷ്</th>
-              <th class="p-1">ബാങ്ക്</th>
-              <th class="p-1 text-right">ആകെ</th>
+            <tr class="bg-amber-100 text-slate-900 font-black border-b">
+              <th class="p-1.5 text-left">ഇനം</th>
+              <th class="p-1.5">ക്യാഷ്</th>
+              <th class="p-1.5">ബാങ്ക്</th>
+              <th class="p-1.5 text-right">ആകെ</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-slate-100 font-bold">
       `;
       if (expArr.length === 0) {
-        expHtml += `<tr><td colspan="4" class="p-1.5 text-center text-slate-400">ചിലവുകൾ ഇല്ല</td></tr>`;
+        expHtml += `<tr><td colspan="4" class="p-2 text-center text-slate-400">ചിലവുകൾ ഇല്ല</td></tr>`;
       } else {
         expArr.forEach(e => {
           rExpCash += e.cash; rExpBank += e.bank; rExpTotal += e.total;
           expHtml += `
             <tr>
-              <td class="p-1 text-left font-bold text-slate-800 truncate" title="${e.name}">${e.name}</td>
-              <td class="p-1 text-amber-700">${e.cash}</td>
-              <td class="p-1 text-blue-700">${e.bank}</td>
-              <td class="p-1 text-right font-bold text-slate-900">${e.total}</td>
+              <td class="p-1.5 text-left font-black text-slate-900 truncate" title="${e.name}">${e.name}</td>
+              <td class="p-1.5 text-amber-800">${e.cash}</td>
+              <td class="p-1.5 text-blue-800">${e.bank}</td>
+              <td class="p-1.5 text-right font-black text-slate-950">${e.total}</td>
             </tr>
           `;
         });
@@ -3415,11 +3386,11 @@
       expHtml += `
           </tbody>
           <tfoot>
-            <tr class="bg-amber-50 text-amber-950 font-black border-t">
-              <td class="p-1 text-left uppercase">ആകെ:</td>
-              <td class="p-1">${rExpCash}</td>
-              <td class="p-1">${rExpBank}</td>
-              <td class="p-1 text-right">₹${rExpTotal}</td>
+            <tr class="bg-amber-50 text-amber-950 font-black border-t-2">
+              <td class="p-1.5 text-left uppercase">ആകെ:</td>
+              <td class="p-1.5">${rExpCash}</td>
+              <td class="p-1.5">${rExpBank}</td>
+              <td class="p-1.5 text-right text-slate-950">${rExpTotal}</td>
             </tr>
           </tfoot>
         </table>
@@ -3443,9 +3414,7 @@
       };
     }
 
-    // ==========================================================
-    // STATEMENT DROPDOWN POPULATION & GENERATION ENGINE
-    // ==========================================================
+    // STATEMENT ENGINE
     function populateStatementPartyDatalist() {
       const type = document.getElementById("statPartyType").value;
       const dl = document.getElementById("statPartyDatalist");
@@ -3849,23 +3818,23 @@
         tableHtml = `
           <table class="w-full text-xs border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
             <thead>
-              <tr class="bg-indigo-900 text-white font-extrabold text-center border-b">
+              <tr class="bg-indigo-900 text-white font-black text-center border-b">
                 <th class="p-2 w-8">No</th>
                 <th class="p-2 w-2/6 text-left">Customer Name</th>
-                <th class="p-2 w-1/6">Old Opening (₹)</th>
-                <th class="p-2 w-1/6">Credit Sales (₹)</th>
-                <th class="p-2 w-1/6">Paid / Coll (₹)</th>
-                <th class="p-2 w-1/6 bg-indigo-950">Balance Due (₹)</th>
+                <th class="p-2 w-1/6">Old Opening</th>
+                <th class="p-2 w-1/6">Credit Sales</th>
+                <th class="p-2 w-1/6">Paid / Coll</th>
+                <th class="p-2 w-1/6 bg-indigo-950">Balance Due</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y divide-slate-100 font-bold">
         `;
         if (agentCustomersSummary.length === 0) {
-          tableHtml += `<tr><td colspan="6" class="p-4 text-center text-slate-400 font-bold">No customers found with activity / balance >= ₹10 on this route</td></tr>`;
+          tableHtml += `<tr><td colspan="6" class="p-4 text-center text-slate-400 font-bold">No customers found with activity / balance >= 10 on this route</td></tr>`;
         } else {
           agentCustomersSummary.forEach((r, idx) => {
             tableHtml += `
-              <tr class="text-center font-bold hover:bg-slate-50">
+              <tr class="text-center hover:bg-slate-50">
                 <td class="p-2 text-slate-500">${idx + 1}</td>
                 <td class="p-2 text-left text-slate-900 truncate" title="${r.name}">${r.name}</td>
                 <td class="p-2 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
@@ -3893,23 +3862,23 @@
         tableHtml = `
           <table class="w-full text-xs border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
             <thead>
-              <tr class="bg-blue-900 text-white font-extrabold text-center border-b">
+              <tr class="bg-blue-900 text-white font-black text-center border-b">
                 <th class="p-2 w-8">No</th>
                 <th class="p-2 w-2/6 text-left">Vendor Name</th>
-                <th class="p-2 w-1/6">Old Opening (₹)</th>
-                <th class="p-2 w-1/6">Credit Pur (₹)</th>
-                <th class="p-2 w-1/6">Paid / Pay (₹)</th>
-                <th class="p-2 w-1/6 bg-blue-950">Payable Due (₹)</th>
+                <th class="p-2 w-1/6">Old Opening</th>
+                <th class="p-2 w-1/6">Credit Pur</th>
+                <th class="p-2 w-1/6">Paid / Pay</th>
+                <th class="p-2 w-1/6 bg-blue-950">Payable Due</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y divide-slate-100 font-bold">
         `;
         if (vendorsConsolidatedSummary.length === 0) {
-          tableHtml += `<tr><td colspan="6" class="p-4 text-center text-slate-400 font-bold">No credit vendors found with activity / balance >= ₹10</td></tr>`;
+          tableHtml += `<tr><td colspan="6" class="p-4 text-center text-slate-400 font-bold">No credit vendors found with activity / balance >= 10</td></tr>`;
         } else {
           vendorsConsolidatedSummary.forEach((r, idx) => {
             tableHtml += `
-              <tr class="text-center font-bold hover:bg-slate-50">
+              <tr class="text-center hover:bg-slate-50">
                 <td class="p-2 text-slate-500">${idx + 1}</td>
                 <td class="p-2 text-left text-slate-900 truncate" title="${r.name}">${r.name}</td>
                 <td class="p-2 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
@@ -3937,15 +3906,15 @@
         tableHtml = `
           <table class="w-full text-xs border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
             <thead>
-              <tr class="bg-indigo-900 text-white font-extrabold text-center border-b">
+              <tr class="bg-indigo-900 text-white font-black text-center border-b">
                 <th class="p-2 w-1/5 text-left">Date</th>
                 <th class="p-2 w-2/5 text-left">Description</th>
-                <th class="p-2 w-1/5">Paid (Cash/Bank)</th>
+                <th class="p-2 w-1/5">Paid</th>
                 <th class="p-2 w-1/5">Bill / Salary</th>
                 <th class="p-2 w-1/5">Balance</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y divide-slate-100 font-bold">
         `;
         if (statementRows.length === 0) {
           tableHtml += `<tr><td colspan="5" class="p-4 text-center text-slate-400 font-bold">No transactions recorded for this month</td></tr>`;
@@ -3954,11 +3923,11 @@
             let payStr = (r.cash + r.bank > 0) ? (r.cash > 0 && r.bank > 0 ? `C:${r.cash} B:${r.bank}` : `${r.cash + r.bank}`) : '-';
             let billStr = (r.bill > 0) ? `${r.bill}` : '-';
             tableHtml += `
-              <tr class="text-center font-bold hover:bg-slate-50">
+              <tr class="text-center hover:bg-slate-50">
                 <td class="p-2 text-left text-slate-600 whitespace-nowrap">${r.date}</td>
                 <td class="p-2 text-left text-slate-900 truncate whitespace-nowrap" title="${r.desc}">${r.desc}</td>
                 <td class="p-2 text-emerald-700 whitespace-nowrap">${payStr}</td>
-                <td class="p-2 text-amber-700 whitespace-nowrap font-bold">${billStr}</td>
+                <td class="p-2 text-amber-700 whitespace-nowrap">${billStr}</td>
                 <td class="p-2 font-black text-slate-900 whitespace-nowrap">${r.bal.toLocaleString('en-IN')}</td>
               </tr>
             `;
@@ -3993,9 +3962,7 @@
       };
     }
 
-    // ==========================================================
-    // WHATSAPP SHARE ENGINE
-    // ==========================================================
+    // WHATSAPP SHARE
     function shareActiveReportWhatsApp() {
       if (currentReportMode === 'statement') {
         if (!currentStatementDataForWA) return alert("Generate statement before sharing!");
@@ -4007,44 +3974,44 @@
                    `👤 *Agent:* ${d.partyName}\n` +
                    `📅 *Month:* ${d.month}\n` +
                    `--------------------------------\n` +
-                   `🔹 *Total Old Opening Balance:* ₹${d.openingBal}\n` +
-                   `🛒 *Total Month Sales:* ₹${d.totalSales}\n` +
-                   `💵 *Total Month Collected:* ₹${d.totalPaid}\n` +
-                   `🔴 *Net Balance Due:* ₹${d.closingBal}\n` +
+                   `🔹 *Total Old Opening Balance:* ${d.openingBal}\n` +
+                   `🛒 *Total Month Sales:* ${d.totalSales}\n` +
+                   `💵 *Total Month Collected:* ${d.totalPaid}\n` +
+                   `🔴 *Net Balance Due:* ${d.closingBal}\n` +
                    `--------------------------------\n` +
-                   `*CUSTOMER BREAKDOWN (>= ₹10):*\n`;
+                   `*CUSTOMER BREAKDOWN (>= 10):*\n`;
 
           (d.agentSummary || []).forEach(c => {
             waText += `▪ *${c.name}*: Open: ${c.opening} | Bills: ${c.sales} | Paid: ${c.paid} | Due: ${c.closing}\n`;
           });
 
           waText += `--------------------------------\n` +
-                    `🔴 *Total Outstanding to Collect:* ₹${d.closingBal}`;
+                    `🔴 *Total Outstanding to Collect:* ${d.closingBal}`;
         } else if (d.isAllVendors) {
           waText = `📊 *${currentShop.name.toUpperCase()} - TOTAL VENDORS STATEMENT*\n` +
                    `📅 *Month:* ${d.month}\n` +
                    `--------------------------------\n` +
-                   `🔹 *Total Old Opening:* ₹${d.openingBal}\n` +
-                   `🚚 *Total Month Purchases:* ₹${d.totalSales}\n` +
-                   `💵 *Total Month Paid:* ₹${d.totalPaid}\n` +
-                   `🔴 *Total Net Balance Payable:* ₹${d.closingBal}\n` +
+                   `🔹 *Total Old Opening:* ${d.openingBal}\n` +
+                   `🚚 *Total Month Purchases:* ${d.totalSales}\n` +
+                   `💵 *Total Month Paid:* ${d.totalPaid}\n` +
+                   `🔴 *Total Net Balance Payable:* ${d.closingBal}\n` +
                    `--------------------------------\n` +
-                   `*VENDOR BREAKDOWN (>= ₹10):*\n`;
+                   `*VENDOR BREAKDOWN (>= 10):*\n`;
 
           (d.vendorSummary || []).forEach(v => {
             waText += `▪ *${v.name}*: Open: ${v.opening} | Pur: ${v.purchases} | Paid: ${v.paid} | Due: ${v.closing}\n`;
           });
 
           waText += `--------------------------------\n` +
-                    `🔴 *Total Payable to Vendors:* ₹${d.closingBal}`;
+                    `🔴 *Total Payable to Vendors:* ${d.closingBal}`;
         } else {
           waText = `📊 *${currentShop.name.toUpperCase()} - ACCOUNT STATEMENT*\n` +
                    `👤 *Account:* ${d.partyName} (${d.type.toUpperCase()})\n` +
                    `📅 *Month:* ${d.month}\n` +
                    `--------------------------------\n` +
-                   `🔹 *Opening Balance:* ₹${d.openingBal}\n` +
-                   `🛒 *Month Bills/Salary:* ₹${d.totalSales}\n` +
-                   `💵 *Month Payments:* ₹${d.totalPaid}\n` +
+                   `🔹 *Opening Balance:* ${d.openingBal}\n` +
+                   `🛒 *Month Bills/Salary:* ${d.totalSales}\n` +
+                   `💵 *Month Payments:* ${d.totalPaid}\n` +
                    `--------------------------------\n`;
 
           (d.rows || []).forEach(r => {
@@ -4053,7 +4020,7 @@
           });
 
           waText += `--------------------------------\n` +
-                    `🔴 *Closing Balance:* ₹${d.closingBal}`;
+                    `🔴 *Closing Balance:* ${d.closingBal}`;
         }
 
         window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(waText), '_blank');
