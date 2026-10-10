@@ -164,8 +164,8 @@
     </div>
   </div>
 
-  <!-- 2. STICKY TOP HEADER -->
-  <header id="mobileAppHeader" class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-4 py-2.5 transition-all duration-300">
+  <!-- 2. STICKY TOP HEADER WITH ULTRA-FAST DATE NAVIGATION -->
+  <header id="mobileAppHeader" class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-3 py-2.5 transition-all duration-300">
     <div class="flex items-center justify-between gap-2">
       
       <div class="flex items-center gap-2 overflow-hidden">
@@ -176,27 +176,42 @@
         
         <div class="truncate">
           <div id="shopSelectorWrapper" class="hidden">
-            <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-slate-700 outline-none cursor-pointer">
+            <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-0.5 rounded-lg border border-slate-700 outline-none cursor-pointer">
             </select>
           </div>
           <h1 id="shopStaticTitle" class="text-xs font-black truncate">ALNASSR POS</h1>
           
-          <div class="flex items-center gap-1.5 mt-0.5">
+          <!-- DATE TOGGLE CONTROLS (PREVIOUS / DATE / NEXT / TODAY) -->
+          <div class="flex items-center gap-1 mt-0.5">
+            <button 
+              type="button" 
+              onclick="changeBusinessDate(-1)" 
+              title="തലേദിവസം" 
+              class="bg-slate-800 hover:bg-slate-700 text-emerald-300 text-[10px] font-black px-1.5 py-0.5 rounded border border-slate-700 touch-btn cursor-pointer">
+              ◀ മുന്നേ
+            </button>
             <input 
               type="date" 
               id="mobileFilterDate" 
               onchange="onDateChanged(this.value)" 
-              class="bg-slate-800 text-emerald-400 text-[11px] font-black px-2 py-0.5 rounded-md border border-slate-700 outline-none cursor-pointer" 
+              class="bg-slate-800 text-emerald-400 text-[11px] font-black px-1.5 py-0.5 rounded-md border border-slate-700 outline-none cursor-pointer" 
             />
             <button 
               type="button" 
+              onclick="changeBusinessDate(1)" 
+              title="അടുത്ത ദിവസം" 
+              class="bg-slate-800 hover:bg-slate-700 text-emerald-300 text-[10px] font-black px-1.5 py-0.5 rounded border border-slate-700 touch-btn cursor-pointer">
+              അടുത്തത് ▶
+            </button>
+            <button 
+              type="button" 
               onclick="setTodayDate()" 
-              title="ഇന്നത്തെ തീയതി" 
+              title="ഇന്നത്തെ തീയതി (സൗദി 6 AM സിങ്ക്)" 
               class="bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/40 touch-btn cursor-pointer">
               ഇന്ന്
             </button>
-            <span id="networkStatusBadge" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              🟢 ഓൺലൈൻ
+            <span id="networkStatusBadge" class="text-[9px] font-extrabold px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hidden sm:inline-block">
+              🟢
             </span>
           </div>
         </div>
@@ -233,7 +248,7 @@
   <!-- 3. MAIN WORKSPACE CONTAINER -->
   <main class="w-full max-w-md mx-auto px-3 pt-2.5 flex-1 flex flex-col justify-between space-y-3">
 
-    <!-- TOP SECTION: ENTRY TABS WITH LARGER TOUCH INPUTS -->
+    <!-- TOP SECTION: ENTRY TABS WITH LARGE TOUCH INPUTS -->
     <div>
       <!-- TAB 1: SALE ENTRY -->
       <div id="view-sale" class="tab-view space-y-2.5">
@@ -437,7 +452,7 @@
 
   </main>
 
-  <!-- 4. FIXED BOTTOM NAVIGATION BAR (CLEAN 3 BUTTONS) -->
+  <!-- 4. FIXED BOTTOM NAVIGATION BAR -->
   <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 z-40 shadow-lg flex items-center justify-around">
     <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-xs touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-emerald-50">
@@ -468,7 +483,7 @@
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
         <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
-          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> ഇന്നത്തെ സെയിൽസ് ഇടപാടുകൾ
+          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് ഇടപാടുകൾ (Selected Date)
         </h3>
         <button onclick="closeTodaySalesModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
@@ -498,7 +513,7 @@
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
         <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">
-          <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> ഇന്നത്തെ പർച്ചേസ് ഇടപാടുകൾ
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് ഇടപാടുകൾ (Selected Date)
         </h3>
         <button onclick="closeTodayPurchaseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
@@ -528,7 +543,7 @@
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
         <h3 class="text-xs font-black text-amber-900 flex items-center gap-1.5">
-          <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ഇന്നത്തെ ചിലവുകൾ & സാലറി
+          <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവുകൾ & സാലറി (Selected Date)
         </h3>
         <button onclick="closeTodayExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
@@ -777,7 +792,7 @@
           </div>
         </div>
 
-        <!-- ENHANCED BOLD SUMMARY CARDS (INCLUDING OPENING FUND) -->
+        <!-- ENHANCED BOLD SUMMARY CARDS (INCLUDING OPENING & ACCURATE CLOSING LIQUID FUND) -->
         <div class="grid grid-cols-4 sm:grid-cols-8 gap-1 font-bold">
           <div class="bg-slate-200/90 p-1.5 rounded-lg border border-slate-400 text-center">
             <span class="text-[8.5px] font-black text-slate-800 block uppercase">തുടക്ക ഫണ്ട്</span>
@@ -985,26 +1000,53 @@
       });
     }
 
-    function getSaudiToday() {
+    // SAUDI BUSINESS DATE (6:00 AM CUT-OFF SYNC)
+    function getSaudiBusinessDate() {
       if (window.getSaudiBusinessDate && typeof window.getSaudiBusinessDate === 'function') {
         return window.getSaudiBusinessDate();
       }
-      return new Date().toISOString().split('T')[0];
+      try {
+        const now = new Date();
+        const saudiTime = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
+        if (saudiTime.getHours() < 6) {
+          saudiTime.setDate(saudiTime.getDate() - 1);
+        }
+        const y = saudiTime.getFullYear();
+        const m = String(saudiTime.getMonth() + 1).padStart(2, '0');
+        const d = String(saudiTime.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      } catch(e) {
+        return new Date().toISOString().split('T')[0];
+      }
     }
 
     function getSelectedDate() {
       const dt = document.getElementById("mobileFilterDate");
-      return (dt && dt.value) ? dt.value : getSaudiToday();
+      return (dt && dt.value) ? dt.value : getSaudiBusinessDate();
     }
 
     function setTodayDate() {
-      const today = getSaudiToday();
+      const today = getSaudiBusinessDate();
       const dt = document.getElementById("mobileFilterDate");
       if (dt) dt.value = today;
       renderQuickTotalsAndRecent();
     }
 
     function onDateChanged(val) {
+      renderQuickTotalsAndRecent();
+    }
+
+    // ULTRA-FAST DATE STEPPING (PREVIOUS / NEXT DAY)
+    function changeBusinessDate(delta) {
+      const dtInput = document.getElementById("mobileFilterDate");
+      let currentStr = (dtInput && dtInput.value) ? dtInput.value : getSaudiBusinessDate();
+      let d = parseToDateObj(currentStr);
+      d.setDate(d.getDate() + delta);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const newDateStr = `${y}-${m}-${day}`;
+      if (dtInput) dtInput.value = newDateStr;
       renderQuickTotalsAndRecent();
     }
 
@@ -1038,12 +1080,12 @@
       const badge = document.getElementById("networkStatusBadge");
       if (!badge) return;
       if (navigator.onLine) {
-        badge.className = "text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-        badge.innerText = "🟢 ഓൺലൈൻ";
+        badge.className = "text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hidden sm:inline-block";
+        badge.innerText = "🟢";
         syncOfflineQueue();
       } else {
         badge.className = "text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-200 border border-amber-500/40";
-        badge.innerText = "⚠️ ഓഫ്‍ലൈൻ";
+        badge.innerText = "⚠️";
       }
     }
 
@@ -1067,7 +1109,7 @@
       }
 
       const dtInput = document.getElementById("mobileFilterDate");
-      if (dtInput) dtInput.value = getSaudiToday();
+      if (dtInput) dtInput.value = getSaudiBusinessDate();
 
       renderSaleInputs('cash');
       renderPurchaseInputs('cash');
@@ -1192,7 +1234,7 @@
 
       const header = document.getElementById("mobileAppHeader");
       if (header) {
-        header.className = `bg-gradient-to-r ${currentShop.themeGradient || 'from-slate-900 via-slate-800 to-slate-900'} text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-4 py-2.5 transition-all duration-300`;
+        header.className = `bg-gradient-to-r ${currentShop.themeGradient || 'from-slate-900 via-slate-800 to-slate-900'} text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-3 py-2.5 transition-all duration-300`;
       }
 
       if (window.supabase && currentShop.url && currentShop.key) {
@@ -1468,7 +1510,7 @@
       if (!monthlySalary) return baseAdv;
 
       const joinD = parseToDateObj(emp.joining_date);
-      const refStr = asOfDateStr ? cleanDate(asOfDateStr) : (document.getElementById("mobileFilterDate")?.value || getSaudiToday());
+      const refStr = asOfDateStr ? cleanDate(asOfDateStr) : (document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate());
       let targetD = parseToDateObj(refStr);
 
       const isStopped = (emp.status === 'stopped' || emp.status === 'left');
@@ -1522,7 +1564,7 @@
 
     function calculateEmployeePendingBalance(emp, asOfDateStr) {
       if (!emp) return 0;
-      const refDate = asOfDateStr || (document.getElementById("mobileFilterDate")?.value || getSaudiToday());
+      const refDate = asOfDateStr || (document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate());
       const totalAccrued = calculateEmployeeAccruedSalary(emp, refDate);
 
       let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
@@ -1558,7 +1600,7 @@
         btn.className = "w-full py-3.5 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-purple-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition";
         btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> സാലറി സേവ് ചെയ്യുക`;
 
-        const busDate = document.getElementById("mobileFilterDate")?.value || getSaudiToday();
+        const busDate = document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate();
         const liveBal = calculateEmployeePendingBalance(emp, busDate);
         info.innerText = `ലൈവ് സാലറി ബാക്കി: ${liveBal.toLocaleString('en-IN')} (ശമ്പളം: ${emp.monthly_salary || 0} | ജോയിനിങ്: ${emp.joining_date || '-'})`;
       } else {
@@ -1630,7 +1672,7 @@
       document.getElementById("newEmpName").value = "";
       document.getElementById("newEmpSalary").value = "";
       document.getElementById("newEmpAdvance").value = "";
-      document.getElementById("newEmpJoinDate").value = getSaudiToday();
+      document.getElementById("newEmpJoinDate").value = getSaudiBusinessDate();
       document.getElementById("newEmployeeModal").classList.remove("hidden");
       document.getElementById("newEmpName").focus();
     }
@@ -1640,7 +1682,7 @@
       const name = document.getElementById("newEmpName").value.trim().toUpperCase();
       const salary = parseFloat(document.getElementById("newEmpSalary").value) || 0;
       const advance = parseFloat(document.getElementById("newEmpAdvance").value) || 0;
-      const joinDate = document.getElementById("newEmpJoinDate").value || getSaudiToday();
+      const joinDate = document.getElementById("newEmpJoinDate").value || getSaudiBusinessDate();
       if (!name) return alert("ജീവനക്കാരന്റെ പേര് നൽകുക!");
 
       let newEmp = {
@@ -2081,7 +2123,7 @@
       const txn = (transactionsList || []).find(t => String(t.id) === String(id));
       if (!txn) return alert("ഇടപാട് കണ്ടെത്താനായില്ല!");
 
-      const todayStr = getSaudiToday();
+      const todayStr = getSaudiBusinessDate();
       let isOlderThanLimit = false;
 
       if (txn.date) {
@@ -2175,7 +2217,7 @@
       pendingTxnId = id;
       
       const txn = (transactionsList || []).find(t => String(t.id) === String(id));
-      const todayStr = getSaudiToday();
+      const todayStr = getSaudiBusinessDate();
       let isOlderThanLimit = false;
 
       if (txn && txn.date) {
@@ -2214,7 +2256,7 @@
       if (pendingTxnId) {
         const id = pendingTxnId;
         const txn = (transactionsList || []).find(t => String(t.id) === String(id));
-        const todayStr = getSaudiToday();
+        const todayStr = getSaudiBusinessDate();
         let isOlderThanLimit = false;
 
         if (txn && txn.date) {
@@ -2258,7 +2300,7 @@
     }
 
     // ========================================================
-    // REPORTS & STATEMENTS ENGINE WITH OPENING LIQUID FUND
+    // REPORTS & STATEMENTS ENGINE (ACCURATE HISTORICAL CLOSING)
     // ========================================================
     function openReportModal() {
       const modal = document.getElementById("reportModal");
@@ -2267,7 +2309,7 @@
         modal.style.display = "flex";
       }
 
-      const dashDate = document.getElementById("mobileFilterDate")?.value || getSaudiToday();
+      const dashDate = document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate();
       if (document.getElementById("repFilterDate")) document.getElementById("repFilterDate").value = dashDate;
       if (document.getElementById("repFilterMonth")) document.getElementById("repFilterMonth").value = dashDate.substring(0, 7);
       if (document.getElementById("statMonth")) document.getElementById("statMonth").value = dashDate.substring(0, 7);
@@ -2347,22 +2389,25 @@
     }
 
     function renderReportData(mode) {
-      let targetDate = document.getElementById("repFilterDate")?.value || getSaudiToday();
+      let targetDate = document.getElementById("repFilterDate")?.value || getSaudiBusinessDate();
       let targetMonth = document.getElementById("repFilterMonth")?.value || targetDate.substring(0, 7);
 
       let titleText = "";
       let dateBadgeText = "";
       let dateCondition;
       let isBeforeTargetCondition;
+      let isTargetOrBeforeCondition;
 
       if (mode === 'daily') {
         dateCondition = (dStr) => cleanDate(dStr) === targetDate;
         isBeforeTargetCondition = (dStr) => cleanDate(dStr) < targetDate;
+        isTargetOrBeforeCondition = (dStr) => cleanDate(dStr) <= targetDate;
         titleText = "ഡെയ്‌ലി റിപ്പോർട്ട് (Daily Report)";
         dateBadgeText = `തീയതി: ${targetDate}`;
       } else {
         dateCondition = (dStr) => cleanDate(dStr).startsWith(targetMonth);
         isBeforeTargetCondition = (dStr) => cleanDate(dStr) < `${targetMonth}-01`;
+        isTargetOrBeforeCondition = (dStr) => cleanDate(dStr).substring(0, 7) <= targetMonth;
         titleText = `മന്ത്ലി റിപ്പോർട്ട് (${targetMonth})`;
         dateBadgeText = `മാസം: ${targetMonth}`;
       }
@@ -2389,6 +2434,10 @@
       let dayOpeningCash = openingSettings.openingCash;
       let dayOpeningBank = openingSettings.openingBank;
 
+      // CLOSING LIQUID FUND AS OF TARGET DATE/MONTH
+      let targetClosingCash = openingSettings.openingCash;
+      let targetClosingBank = openingSettings.openingBank;
+
       allTx.forEach(t => {
         if (!t) return;
         const tDate = cleanDate(t.date);
@@ -2396,6 +2445,11 @@
         if (isBeforeTargetCondition(tDate)) {
           dayOpeningCash += (parseFloat(t.cash_amount) || 0);
           dayOpeningBank += (parseFloat(t.bank_amount) || 0);
+        }
+
+        if (isTargetOrBeforeCondition(tDate)) {
+          targetClosingCash += (parseFloat(t.cash_amount) || 0);
+          targetClosingBank += (parseFloat(t.bank_amount) || 0);
         }
 
         if (dateCondition(t.date)) {
@@ -2512,15 +2566,8 @@
         totalEmpPending += calculateEmployeePendingBalance(emp, targetDate);
       });
 
-      let curCash = openingSettings.openingCash;
-      let curBank = openingSettings.openingBank;
-      allTx.forEach(t => {
-        if (!t) return;
-        curCash += (parseFloat(t.cash_amount) || 0);
-        curBank += (parseFloat(t.bank_amount) || 0);
-      });
-      let totalLiquid = curCash + curBank;
       let totalDayOpening = dayOpeningCash + dayOpeningBank;
+      let totalTargetClosing = targetClosingCash + targetClosingBank;
 
       document.getElementById("repOpeningLiquidBal").innerText = totalDayOpening.toLocaleString('en-IN');
       document.getElementById("repTotalSale").innerText = totSale.toLocaleString('en-IN');
@@ -2529,7 +2576,7 @@
       document.getElementById("repCustBal").innerText = totalCustOutstanding.toLocaleString('en-IN');
       document.getElementById("repVendorBal").innerText = totalVendOutstanding.toLocaleString('en-IN');
       document.getElementById("repSalaryBal").innerText = totalEmpPending.toLocaleString('en-IN');
-      document.getElementById("repLiquidBal").innerText = totalLiquid.toLocaleString('en-IN');
+      document.getElementById("repLiquidBal").innerText = totalTargetClosing.toLocaleString('en-IN');
 
       document.getElementById("salesGrandBadge").innerText = `ആകെ: ${totSale.toLocaleString('en-IN')}`;
       document.getElementById("purchaseGrandBadge").innerText = `ആകെ: ${totPur.toLocaleString('en-IN')}`;
@@ -2805,8 +2852,8 @@
         sale: totSale.toLocaleString('en-IN'),
         purchase: totPur.toLocaleString('en-IN'),
         expense: (totExp + totSal).toLocaleString('en-IN'),
-        cash: curCash.toLocaleString('en-IN'),
-        bank: curBank.toLocaleString('en-IN'),
+        cash: targetClosingCash.toLocaleString('en-IN'),
+        bank: targetClosingBank.toLocaleString('en-IN'),
         custPaid: (custCashReceipt + custBankReceipt).toLocaleString('en-IN'),
         custBal: totalCustOutstanding.toLocaleString('en-IN'),
         vendorPaid: (vendCashPay + vendBankPay).toLocaleString('en-IN'),
