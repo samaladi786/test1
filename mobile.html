@@ -34,9 +34,10 @@
     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
     .touch-btn:active { transform: scale(0.97); }
+    .uppercase-input { text-transform: uppercase; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col pb-24">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col pb-28">
 
   <!-- 1. LOGIN SCREEN -->
   <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-[99999] p-4 backdrop-blur-sm">
@@ -133,36 +134,6 @@
       </div>
 
     </div>
-
-    <!-- LIVE LIQUID FUNDS CARD -->
-    <div class="mt-2.5 bg-black/40 rounded-2xl p-2 border border-white/10 flex items-center justify-between text-xs font-bold">
-      <div class="space-y-0.5">
-        <span class="text-[9px] text-slate-300 font-extrabold uppercase flex items-center gap-1">
-          <i data-lucide="wallet" class="w-3 h-3 text-emerald-400"></i> ആകെ ലിക്വിഡ് ഫണ്ട്
-        </span>
-        <span id="liveTotalLiquid" class="text-sm font-black text-emerald-400 font-mono">0.00</span>
-      </div>
-      <div class="flex gap-2 text-[10px] text-slate-200">
-        <span id="liveHandCash" class="bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700">💵 ക്യാഷ്: 0</span>
-        <span id="liveBankCash" class="bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700">🏦 ബാങ്ക്: 0</span>
-      </div>
-    </div>
-
-    <!-- QUICK DAILY METRIC BAR -->
-    <div class="grid grid-cols-3 gap-1.5 mt-2 pt-2 border-t border-white/10 text-center">
-      <div class="bg-black/30 rounded-lg p-1 border border-white/5">
-        <span class="text-[9px] text-emerald-400 font-bold block uppercase">സെയിൽസ്</span>
-        <span id="quickSaleTotal" class="text-xs font-black text-white">0</span>
-      </div>
-      <div class="bg-black/30 rounded-lg p-1 border border-white/5">
-        <span class="text-[9px] text-blue-400 font-bold block uppercase">പർച്ചേസ്</span>
-        <span id="quickPurTotal" class="text-xs font-black text-white">0</span>
-      </div>
-      <div class="bg-black/30 rounded-lg p-1 border border-white/5">
-        <span class="text-[9px] text-amber-400 font-bold block uppercase">ചിലവ്</span>
-        <span id="quickExpTotal" class="text-xs font-black text-white">0</span>
-      </div>
-    </div>
   </header>
 
   <!-- OFFLINE PENDING SYNC NOTICE -->
@@ -171,158 +142,210 @@
   </div>
 
   <!-- 3. MAIN WORKSPACE CONTAINER -->
-  <main class="w-full max-w-md mx-auto px-3.5 pt-3 flex-1">
+  <main class="w-full max-w-md mx-auto px-3.5 pt-3 flex-1 flex flex-col justify-between space-y-4">
 
-    <!-- TAB 1: SALE ENTRY -->
-    <div id="view-sale" class="tab-view space-y-3">
-      <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3">
-        <div class="flex items-center justify-between border-b pb-2">
-          <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-1.5">
-            <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് എൻട്രി (Sales)
-          </h2>
-          <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">ക്വിക്ക് ബില്ലിംഗ്</span>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-[11px] font-bold text-slate-700">കസ്റ്റമർ:</label>
-            <button type="button" onclick="openNewCustomerModal()" class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-0.5 rounded-full touch-btn cursor-pointer">
-              + ന്യൂ കസ്റ്റമർ
-            </button>
+    <!-- TOP SECTION: ENTRY TABS -->
+    <div>
+      <!-- TAB 1: SALE ENTRY -->
+      <div id="view-sale" class="tab-view space-y-3">
+        <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b pb-2">
+            <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-1.5">
+              <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് എൻട്രി (Sales)
+            </h2>
+            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">ക്വിക്ക് ബില്ലിംഗ്</span>
           </div>
-          <input 
-            list="customerListOptions" 
-            id="saleCustomerInput" 
-            onclick="this.select()"
-            onfocus="this.select()"
-            oninput="onCustomerSelected()"
-            onchange="onCustomerSelected()"
-            value="SHOPE" 
-            placeholder="കസ്റ്റമർ പേര്..." 
-            class="w-full text-sm font-black p-2.5 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-          <datalist id="customerListOptions"></datalist>
-          <span id="custOpeningInfo" class="text-[11px] font-black text-emerald-700 block mt-1 truncate"></span>
-        </div>
 
-        <!-- DYNAMIC SALE AMOUNTS CONTAINER -->
-        <div id="saleAmountsContainer" class="pt-1">
-          <!-- Populated dynamically (2 cells for Cash Cust, 3 cells for Credit Cust) -->
-        </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-[11px] font-bold text-slate-700">കസ്റ്റമർ:</label>
+              <button type="button" onclick="openNewCustomerModal()" class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-0.5 rounded-full touch-btn cursor-pointer">
+                + ന്യൂ കസ്റ്റമർ
+              </button>
+            </div>
+            
+            <div class="relative">
+              <input 
+                list="customerListOptions" 
+                id="saleCustomerInput" 
+                onclick="this.select()"
+                onfocus="this.select()"
+                oninput="this.value = this.value.toUpperCase(); onCustomerSelected();"
+                onchange="onCustomerSelected()"
+                value="SHOPE" 
+                placeholder="കസ്റ്റമർ പേര്..." 
+                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 uppercase-input"
+              />
+              <button type="button" onclick="clearCustomerInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-black text-sm p-1 cursor-pointer">
+                ✕
+              </button>
+            </div>
+            <datalist id="customerListOptions"></datalist>
+            <span id="custOpeningInfo" class="text-[11px] font-black text-emerald-700 block mt-1 truncate"></span>
+          </div>
 
-        <button onclick="saveSaleEntry()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
-          <i data-lucide="check-circle" class="w-4 h-4"></i> സെയിൽ സേവ് ചെയ്യുക
-        </button>
+          <!-- DYNAMIC SALE AMOUNTS CONTAINER -->
+          <div id="saleAmountsContainer" class="pt-1">
+            <!-- Populated dynamically (2 cells for Cash Cust, 3 cells for Credit Cust) -->
+          </div>
+
+          <button onclick="saveSaleEntry()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> സെയിൽ സേവ് ചെയ്യുക
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 2: PURCHASE ENTRY -->
+      <div id="view-purchase" class="tab-view hidden space-y-3">
+        <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b pb-2">
+            <h2 class="font-extrabold text-sm text-blue-900 flex items-center gap-1.5">
+              <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് എൻട്രി (Purchase)
+            </h2>
+            <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">വെണ്ടർ പെയ്മെന്റ്</span>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-[11px] font-bold text-slate-700">വെണ്ടർ:</label>
+              <button type="button" onclick="openNewVendorModal()" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-2.5 py-0.5 rounded-full touch-btn cursor-pointer">
+                + ന്യൂ വെണ്ടർ
+              </button>
+            </div>
+            <div class="relative">
+              <input 
+                list="vendorListOptions" 
+                id="purchaseVendorInput" 
+                onclick="this.select()"
+                onfocus="this.select()"
+                oninput="this.value = this.value.toUpperCase(); onVendorSelected();"
+                onchange="onVendorSelected()"
+                placeholder="വെണ്ടർ പേര്..." 
+                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 uppercase-input"
+              />
+              <button type="button" onclick="clearVendorInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-black text-sm p-1 cursor-pointer">
+                ✕
+              </button>
+            </div>
+            <datalist id="vendorListOptions"></datalist>
+            <span id="vendorOpeningInfo" class="text-[11px] font-black text-blue-700 block mt-1 truncate"></span>
+          </div>
+
+          <!-- DYNAMIC PURCHASE AMOUNTS CONTAINER -->
+          <div id="purAmountsContainer" class="pt-1">
+            <!-- Populated dynamically (2 cells for Cash Vend, 3 cells for Credit Vend) -->
+          </div>
+
+          <button onclick="savePurchaseEntry()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-blue-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> പർച്ചേസ് സേവ് ചെയ്യുക
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 3: EXPENSE & SALARY ENTRY -->
+      <div id="view-expense" class="tab-view hidden space-y-3">
+        <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b pb-2">
+            <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-1.5">
+              <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവ് & സാലറി (Outflow)
+            </h2>
+            <span id="currentExpTypeBadge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">ചിലവ്</span>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-[11px] font-bold text-slate-700">ഇനം / ജീവനക്കാരൻ:</label>
+              <button type="button" onclick="quickAddExpensePrompt()" class="text-[10px] bg-amber-600 hover:bg-amber-700 text-white font-bold px-2.5 py-0.5 rounded-full touch-btn cursor-pointer">
+                + ന്യൂ ചിലവ് ഇനം
+              </button>
+            </div>
+            <div class="relative">
+              <input 
+                list="unifiedPartyOptions" 
+                id="unifiedPartyInput" 
+                onclick="this.select()"
+                onfocus="this.select()"
+                oninput="this.value = this.value.toUpperCase(); onUnifiedPartySelected();"
+                onchange="onUnifiedPartySelected()"
+                placeholder="പേര് തിരഞ്ഞെടുക്കുക..." 
+                class="w-full text-sm font-black p-2.5 pr-8 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-amber-500 uppercase-input"
+              />
+              <button type="button" onclick="clearUnifiedInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-black text-sm p-1 cursor-pointer">
+                ✕
+              </button>
+            </div>
+            <datalist id="unifiedPartyOptions"></datalist>
+            <span id="unifiedPartyInfo" class="text-[11px] font-black text-amber-700 block mt-1 truncate"></span>
+          </div>
+
+          <!-- AMOUNTS -->
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
+              <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
+              <input type="number" step="any" inputmode="decimal" id="expSalCashAmt" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
+            </div>
+            <div class="bg-purple-50/80 p-2 rounded-2xl border border-purple-200">
+              <label class="block text-[10px] font-black text-purple-900 mb-0.5 text-center">🏦 ബാങ്ക് നൽകിയത്</label>
+              <input type="number" step="any" inputmode="decimal" id="expSalBankAmt" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-purple-500 text-purple-700" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-slate-600 mb-0.5">വിവരണം / കുറിപ്പ് (Note):</label>
+            <input type="text" id="expSalNote" placeholder="കുറിപ്പ്..." class="w-full text-xs p-2.5 rounded-xl border bg-slate-50 outline-none" />
+          </div>
+
+          <button id="btnSaveUnified" onclick="saveUnifiedExpSalEntry()" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> ചിലവ് സേവ് ചെയ്യുക
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 4: RECENT ENTRIES OF SELECTED DATE -->
+      <div id="view-recent" class="tab-view hidden space-y-3">
+        <div class="bg-white p-4 rounded-3xl border shadow-sm space-y-2.5">
+          <div class="flex items-center justify-between border-b pb-2">
+            <h2 class="font-extrabold text-sm text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="history" class="w-4 h-4 text-slate-600"></i> ഇടപാടുകൾ (Selected Date)
+            </h2>
+            <span id="recentCountBadge" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">0 എൻട്രികൾ</span>
+          </div>
+          <div id="todayRecentList" class="divide-y divide-slate-100 max-h-[55vh] overflow-y-auto space-y-1 text-xs">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- TAB 2: PURCHASE ENTRY -->
-    <div id="view-purchase" class="tab-view hidden space-y-3">
-      <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3">
-        <div class="flex items-center justify-between border-b pb-2">
-          <h2 class="font-extrabold text-sm text-blue-900 flex items-center gap-1.5">
-            <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് എൻട്രി (Purchase)
-          </h2>
-          <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">വെണ്ടർ പെയ്മെന്റ്</span>
+    <!-- BOTTOM METRIC SECTION (PLACED BELOW ENTRY FOR DIRECT TOP VISIBILITY) -->
+    <div class="space-y-2 pt-2">
+      <!-- QUICK DAILY METRIC BAR -->
+      <div class="grid grid-cols-3 gap-1.5 text-center">
+        <div class="bg-emerald-900/90 text-white rounded-2xl p-2 border border-emerald-700/50 shadow-sm">
+          <span class="text-[9px] text-emerald-300 font-extrabold block uppercase">സെയിൽസ്</span>
+          <span id="quickSaleTotal" class="text-xs font-black">0</span>
         </div>
-
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-[11px] font-bold text-slate-700">വെണ്ടർ:</label>
-            <button type="button" onclick="openNewVendorModal()" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-2.5 py-0.5 rounded-full touch-btn cursor-pointer">
-              + ന്യൂ വെണ്ടർ
-            </button>
-          </div>
-          <input 
-            list="vendorListOptions" 
-            id="purchaseVendorInput" 
-            onclick="this.select()"
-            onfocus="this.select()"
-            oninput="onVendorSelected()"
-            onchange="onVendorSelected()"
-            placeholder="വെണ്ടർ പേര്..." 
-            class="w-full text-sm font-black p-2.5 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <datalist id="vendorListOptions"></datalist>
-          <span id="vendorOpeningInfo" class="text-[11px] font-black text-blue-700 block mt-1 truncate"></span>
+        <div class="bg-blue-900/90 text-white rounded-2xl p-2 border border-blue-700/50 shadow-sm">
+          <span class="text-[9px] text-blue-300 font-extrabold block uppercase">പർച്ചേസ്</span>
+          <span id="quickPurTotal" class="text-xs font-black">0</span>
         </div>
-
-        <!-- DYNAMIC PURCHASE AMOUNTS CONTAINER -->
-        <div id="purAmountsContainer" class="pt-1">
-          <!-- Populated dynamically (2 cells for Cash Vend, 3 cells for Credit Vend) -->
+        <div class="bg-amber-900/90 text-white rounded-2xl p-2 border border-amber-700/50 shadow-sm">
+          <span class="text-[9px] text-amber-300 font-extrabold block uppercase">ചിലവ്</span>
+          <span id="quickExpTotal" class="text-xs font-black">0</span>
         </div>
-
-        <button onclick="savePurchaseEntry()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-blue-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
-          <i data-lucide="check-circle" class="w-4 h-4"></i> പർച്ചേസ് സേവ് ചെയ്യുക
-        </button>
       </div>
-    </div>
 
-    <!-- TAB 3: EXPENSE & SALARY ENTRY -->
-    <div id="view-expense" class="tab-view hidden space-y-3">
-      <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3">
-        <div class="flex items-center justify-between border-b pb-2">
-          <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-1.5">
-            <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവ് & സാലറി (Outflow)
-          </h2>
-          <span id="currentExpTypeBadge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">ചിലവ്</span>
+      <!-- LIVE LIQUID FUNDS CARD -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-2.5 border border-slate-700 text-white flex items-center justify-between text-xs font-bold shadow-md">
+        <div class="space-y-0.5">
+          <span class="text-[9px] text-slate-400 font-extrabold uppercase flex items-center gap-1">
+            <i data-lucide="wallet" class="w-3 h-3 text-emerald-400"></i> ആകെ ലിക്വിഡ് ഫണ്ട്
+          </span>
+          <span id="liveTotalLiquid" class="text-sm font-black text-emerald-400 font-mono">0.00</span>
         </div>
-
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-[11px] font-bold text-slate-700">ഇനം / ജീവനക്കാരൻ:</label>
-            <button type="button" onclick="quickAddExpensePrompt()" class="text-[10px] bg-amber-600 hover:bg-amber-700 text-white font-bold px-2.5 py-0.5 rounded-full touch-btn cursor-pointer">
-              + ന്യൂ ചിലവ് ഇനം
-            </button>
-          </div>
-          <input 
-            list="unifiedPartyOptions" 
-            id="unifiedPartyInput" 
-            onclick="this.select()"
-            onfocus="this.select()"
-            oninput="onUnifiedPartySelected()"
-            onchange="onUnifiedPartySelected()"
-            placeholder="പേര് തിരഞ്ഞെടുക്കുക..." 
-            class="w-full text-sm font-black p-2.5 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-amber-500"
-          />
-          <datalist id="unifiedPartyOptions"></datalist>
-          <span id="unifiedPartyInfo" class="text-[11px] font-black text-amber-700 block mt-1 truncate"></span>
-        </div>
-
-        <!-- AMOUNTS -->
-        <div class="grid grid-cols-2 gap-2">
-          <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
-            <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
-            <input type="number" step="any" inputmode="decimal" id="expSalCashAmt" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-amber-500 text-amber-700" />
-          </div>
-          <div class="bg-purple-50/80 p-2 rounded-2xl border border-purple-200">
-            <label class="block text-[10px] font-black text-purple-900 mb-0.5 text-center">🏦 ബാങ്ക് നൽകിയത്</label>
-            <input type="number" step="any" inputmode="decimal" id="expSalBankAmt" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-purple-500 text-purple-700" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-bold text-slate-600 mb-0.5">വിവരണം / കുറിപ്പ് (Note):</label>
-          <input type="text" id="expSalNote" placeholder="കുറിപ്പ്..." class="w-full text-xs p-2.5 rounded-xl border bg-slate-50 outline-none" />
-        </div>
-
-        <button id="btnSaveUnified" onclick="saveUnifiedExpSalEntry()" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
-          <i data-lucide="check-circle" class="w-4 h-4"></i> ചിലവ് സേവ് ചെയ്യുക
-        </button>
-      </div>
-    </div>
-
-    <!-- TAB 4: RECENT ENTRIES OF SELECTED DATE -->
-    <div id="view-recent" class="tab-view hidden space-y-3">
-      <div class="bg-white p-4 rounded-3xl border shadow-sm space-y-2.5">
-        <div class="flex items-center justify-between border-b pb-2">
-          <h2 class="font-extrabold text-sm text-slate-800 flex items-center gap-1.5">
-            <i data-lucide="history" class="w-4 h-4 text-slate-600"></i> ഇടപാടുകൾ (Selected Date)
-          </h2>
-          <span id="recentCountBadge" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">0 എൻട്രികൾ</span>
-        </div>
-        <div id="todayRecentList" class="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto space-y-1 text-xs">
-          <!-- Dynamically populated -->
+        <div class="flex gap-1.5 text-[10px] text-slate-200">
+          <span id="liveHandCash" class="bg-slate-800/90 px-2 py-1 rounded-lg border border-slate-700">💵 ക്യാഷ്: 0</span>
+          <span id="liveBankCash" class="bg-slate-800/90 px-2 py-1 rounded-lg border border-slate-700">🏦 ബാങ്ക്: 0</span>
         </div>
       </div>
     </div>
@@ -373,7 +396,7 @@
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">കസ്റ്റമർ പേര്:</label>
-          <input type="text" id="newCustName" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500" />
+          <input type="text" id="newCustName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500 uppercase-input" />
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">പഴയ കടം / ബാലൻസ്:</label>
@@ -401,7 +424,7 @@
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">വെണ്ടർ പേര്:</label>
-          <input type="text" id="newVendName" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
+          <input type="text" id="newVendName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500 uppercase-input" />
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">പഴയ ബാക്കി / കൊടുക്കാനുള്ളത്:</label>
@@ -416,15 +439,58 @@
     </div>
   </div>
 
-  <!-- PIN VERIFY MODAL FOR DELETE -->
+  <!-- MODAL: EDIT TRANSACTION -->
+  <div id="editTransactionModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+          ✏️ ഇടപാട് തിരുത്തുക
+        </h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <input type="hidden" id="editTxnId" />
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">തീയതി:</label>
+          <input type="date" id="editTxnDate" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">പേര് / വിവരണം:</label>
+          <input type="text" id="editTxnParty" oninput="this.value = this.value.toUpperCase();" class="w-full p-2 rounded-xl border bg-slate-50 font-bold uppercase-input" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">ക്യാഷ് തുക:</label>
+            <input type="number" step="any" id="editTxnCash" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">ബാങ്ക് തുക:</label>
+            <input type="number" step="any" id="editTxnBank" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
+          </div>
+        </div>
+        <div id="editCreditContainer">
+          <label class="block font-bold text-slate-700 mb-0.5">ക്രെഡിറ്റ് തുക:</label>
+          <input type="number" step="any" id="editTxnCredit" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeEditModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveEditedTransaction()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">അപ്‌ഡേറ്റ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN VERIFY MODAL FOR DELETE & EDIT RESTRICTION -->
   <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
       <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
-      <p id="pinSubText" class="text-xs text-slate-500">ഡിലീറ്റ് ചെയ്യാൻ ലോഗിൻ പിൻ നൽകുക</p>
+      <p id="pinSubText" class="text-xs text-slate-500">തുടരാൻ ലോഗിൻ പിൻ നൽകുക</p>
       <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" id="pinInput" placeholder="••••" class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-rose-500" onkeydown="if(event.key === 'Enter') verifyPinAndExecute()" />
       <div class="flex gap-2 pt-2">
         <button onclick="closePinModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-xs font-semibold cursor-pointer">റദ്ദാക്കുക</button>
-        <button onclick="verifyPinAndExecute()" class="flex-1 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">ഡിലീറ്റ്</button>
+        <button onclick="verifyPinAndExecute()" class="flex-1 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">സ്ഥിരീകരിക്കുക</button>
       </div>
     </div>
   </div>
@@ -443,7 +509,8 @@
     let transactionsList = [];
     let openingSettings = { openingCash: 0, openingBank: 0 };
 
-    let pendingDeleteId = null;
+    let pendingAction = null;
+    let pendingTxnId = null;
     let deferredPrompt = null;
 
     // PWA INSTALL LOGIC
@@ -683,6 +750,34 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    // QUICK CLEAR INPUTS TO OPEN DROPDOWNS INSTANTLY
+    function clearCustomerInput() {
+      const inp = document.getElementById("saleCustomerInput");
+      if (inp) {
+        inp.value = "";
+        inp.focus();
+        onCustomerSelected();
+      }
+    }
+
+    function clearVendorInput() {
+      const inp = document.getElementById("purchaseVendorInput");
+      if (inp) {
+        inp.value = "";
+        inp.focus();
+        onVendorSelected();
+      }
+    }
+
+    function clearUnifiedInput() {
+      const inp = document.getElementById("unifiedPartyInput");
+      if (inp) {
+        inp.value = "";
+        inp.focus();
+        onUnifiedPartySelected();
+      }
+    }
+
     function loadLocalCacheData() {
       try {
         customersList = JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_CUSTOMERS`)) || [];
@@ -744,18 +839,18 @@
       const cDL = document.getElementById("customerListOptions");
       if (cDL) {
         cDL.innerHTML = "";
-        customersList.forEach(c => cDL.innerHTML += `<option value="${c.name}">`);
+        customersList.forEach(c => cDL.innerHTML += `<option value="${c.name.toUpperCase()}">`);
       }
       const vDL = document.getElementById("vendorListOptions");
       if (vDL) {
         vDL.innerHTML = "";
-        vendorsList.forEach(v => vDL.innerHTML += `<option value="${v.name}">`);
+        vendorsList.forEach(v => vDL.innerHTML += `<option value="${v.name.toUpperCase()}">`);
       }
       const uDL = document.getElementById("unifiedPartyOptions");
       if (uDL) {
         uDL.innerHTML = "";
-        expensesMasterList.forEach(e => uDL.innerHTML += `<option value="${e.name}">`);
-        employeesList.forEach(em => uDL.innerHTML += `<option value="${em.name}">`);
+        expensesMasterList.forEach(e => uDL.innerHTML += `<option value="${e.name.toUpperCase()}">`);
+        employeesList.forEach(em => uDL.innerHTML += `<option value="${em.name.toUpperCase()}">`);
       }
     }
 
@@ -768,11 +863,11 @@
         box.innerHTML = `
           <div class="grid grid-cols-3 gap-1.5">
             <div class="bg-emerald-50/80 p-1.5 rounded-xl border border-emerald-200">
-              <label class="block text-[9px] font-black text-emerald-900 mb-0.5 text-center truncate">💵 ക്യാഷ് കളക്ഷൻ</label>
+              <label class="block text-[9px] font-black text-emerald-900 mb-0.5 text-center truncate">💵 ക്യാഷ് റസീറ്റ്</label>
               <input type="number" step="any" inputmode="decimal" id="saleCash" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-emerald-500 text-emerald-700" />
             </div>
             <div class="bg-blue-50/80 p-1.5 rounded-xl border border-blue-200">
-              <label class="block text-[9px] font-black text-blue-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് കളക്ഷൻ</label>
+              <label class="block text-[9px] font-black text-blue-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് റസീറ്റ്</label>
               <input type="number" step="any" inputmode="decimal" id="saleBank" placeholder="0.00" class="w-full text-center text-xs font-black p-1.5 rounded-lg border bg-white outline-none focus:ring-2 focus:ring-blue-500 text-blue-700" />
             </div>
             <div class="bg-amber-50/80 p-1.5 rounded-xl border border-amber-200">
@@ -901,7 +996,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // NEW MASTER POPUPS
+    // MODAL HANDLERS
     function openNewCustomerModal() {
       document.getElementById("newCustName").value = "";
       document.getElementById("newCustOpening").value = "";
@@ -911,7 +1006,7 @@
     function closeNewCustomerModal() { document.getElementById("newCustomerModal").classList.add("hidden"); }
 
     async function saveNewCustomerMaster() {
-      const name = document.getElementById("newCustName").value.trim();
+      const name = document.getElementById("newCustName").value.trim().toUpperCase();
       const opening = parseFloat(document.getElementById("newCustOpening").value) || 0;
       if (!name) return alert("കസ്റ്റമർ പേര് നൽകുക!");
 
@@ -938,7 +1033,7 @@
     function closeNewVendorModal() { document.getElementById("newVendorModal").classList.add("hidden"); }
 
     async function saveNewVendorMaster() {
-      const name = document.getElementById("newVendName").value.trim();
+      const name = document.getElementById("newVendName").value.trim().toUpperCase();
       const opening = parseFloat(document.getElementById("newVendOpening").value) || 0;
       if (!name) return alert("വെണ്ടർ പേര് നൽകുക!");
 
@@ -959,7 +1054,7 @@
     async function quickAddExpensePrompt() {
       let name = prompt("പുതിയ ചിലവ് ഇനം നൽകുക:");
       if (!name || !name.trim()) return;
-      name = name.trim();
+      name = name.trim().toUpperCase();
 
       const newExp = { name: name };
       if (navigator.onLine && supabaseClient) {
@@ -1026,7 +1121,7 @@
 
     // TRANSACTION SAVING
     async function saveSaleEntry() {
-      let rawName = document.getElementById("saleCustomerInput").value.trim();
+      let rawName = document.getElementById("saleCustomerInput").value.trim().toUpperCase();
       if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
       let name = rawName.split(' (')[0].trim();
 
@@ -1077,7 +1172,7 @@
     }
 
     async function savePurchaseEntry() {
-      let rawName = document.getElementById("purchaseVendorInput").value.trim();
+      let rawName = document.getElementById("purchaseVendorInput").value.trim().toUpperCase();
       if (!rawName) return alert("വെണ്ടർ പേര് നൽകുക!");
       let name = rawName.split(' (')[0].trim();
 
@@ -1128,7 +1223,7 @@
     }
 
     async function saveUnifiedExpSalEntry() {
-      let rawVal = document.getElementById("unifiedPartyInput").value.trim();
+      let rawVal = document.getElementById("unifiedPartyInput").value.trim().toUpperCase();
       if (!rawVal) return alert("ഇനം അല്ലെങ്കിൽ ജീവനക്കാരന്റെ പേര് നൽകുക!");
 
       const cash = parseFloat(document.getElementById("expSalCashAmt").value) || 0;
@@ -1196,7 +1291,7 @@
       onUnifiedPartySelected();
     }
 
-    // DASHBOARD & LIVE LIQUID FUNDS RENDER
+    // DASHBOARD & LIVE LIQUID FUNDS RENDER WITH STRICT ACCOUNTING
     function renderQuickTotalsAndRecent() {
       const selectedDate = getSelectedDate();
       let saleTotal = 0, purTotal = 0, expTotal = 0;
@@ -1213,10 +1308,29 @@
         const isSelectedDate = String(t.date).startsWith(selectedDate);
         if (isSelectedDate) {
           dateFilteredList.push(t);
+
           if (t.type === 'sale') {
-            saleTotal += (parseFloat(t.cash_amount) || 0) + (parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+            const cleanN = cleanPartyName(t.party_name);
+            const cust = customersList.find(c => cleanPartyName(c.name) === cleanN);
+            const isCreditCust = cust && (cust.type || '').toLowerCase() === 'credit';
+
+            // റസീറ്റ് തുക സെയിൽസിൽ കൂട്ടാതെ ക്രെഡിറ്റ് സെയിൽ മാത്രം സെയിൽസ് ടോട്ടലിൽ കൂട്ടുന്നു!
+            if (isCreditCust) {
+              saleTotal += (parseFloat(t.credit_amount) || 0);
+            } else {
+              saleTotal += (parseFloat(t.cash_amount) || 0) + (parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+            }
           } else if (t.type === 'purchase') {
-            purTotal += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+            const cleanN = cleanPartyName(t.party_name);
+            const vend = vendorsList.find(v => cleanPartyName(v.name) === cleanN);
+            const isCreditVend = vend && (vend.type || '').toLowerCase() === 'credit';
+
+            // വെണ്ടർക്ക് നൽകിയ പെയ്മെന്റ് കൂട്ടാതെ ക്രെഡിറ്റ് പർച്ചേസ് ബില്ല് മാത്രം പർച്ചേസ് ടോട്ടലിൽ കൂട്ടുന്നു!
+            if (isCreditVend) {
+              purTotal += (parseFloat(t.credit_amount) || 0);
+            } else {
+              purTotal += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
+            }
           } else if (t.type === 'expense' || t.type === 'salary') {
             expTotal += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
           }
@@ -1234,6 +1348,7 @@
       document.getElementById("liveHandCash").innerText = `💵 ക്യാഷ്: ${curCash.toLocaleString('en-IN')}`;
       document.getElementById("liveBankCash").innerText = `🏦 ബാങ്ക്: ${curBank.toLocaleString('en-IN')}`;
 
+      // POPULATE RECENT LIST WITH DETAILED BREAKDOWN & EDIT/DELETE BUTTONS
       const listContainer = document.getElementById("todayRecentList");
       if (dateFilteredList.length === 0) {
         listContainer.innerHTML = `<div class="py-6 text-center text-slate-400">തിരഞ്ഞെടുത്ത തീയതിയിൽ എൻട്രികൾ ഒന്നും ഇല്ല</div>`;
@@ -1241,33 +1356,53 @@
       }
 
       listContainer.innerHTML = dateFilteredList.map(t => {
-        let amt = 0, colorClass = "text-slate-800", typeBadge = "";
+        let typeBadge = "";
+        let detailsHtml = "";
+
+        const cAmt = Math.abs(parseFloat(t.cash_amount) || 0);
+        const bAmt = Math.abs(parseFloat(t.bank_amount) || 0);
+        const crAmt = parseFloat(t.credit_amount) || 0;
+
         if (t.type === 'sale') {
-          amt = (parseFloat(t.cash_amount) || 0) + (parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
-          colorClass = "text-emerald-700";
           typeBadge = `<span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded text-[9px] font-bold">സെയിൽ</span>`;
+          const cust = customersList.find(c => cleanPartyName(c.name) === cleanPartyName(t.party_name));
+          const isCredit = cust && (cust.type || '').toLowerCase() === 'credit';
+
+          if (isCredit) {
+            detailsHtml = `<span class="text-slate-600 font-semibold">റസീറ്റ്: C:${cAmt} B:${bAmt} | <b class="text-amber-700">ക്രെഡിറ്റ് സെയിൽ: ${crAmt}</b></span>`;
+          } else {
+            detailsHtml = `<span class="text-slate-600 font-semibold">സെയിൽ: C:${cAmt} B:${bAmt}</span>`;
+          }
         } else if (t.type === 'purchase') {
-          amt = Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0) + (parseFloat(t.credit_amount) || 0);
-          colorClass = "text-blue-700";
           typeBadge = `<span class="bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded text-[9px] font-bold">പർച്ചേസ്</span>`;
+          const vend = vendorsList.find(v => cleanPartyName(v.name) === cleanPartyName(t.party_name));
+          const isCredit = vend && (vend.type || '').toLowerCase() === 'credit';
+
+          if (isCredit) {
+            detailsHtml = `<span class="text-slate-600 font-semibold">നൽകിയത്: C:${cAmt} B:${bAmt} | <b class="text-blue-800">ക്രെഡിറ്റ് ബില്ല്: ${crAmt}</b></span>`;
+          } else {
+            detailsHtml = `<span class="text-slate-600 font-semibold">പർച്ചേസ്: C:${cAmt} B:${bAmt}</span>`;
+          }
         } else {
-          amt = Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
-          colorClass = "text-amber-700";
           typeBadge = `<span class="bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded text-[9px] font-bold">ചിലവ്</span>`;
+          detailsHtml = `<span class="text-slate-600 font-semibold">ചിലവ്: C:${cAmt} B:${bAmt}</span>`;
         }
 
         return `
-          <div class="py-2.5 flex items-center justify-between">
-            <div class="space-y-0.5 truncate pr-2">
+          <div class="py-2.5 flex items-center justify-between gap-1">
+            <div class="space-y-0.5 truncate pr-1">
               <div class="flex items-center gap-1.5">
                 ${typeBadge}
                 <span class="font-extrabold text-slate-800 truncate">${t.party_name}</span>
               </div>
-              <span class="text-[10px] text-slate-400 block">${t.date}</span>
+              <div class="text-[10px] truncate">${detailsHtml}</div>
+              <span class="text-[9px] text-slate-400 block">${t.date}</span>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="font-black ${colorClass}">${amt.toLocaleString('en-IN')}</span>
-              <button onclick="requestDelete('${t.id}')" class="text-rose-500 hover:text-rose-700 p-1 cursor-pointer">
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="requestEdit('${t.id}')" title="തിരുത്തുക" class="text-blue-600 hover:text-blue-800 p-1.5 rounded-lg bg-blue-50 touch-btn cursor-pointer">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="requestDelete('${t.id}')" title="ഡിലീറ്റ്" class="text-rose-600 hover:text-rose-800 p-1.5 rounded-lg bg-rose-50 touch-btn cursor-pointer">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -1277,13 +1412,108 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    // EDIT TRANSACTION WORKFLOW
+    function requestEdit(id) {
+      if (String(id).startsWith('temp_')) {
+        alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. ഇത് നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
+        return;
+      }
+
+      const txn = (transactionsList || []).find(t => String(t.id) === String(id));
+      if (!txn) return alert("ഇടപാട് കണ്ടെത്താനായില്ല!");
+
+      const todayStr = getSaudiToday();
+      let isOlderThanLimit = false;
+
+      if (txn.date) {
+        const txnDateStr = String(txn.date).split('T')[0].split(' ')[0].trim();
+        const limitDays = window.STAFF_DELETE_LIMIT_DAYS || 2;
+        const dToday = new Date(todayStr);
+        const dTxn = new Date(txnDateStr);
+        const diffDays = Math.floor((dToday - dTxn) / (1000 * 60 * 60 * 24));
+        if (diffDays > limitDays) isOlderThanLimit = true;
+      }
+
+      if (isOlderThanLimit) {
+        pendingAction = 'edit';
+        pendingTxnId = id;
+        document.getElementById("pinSubText").innerText = "⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണ്! എഡിറ്റ് ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക.";
+        document.getElementById("pinInput").value = "";
+        document.getElementById("pinModal").classList.remove("hidden");
+        document.getElementById("pinInput").focus();
+      } else {
+        openEditModal(txn);
+      }
+    }
+
+    function openEditModal(txn) {
+      document.getElementById("editTxnId").value = txn.id;
+      document.getElementById("editTxnDate").value = String(txn.date).split('T')[0];
+      document.getElementById("editTxnParty").value = txn.party_name || "";
+      document.getElementById("editTxnCash").value = Math.abs(parseFloat(txn.cash_amount) || 0);
+      document.getElementById("editTxnBank").value = Math.abs(parseFloat(txn.bank_amount) || 0);
+      
+      const crBox = document.getElementById("editCreditContainer");
+      if (txn.type === 'expense' || txn.type === 'salary') {
+        crBox.classList.add("hidden");
+      } else {
+        crBox.classList.remove("hidden");
+        document.getElementById("editTxnCredit").value = parseFloat(txn.credit_amount) || 0;
+      }
+
+      document.getElementById("editTransactionModal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editTransactionModal").classList.add("hidden");
+    }
+
+    async function saveEditedTransaction() {
+      const id = document.getElementById("editTxnId").value;
+      const txn = (transactionsList || []).find(t => String(t.id) === String(id));
+      if (!txn) return;
+
+      const newDate = document.getElementById("editTxnDate").value;
+      const newParty = document.getElementById("editTxnParty").value.trim().toUpperCase();
+      let cashAmt = parseFloat(document.getElementById("editTxnCash").value) || 0;
+      let bankAmt = parseFloat(document.getElementById("editTxnBank").value) || 0;
+      let creditAmt = parseFloat(document.getElementById("editTxnCredit").value) || 0;
+
+      if (cashAmt <= 0 && bankAmt <= 0 && creditAmt <= 0) return alert("തുക നൽകുക!");
+
+      if (txn.type === 'purchase' || txn.type === 'expense' || txn.type === 'salary') {
+        cashAmt = -cashAmt;
+        bankAmt = -bankAmt;
+      }
+
+      const updatePayload = {
+        date: newDate,
+        party_name: newParty,
+        cash_amount: cashAmt,
+        bank_amount: bankAmt,
+        credit_amount: creditAmt
+      };
+
+      if (navigator.onLine && supabaseClient) {
+        const { error } = await supabaseClient.from('transactions').update(updatePayload).eq('id', id);
+        if (error) return alert("അപ്‌ഡേറ്റ് പരാജയപ്പെട്ടു: " + error.message);
+      }
+
+      Object.assign(txn, updatePayload);
+      localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+      renderQuickTotalsAndRecent();
+      closeEditModal();
+      alert("ഇടപാട് വിജയകരമായി തിരുത്തി!");
+    }
+
     // 2 DAYS DELETE RULE ENGINE
     function requestDelete(id) {
       if (String(id).startsWith('temp_')) {
         alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
         return;
       }
-      pendingDeleteId = id;
+      pendingAction = 'delete';
+      pendingTxnId = id;
       
       const txn = (transactionsList || []).find(t => String(t.id) === String(id));
       const todayStr = getSaudiToday();
@@ -1301,7 +1531,7 @@
       const subTitle = document.getElementById("pinSubText");
       if (subTitle) {
         subTitle.innerText = isOlderThanLimit 
-          ? "⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണ്! സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക." 
+          ? "⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണ്! ഡിലീറ്റ് ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക." 
           : "ഡിലീറ്റ് ചെയ്യാൻ ലോഗിൻ പിൻ നൽകുക";
       }
 
@@ -1312,7 +1542,8 @@
 
     function closePinModal() {
       document.getElementById("pinModal").classList.add("hidden");
-      pendingDeleteId = null;
+      pendingTxnId = null;
+      pendingAction = null;
     }
 
     async function verifyPinAndExecute() {
@@ -1321,8 +1552,8 @@
       const masterPin = String(window.MASTER_PIN);
       const currentShopPin = currentShop ? String(currentShop.pin) : null;
 
-      if (pendingDeleteId) {
-        const id = pendingDeleteId;
+      if (pendingTxnId) {
+        const id = pendingTxnId;
         const txn = (transactionsList || []).find(t => String(t.id) === String(id));
         const todayStr = getSaudiToday();
         let isOlderThanLimit = false;
@@ -1338,7 +1569,7 @@
 
         if (isOlderThanLimit) {
           if (pinVal !== masterPin) {
-            alert("⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ള എൻട്രികൾ ഡിലീറ്റ് ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ തന്നെ വേണം!");
+            alert("⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ള എൻട്രികൾ തിരുത്താനും ഡിലീറ്റ് ചെയ്യാനും സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ തന്നെ വേണം!");
             document.getElementById("pinInput").value = "";
             return;
           }
@@ -1351,12 +1582,18 @@
           }
         }
 
+        const action = pendingAction;
         closePinModal();
-        const { error } = await supabaseClient.from('transactions').delete().eq('id', id);
-        if (error) alert("ഡിലീറ്റ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
-        else {
-          alert("വിജയകരമായി ഡിലീറ്റ് ചെയ്തു!");
-          fetchAllData();
+
+        if (action === 'delete') {
+          const { error } = await supabaseClient.from('transactions').delete().eq('id', id);
+          if (error) alert("ഡിലീറ്റ് ചെയ്യാൻ സാധിച്ചില്ല: " + error.message);
+          else {
+            alert("വിജയകരമായി ഡിലീറ്റ് ചെയ്തു!");
+            fetchAllData();
+          }
+        } else if (action === 'edit') {
+          openEditModal(txn);
         }
       }
     }
