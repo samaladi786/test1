@@ -49,21 +49,11 @@
       .desktop-layout-grid .tab-view {
         display: block !important;
       }
-      #view-purchase {
-        order: 1 !important;
-      }
-      #view-expense {
-        order: 2 !important;
-      }
-      #view-sale {
-        order: 3 !important;
-      }
-      nav.fixed {
-        display: none !important;
-      }
-      body {
-        padding-bottom: 2rem !important;
-      }
+      #view-purchase { order: 1 !important; }
+      #view-expense { order: 2 !important; }
+      #view-sale { order: 3 !important; }
+      nav.fixed { display: none !important; }
+      body { padding-bottom: 2rem !important; }
     }
 
     /* CONTINUOUS 2-COLUMN FLOW */
@@ -86,7 +76,7 @@
         size: A4 portrait;
         margin: 4mm 6mm;
       }
-      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #masterModal, #staffDepositModal, #transferModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
+      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #masterModal, #editMasterModal, #staffDepositModal, #transferModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
         display: none !important;
       }
       body {
@@ -194,55 +184,46 @@
     </div>
   </div>
 
-  <!-- 2. STICKY TOP HEADER -->
+  <!-- 2. STICKY TOP HEADER (CLEAN & SPACIOUS FOR LOGO AND SHOP SELECTOR) -->
   <header id="mobileAppHeader" class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-3 py-2.5 transition-all duration-300">
     <div class="flex items-center justify-between gap-2">
       
-      <div class="flex items-center gap-2 overflow-hidden flex-1">
+      <!-- LEFT: SHOP LOGO & SHOP SELECTOR DROPDOWN (FULL SPACE RESERVED) -->
+      <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
         <div id="shopLogoBox" class="w-9 h-9 rounded-xl bg-white/10 p-0.5 flex items-center justify-center border border-white/20 shrink-0 overflow-hidden shadow-sm">
           <img id="shopLogoImg" src="icon-192.png" alt="Shop Logo" class="w-full h-full object-contain rounded-lg" onerror="this.style.display='none'; document.getElementById('shopDefaultIcon').classList.remove('hidden');" />
           <i id="shopDefaultIcon" data-lucide="store" class="w-5 h-5 text-emerald-400 hidden"></i>
         </div>
         
-        <div class="truncate">
+        <div class="truncate flex-1 min-w-0">
           <div id="shopSelectorWrapper" class="hidden">
-            <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-0.5 rounded-lg border border-slate-700 outline-none cursor-pointer">
+            <select id="shopSelector" onchange="onShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-slate-700 outline-none cursor-pointer max-w-[170px] truncate">
             </select>
           </div>
-          <h1 id="shopStaticTitle" class="text-xs font-black truncate">ALNASSR POS</h1>
+          <h1 id="shopStaticTitle" class="text-xs font-black truncate text-white">ALNASSR POS</h1>
           <div class="flex items-center gap-1 text-[10px] text-slate-300">
             <span id="networkStatusBadge" class="font-extrabold text-emerald-400">🟢 ഓൺലൈൻ</span>
           </div>
         </div>
       </div>
 
+      <!-- RIGHT: ACTION CONTROLS (COMPACT & CLEAN) -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <!-- MASTER MANAGEMENT BUTTON IN HEADER (FOR DESKTOP / PC USERS) -->
-        <button onclick="openMasterModal()" title="മാസ്റ്റർ ഐറ്റങ്ങൾ (Customer, Vendor, Staff, Exp)" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1 touch-btn cursor-pointer">
-          <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-400"></i> മാസ്റ്റർ
-        </button>
-
-        <!-- CASH / BANK TRANSFER BUTTON -->
-        <button onclick="openTransferModal()" title="ക്യാഷ് / ബാങ്ക് മാറ്റം" class="px-2 py-1.5 bg-purple-700 hover:bg-purple-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
-          <i data-lucide="repeat" class="w-3.5 h-3.5"></i> മാറ്റം
-        </button>
-
-        <!-- EXTERNAL REPORT PORTAL LINK -->
-        <a href="https://samaladi786.github.io/report" target="_blank" title="റിപ്പോർട്ട് പോർട്ടൽ" class="px-2.5 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
-          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> പോർട്ടൽ
+        <a href="https://samaladi786.github.io/report" target="_blank" title="റിപ്പോർട്ട് പോർട്ടൽ" class="px-2 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">പോർട്ടൽ</span>
         </a>
 
-        <!-- REPORTS MODAL BUTTON -->
         <button onclick="openReportModal()" title="റിപ്പോർട്ടുകൾ & സ്റ്റേറ്റ്മെന്റ്" class="px-2.5 py-1.5 bg-violet-700 hover:bg-violet-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
-          <i data-lucide="file-text" class="w-3.5 h-3.5"></i> റിപ്പോർട്ട്
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span>റിപ്പോർട്ട്</span>
         </button>
 
         <button id="pwaInstallBtn" onclick="triggerPwaInstall()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-2 py-1.5 rounded-xl text-[10px] touch-btn flex items-center gap-1 shadow">
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
         </button>
 
-        <!-- DESKTOP PORTAL LINK (ADMIN PIN PROTECTED) -->
-        <button onclick="goToDesktopPortal()" title="ഡെസ്ക്ടോപ്പ് പോർട്ടൽ (Admin Only)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
+        <button onclick="goToDesktopPortal()" title="ഡെസ്ക്ടോപ്പ് വ്യൂ (Admin PIN)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
           <i data-lucide="monitor" class="w-4 h-4"></i>
         </button>
         <button onclick="fetchAllData(true)" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs touch-btn cursor-pointer">
@@ -293,13 +274,13 @@
     ⚠️ <span id="offlineSyncMsg">നെറ്റ് ഇല്ലാതെ എടുത്ത എൻട്രികൾ ഉണ്ട്. സിങ്ക് ചെയ്യാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക.</span>
   </div>
 
-  <!-- 3. MAIN WORKSPACE CONTAINER (RESPONSIVE: 1 COL ON MOBILE, 3 COLS ON PC) -->
+  <!-- 3. MAIN WORKSPACE CONTAINER (1 COL ON MOBILE, 3 COLS ON DESKTOP) -->
   <main class="w-full max-w-md lg:max-w-7xl mx-auto px-3 pt-2.5 flex-1 flex flex-col justify-between space-y-3">
 
     <!-- DESKTOP GRID CONTAINER: PURCHASE (COL 1) | EXPENSE (COL 2) | SALES (COL 3) -->
     <div class="desktop-layout-grid space-y-3 lg:space-y-0">
       
-      <!-- TAB 2: PURCHASE ENTRY (ORDER 1 ON DESKTOP) -->
+      <!-- TAB 2: PURCHASE ENTRY -->
       <div id="view-purchase" class="tab-view hidden space-y-2.5">
         <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3 h-full flex flex-col justify-between">
           <div class="space-y-3">
@@ -325,7 +306,7 @@
                   onfocus="this.select()" 
                   oninput="this.value = this.value.toUpperCase(); onVendorSelected();" 
                   onchange="onVendorSelected()" 
-                  placeholder="വെണ്ടർ പേര് ടൈപ്പ് ചെയ്യുക..." 
+                  placeholder="വെണ്ടർ പേര്..." 
                   class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 uppercase-input" 
                 />
                 <button type="button" onclick="clearVendorInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
@@ -336,7 +317,6 @@
               <span id="vendorOpeningInfo" class="text-xs font-black text-blue-700 block mt-1 truncate"></span>
             </div>
 
-            <!-- DYNAMIC PURCHASE AMOUNTS CONTAINER -->
             <div id="purAmountsContainer" class="pt-0.5"></div>
           </div>
 
@@ -346,7 +326,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: EXPENSE & SALARY ENTRY (ORDER 2 ON DESKTOP) -->
+      <!-- TAB 3: EXPENSE & SALARY ENTRY -->
       <div id="view-expense" class="tab-view hidden space-y-2.5">
         <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3 h-full flex flex-col justify-between">
           <div class="space-y-3">
@@ -416,7 +396,7 @@
         </div>
       </div>
 
-      <!-- TAB 1: SALE ENTRY (ORDER 3 ON DESKTOP) -->
+      <!-- TAB 1: SALE ENTRY -->
       <div id="view-sale" class="tab-view space-y-2.5">
         <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3 h-full flex flex-col justify-between">
           <div class="space-y-3">
@@ -444,7 +424,7 @@
                   oninput="this.value = this.value.toUpperCase(); onCustomerSelected();" 
                   onchange="onCustomerSelected()" 
                   value="SHOPE" 
-                  placeholder="കസ്റ്റമർ പേര് ടൈപ്പ് ചെയ്യുക..." 
+                  placeholder="കസ്റ്റമർ പേര്..." 
                   class="w-full text-base font-black p-3 pr-9 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 uppercase-input" 
                 />
                 <button type="button" onclick="clearCustomerInput()" title="ക്ലിയർ ചെയ്യുക" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-black text-base p-1 cursor-pointer">
@@ -466,10 +446,9 @@
 
     </div>
 
-    <!-- BOTTOM SECTION: CLICKABLE CARDS -->
+    <!-- BOTTOM SECTION: CLICKABLE METRIC CARDS -->
     <div class="space-y-2 pt-2">
       <div class="grid grid-cols-3 gap-1.5 text-center">
-        <!-- 1. SALES CARD -->
         <div onclick="openTodaySalesModal()" class="bg-emerald-900/90 hover:bg-emerald-800 text-white rounded-2xl p-2 border border-emerald-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
           <span class="text-[9px] text-emerald-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
             സെയിൽസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
@@ -477,7 +456,6 @@
           <span id="quickSaleTotal" class="text-xs font-black">0</span>
         </div>
 
-        <!-- 2. PURCHASE CARD -->
         <div onclick="openTodayPurchaseModal()" class="bg-blue-900/90 hover:bg-blue-800 text-white rounded-2xl p-2 border border-blue-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
           <span class="text-[9px] text-blue-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
             പർച്ചേസ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
@@ -485,7 +463,6 @@
           <span id="quickPurTotal" class="text-xs font-black">0</span>
         </div>
 
-        <!-- 3. EXPENSE CARD -->
         <div onclick="openTodayExpenseModal()" class="bg-amber-900/90 hover:bg-amber-800 text-white rounded-2xl p-2 border border-amber-700/50 shadow-sm cursor-pointer transition touch-btn active:scale-95">
           <span class="text-[9px] text-amber-300 font-extrabold block uppercase flex items-center justify-center gap-0.5">
             ചിലവ് <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i>
@@ -514,7 +491,7 @@
 
   </main>
 
-  <!-- 4. FIXED BOTTOM NAVIGATION BAR (INCLUDES MASTER BUTTON FOR MOBILE) -->
+  <!-- 4. FIXED BOTTOM NAVIGATION BAR -->
   <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 z-40 shadow-lg flex items-center justify-around">
     <button onclick="switchMobileTab('sale')" id="mTab-sale" class="flex flex-col items-center gap-1 text-emerald-600 font-extrabold text-[11px] touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-emerald-50">
@@ -537,7 +514,6 @@
       <span>ചിലവ് & സാലറി</span>
     </button>
 
-    <!-- MASTER BUTTON ON MOBILE NAV -->
     <button onclick="openMasterModal()" id="mTab-master" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-[11px] touch-btn cursor-pointer">
       <div class="p-1.5 rounded-xl bg-slate-50">
         <i data-lucide="database" class="w-5 h-5"></i>
@@ -547,12 +523,241 @@
   </nav>
 
   <!-- ======================================================== -->
-  <!-- MODAL: MASTER DATA MANAGEMENT (ADD / EDIT / DELETE) -->
+  <!-- MODAL: REPORTS & STATEMENTS -->
+  <!-- ======================================================== -->
+  <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-4xl w-full bg-white p-3 sm:p-5 shadow-2xl rounded-3xl border space-y-2.5 my-auto max-h-[96vh] overflow-y-auto relative">
+      
+      <!-- STICKY TOP MODAL CONTROLS -->
+      <div class="sticky top-0 bg-white/95 backdrop-blur-sm border-b pb-2 pt-1 z-30 flex items-center justify-between no-print">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <h3 class="text-xs sm:text-sm font-bold text-slate-800">📊 ബിസിനസ്സ് റിപ്പോർട്ട് & സ്റ്റേറ്റ്മെന്റ്</h3>
+          <div class="flex bg-slate-100 p-0.5 rounded-xl text-[10px] font-bold border">
+            <button onclick="switchReportMode('daily')" id="repDailyBtn" class="px-2 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black">ഡെയ്‌ലി</button>
+            <button onclick="switchReportMode('monthly')" id="repMonthlyBtn" class="px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">മന്ത്ലി</button>
+            <button onclick="switchReportMode('statement')" id="repStatBtn" class="px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">📄 സ്റ്റേറ്റ്മെന്റ്</button>
+          </div>
+        </div>
+        <button onclick="closeReportModal()" title="ക്ലോസ് ചെയ്യുക" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-sm flex items-center justify-center cursor-pointer shadow-sm">✕</button>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div id="reportDateSelectorBar" class="bg-slate-50 p-2 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-1.5 text-xs no-print">
+        <div class="flex items-center gap-1.5">
+          <span id="repFilterLabel" class="font-extrabold text-slate-700 text-[11px]">📅 തീയതി മാറ്റുക:</span>
+          <input type="date" id="repFilterDate" onchange="onReportDateChanged()" class="p-1 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]" />
+          <input type="month" id="repFilterMonth" onchange="onReportMonthChanged()" class="hidden p-1 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]" />
+        </div>
+        <span class="text-[9px] font-bold text-slate-500">തീയതി മാറ്റി റിപ്പോർട്ട് പരിശോധിക്കാം</span>
+      </div>
+
+      <!-- STATEMENT CONTROLS -->
+      <div id="statementControlBar" class="hidden bg-slate-50 p-2 rounded-2xl border border-indigo-200 grid grid-cols-1 sm:grid-cols-4 gap-1.5 text-xs no-print">
+        <div>
+          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">വിഭാഗം (Type):</label>
+          <select id="statPartyType" onchange="populateStatementPartyDatalist()" class="w-full p-1.5 rounded-xl border bg-white font-bold outline-none cursor-pointer text-[11px]">
+            <option value="customer">🛒 കസ്റ്റമർ (Credit Only)</option>
+            <option value="vendor">🚚 വെണ്ടർ (Vendor)</option>
+            <option value="employee">👥 ജീവനക്കാരൻ (Staff)</option>
+            <option value="agent">👤 റൂട്ട് ഏജന്റ് (Route Agent)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">ആളെ തിരഞ്ഞെടുക്കുക:</label>
+          <input 
+            list="statPartyDatalist" 
+            id="statPartyInput" 
+            onclick="this.select()" 
+            onfocus="this.select()" 
+            oninput="generateStatement()" 
+            onchange="generateStatement()" 
+            placeholder="പേര് ടൈപ്പ് ചെയ്യുക..." 
+            class="w-full p-1.5 rounded-xl border bg-white font-bold outline-none text-[11px] uppercase-input" 
+          />
+          <datalist id="statPartyDatalist"></datalist>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-0.5 text-[9px]">മാസം:</label>
+          <input type="month" id="statMonth" onchange="generateStatement()" class="w-full p-1 rounded-xl border bg-white font-bold text-[11px] cursor-pointer" />
+        </div>
+        <div class="flex items-end">
+          <button onclick="generateStatement()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow cursor-pointer text-[11px]">
+            🔍 സ്റ്റേറ്റ്മെന്റ്
+          </button>
+        </div>
+      </div>
+
+      <!-- PRINTABLE REPORT CONTENT -->
+      <div id="reportPrintContainer" class="space-y-2 text-xs sm:text-sm">
+        <div class="text-center border-b pb-1.5 flex justify-between items-center">
+          <div>
+            <h2 id="reportPageShopName" class="text-xs sm:text-sm font-black text-slate-900 uppercase">ALNASSR</h2>
+            <p id="reportModeTitle" class="text-[9px] sm:text-[10px] font-bold text-slate-600">ഡെയ്‌ലി റിപ്പോർട്ട്</p>
+          </div>
+          <div class="text-right text-[9px] sm:text-[10px] text-slate-600 font-bold">
+            <p id="reportDateBadgeLabel">തീയതി: --</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 sm:grid-cols-8 gap-1 font-bold">
+          <div class="bg-slate-200/90 p-1.5 rounded-lg border border-slate-400 text-center">
+            <span class="text-[8.5px] font-black text-slate-800 block uppercase">തുടക്ക ഫണ്ട്</span>
+            <h3 id="repOpeningLiquidBal" class="text-xs font-black text-slate-900">0</h3>
+          </div>
+          <div class="bg-emerald-50/90 p-1.5 rounded-lg border border-emerald-300 text-center">
+            <span class="text-[8.5px] font-black text-emerald-800 block uppercase">സെയിൽസ്</span>
+            <h3 id="repTotalSale" class="text-xs font-black text-emerald-700">0</h3>
+          </div>
+          <div class="bg-blue-50/90 p-1.5 rounded-lg border border-blue-300 text-center">
+            <span class="text-[8.5px] font-black text-blue-800 uppercase block">പർച്ചേസ്</span>
+            <h3 id="repTotalPurchase" class="text-xs font-black text-blue-700">0</h3>
+          </div>
+          <div class="bg-amber-50/90 p-1.5 rounded-lg border border-amber-300 text-center">
+            <span class="text-[8.5px] font-black text-amber-800 uppercase block">എക്സ്പെൻസ്</span>
+            <h3 id="repTotalExpense" class="text-xs font-black text-amber-700">0</h3>
+          </div>
+          <div class="bg-teal-50/90 p-1.5 rounded-lg border border-teal-300 text-center">
+            <span class="text-[8.5px] font-black text-teal-800 uppercase block">കസ്റ്റമർ ബാക്കി</span>
+            <h3 id="repCustBal" class="text-[10px] font-black text-teal-900 leading-tight">0</h3>
+          </div>
+          <div class="bg-rose-50/90 p-1.5 rounded-lg border border-rose-300 text-center">
+            <span class="text-[8.5px] font-black text-rose-800 uppercase block">വെണ്ടർ ബാക്കി</span>
+            <h3 id="repVendorBal" class="text-[10px] font-black text-rose-900 leading-tight">0</h3>
+          </div>
+          <div class="bg-purple-50/90 p-1.5 rounded-lg border border-purple-300 text-center">
+            <span class="text-[8.5px] font-black text-purple-800 uppercase block">സാലറി ബാക്കി</span>
+            <h3 id="repSalaryBal" class="text-[10px] font-black text-purple-900 leading-tight">0</h3>
+          </div>
+          <div class="bg-slate-100 p-1.5 rounded-lg border border-slate-300 text-center">
+            <span class="text-[8.5px] font-black text-slate-800 uppercase block">ലിക്വിഡ് ഫണ്ട്</span>
+            <h3 id="repLiquidBal" class="text-[10px] font-black text-slate-900 leading-tight">0</h3>
+          </div>
+        </div>
+
+        <div class="report-continuous-flow border-t pt-1.5">
+          <div class="report-block bg-slate-50 p-2 rounded-xl border border-emerald-200 space-y-1">
+            <h3 class="font-extrabold text-emerald-900 text-[11px] flex items-center justify-between border-b pb-0.5">
+              <span>🛒 സെയിൽസ് ഇടപാടുകൾ</span>
+              <span id="salesGrandBadge" class="text-[9.5px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
+            </h3>
+            <div class="space-y-0.5">
+              <span class="text-[9px] font-extrabold text-emerald-800 uppercase block">💵 ക്യാഷ് കസ്റ്റമർമാർ</span>
+              <div id="repCashSalesList" class="overflow-x-auto"></div>
+            </div>
+            <div class="space-y-0.5 pt-1 border-t border-emerald-200/60">
+              <span class="text-[9px] font-extrabold text-amber-800 uppercase block">🛒 ക്രെഡിറ്റ് കസ്റ്റമർമാർ</span>
+              <div id="repCreditSalesList" class="overflow-x-auto"></div>
+            </div>
+          </div>
+
+          <div class="report-block bg-slate-50 p-2 rounded-xl border border-blue-200 space-y-1">
+            <h3 class="font-extrabold text-blue-900 text-[11px] flex items-center justify-between border-b pb-0.5">
+              <span>🚚 പർച്ചേസ് ഇടപാടുകൾ</span>
+              <span id="purchaseGrandBadge" class="text-[9.5px] font-black bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
+            </h3>
+            <div class="space-y-0.5">
+              <span class="text-[9px] font-extrabold text-blue-800 uppercase block">💵 ക്യാഷ് പർച്ചേസ്</span>
+              <div id="repCashPurchasesList" class="overflow-x-auto"></div>
+            </div>
+            <div class="space-y-0.5 pt-1 border-t border-blue-200/60">
+              <span class="text-[9px] font-extrabold text-indigo-800 uppercase block">🚚 ക്രെഡിറ്റ് വെണ്ടർമാർ</span>
+              <div id="repCreditPurchasesList" class="overflow-x-auto"></div>
+            </div>
+          </div>
+
+          <div class="report-block bg-slate-50 p-2 rounded-xl border border-purple-200 space-y-1">
+            <h3 class="font-extrabold text-purple-950 text-[11px] flex items-center justify-between border-b pb-0.5">
+              <span>👥 സാലറി നൽകിയത്</span>
+            </h3>
+            <div id="repSalariesList" class="overflow-x-auto"></div>
+          </div>
+
+          <div class="report-block bg-slate-50 p-2 rounded-xl border border-amber-200 space-y-1">
+            <h3 class="font-extrabold text-amber-950 text-[11px] flex items-center justify-between border-b pb-0.5">
+              <span>⚡ ചിലവുകൾ</span>
+            </h3>
+            <div id="repExpensesList" class="overflow-x-auto"></div>
+          </div>
+        </div>
+
+        <div class="pt-5 mt-4 border-t-2 border-slate-900 flex justify-between items-end text-[10.5px] font-black">
+          <div class="text-left space-y-6">
+            <div>...................................................................<br>ഷോപ്പ് ഇൻ-ചാർജ് ഒപ്പ്</div>
+            <div>തീയതി: ............................................</div>
+          </div>
+          <div class="text-right space-y-6">
+            <div>...................................................................<br>മാനേജർ ഒപ്പ്</div>
+            <div>തീയതി: ............................................</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATEMENT PRINT CONTAINER -->
+      <div id="statementPrintContainer" class="hidden space-y-2 text-xs sm:text-sm">
+        <div class="text-center border-b pb-1 flex justify-between items-center">
+          <div>
+            <h2 id="statementShopName" class="text-xs sm:text-sm font-black text-slate-900 uppercase">ALNASSR</h2>
+            <p id="statHeaderTitle" class="text-[10px] font-bold text-indigo-800">ACCOUNT STATEMENT</p>
+          </div>
+          <div class="text-right text-[10px] text-slate-600 font-bold">
+            <p id="statPeriodLabel">Statement Month</p>
+          </div>
+        </div>
+
+        <div id="statBannerGrid" class="bg-indigo-50 p-1.5 rounded-xl border border-indigo-200 grid grid-cols-2 sm:grid-cols-4 gap-1 text-xs font-bold text-slate-800">
+          <div>
+            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Old Opening</span>
+            <span id="statOpeningBalText" class="text-slate-900 text-xs">0</span>
+          </div>
+          <div>
+            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Month Sales/Bills</span>
+            <span id="statMonthSalesText" class="text-amber-700 text-xs">0</span>
+          </div>
+          <div>
+            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Month Paid/Coll</span>
+            <span id="statMonthPaidText" class="text-emerald-700 text-xs">0</span>
+          </div>
+          <div>
+            <span class="text-[8.5px] text-slate-500 block uppercase font-bold">Net Balance Due</span>
+            <span id="statClosingBalText" class="text-indigo-900 text-xs font-black">0</span>
+          </div>
+        </div>
+
+        <div id="statTableContainer" class="overflow-x-auto"></div>
+
+        <div class="pt-5 mt-4 border-t-2 border-slate-900 flex justify-between items-end text-[10.5px] font-black">
+          <div class="text-left space-y-6">
+            <div>...................................................................<br>കസ്റ്റമർ / വെണ്ടർ ഒപ്പ്</div>
+            <div>തീയതി: ............................................</div>
+          </div>
+          <div class="text-right space-y-6">
+            <div>...................................................................<br>മാനേജർ ഒപ്പ്</div>
+            <div>തീയതി: ............................................</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM CLOSE & PRINT ACTIONS -->
+      <div class="pt-2 no-print flex gap-2 justify-center flex-wrap border-t">
+        <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
+          🖨️ PDF ആയി സേവ് / പ്രിന്റ്
+        </button>
+        <button onclick="shareActiveReportWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
+          🟢 വാട്‌സ്ആപ്പിലേക്ക് സെന്റ് ചെയ്യുക
+        </button>
+        <button onclick="closeReportModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
+          ✕ ക്ലോസ് ചെയ്യുക
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: MASTER MANAGEMENT (WITH AGENT TAB & SEARCH) -->
   <!-- ======================================================== -->
   <div id="masterModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-3xl w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[94vh] overflow-y-auto relative">
       
-      <!-- HEADER -->
       <div class="sticky top-0 bg-white border-b pb-2 pt-1 z-30 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black">
@@ -566,15 +771,15 @@
         <button onclick="closeMasterModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-sm flex items-center justify-center cursor-pointer shadow-sm">✕</button>
       </div>
 
-      <!-- TABS: CUSTOMER / VENDOR / EMPLOYEE / EXPENSE -->
+      <!-- TABS INCLUDING AGENT -->
       <div class="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold border gap-1 overflow-x-auto">
         <button onclick="switchMasterTab('customer')" id="mTabBtn-customer" class="flex-1 py-1.5 px-2 rounded-xl bg-emerald-600 text-white shadow font-black whitespace-nowrap cursor-pointer">🛒 കസ്റ്റമർ</button>
         <button onclick="switchMasterTab('vendor')" id="mTabBtn-vendor" class="flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer">🚚 വെണ്ടർ</button>
         <button onclick="switchMasterTab('employee')" id="mTabBtn-employee" class="flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer">👥 സ്റ്റാഫ്</button>
+        <button onclick="switchMasterTab('agent')" id="mTabBtn-agent" class="flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer">👤 ഏജന്റ്</button>
         <button onclick="switchMasterTab('expense')" id="mTabBtn-expense" class="flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer">⚡ ചിലവ് ഇനം</button>
       </div>
 
-      <!-- SEARCH & ADD ACTION BAR -->
       <div class="flex items-center justify-between gap-2">
         <div class="relative flex-1">
           <input 
@@ -591,12 +796,8 @@
         </button>
       </div>
 
-      <!-- MASTER ITEMS LIST CONTAINER -->
-      <div id="masterListContainer" class="overflow-x-auto min-h-[220px] max-h-[55vh] border rounded-2xl p-2 bg-slate-50/50">
-        <!-- DYNAMIC CONTENT GENERATED BY JS -->
-      </div>
+      <div id="masterListContainer" class="overflow-x-auto min-h-[220px] max-h-[55vh] border rounded-2xl p-2 bg-slate-50/50"></div>
 
-      <!-- FOOTER CLOSE BUTTON -->
       <div class="pt-2 border-t flex justify-end">
         <button onclick="closeMasterModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold cursor-pointer">
           തിരികെ പോകുക
@@ -605,7 +806,7 @@
     </div>
   </div>
 
-  <!-- MODAL: EDIT MASTER ITEM GENERIC -->
+  <!-- MODAL: EDIT MASTER ITEM (SUPPORTS ROUTE AGENT ASSIGNMENT) -->
   <div id="editMasterModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -622,8 +823,13 @@
           <input type="text" id="editMasterName" oninput="this.value = this.value.toUpperCase();" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold uppercase-input outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
+        <div id="editMasterAgentBox" class="hidden">
+          <label class="block font-bold text-slate-700 mb-0.5">റൂട്ട് ഏജന്റ് (Route Agent):</label>
+          <input list="agentListOptions" id="editMasterAgent" placeholder="ഏജന്റ് പേര്..." class="w-full p-2 rounded-xl border bg-slate-50 font-bold uppercase-input outline-none" />
+        </div>
+
         <div id="editMasterOpeningBox">
-          <label id="editMasterOpeningLabel" class="block font-bold text-slate-700 mb-0.5">തുടക്ക ബാലൻസ് / അഡ്വാൻസ്:</label>
+          <label id="editMasterOpeningLabel" class="block font-bold text-slate-700 mb-0.5">തുടക്ക ബാലൻസ്:</label>
           <input type="number" step="any" id="editMasterOpening" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
@@ -645,7 +851,94 @@
     </div>
   </div>
 
-  <!-- OTHER MODALS (TRANSFER, STAFF DEPOSIT, POPUPS, REPORT ETC. REMAIN FULLY INTACT) -->
+  <!-- MODAL: NEW CREDIT CUSTOMER (WITH ROUTE AGENT FIELD) -->
+  <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">🛒 പുതിയ ക്രെഡിറ്റ് കസ്റ്റമർ</h3>
+        <button onclick="closeNewCustomerModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">കസ്റ്റമർ പേര്:</label>
+          <input type="text" id="newCustName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500 uppercase-input" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">റൂട്ട് ഏജന്റ് (Route Agent):</label>
+          <input list="agentListOptions" id="newCustAgent" placeholder="ഏജന്റ് പേര് (ഓപ്ഷണൽ)..." class="w-full p-2 rounded-xl border bg-slate-50 font-bold uppercase-input outline-none focus:border-emerald-500" />
+          <datalist id="agentListOptions"></datalist>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">പഴയ കടം / ബാലൻസ്:</label>
+          <input type="number" step="any" id="newCustOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500" />
+        </div>
+      </div>
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewCustomerModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewCustomerMaster()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW VENDOR -->
+  <div id="newVendorModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">🚚 പുതിയ ക്രെഡിറ്റ് വെണ്ടർ</h3>
+        <button onclick="closeNewVendorModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">വെണ്ടർ പേര്:</label>
+          <input type="text" id="newVendName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500 uppercase-input" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">പഴയ ബാക്കി / കൊടുക്കാനുള്ളത്:</label>
+          <input type="number" step="any" id="newVendOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
+        </div>
+      </div>
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewVendorModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewVendorMaster()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW EMPLOYEE -->
+  <div id="newEmployeeModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-purple-900 flex items-center gap-1.5">👥 പുതിയ ജീവനക്കാരനെ ചേർക്കുക</h3>
+        <button onclick="closeNewEmployeeModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">സ്റ്റാഫ് പേര്:</label>
+          <input type="text" id="newEmpName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500 uppercase-input" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">മാസ ശമ്പളം:</label>
+            <input type="number" step="any" id="newEmpSalary" placeholder="0.00" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-0.5">തുടക്ക ബാക്കി:</label>
+            <input type="number" step="any" id="newEmpAdvance" placeholder="0.00" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ജോയിനിങ് ഡേറ്റ്:</label>
+          <input type="date" id="newEmpJoinDate" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none cursor-pointer" />
+        </div>
+      </div>
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewEmployeeModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewEmployeeMaster()" class="flex-1 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CASH / BANK TRANSFER -->
   <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
@@ -675,19 +968,14 @@
     </div>
   </div>
 
+  <!-- MODAL: STAFF DEPOSIT -->
   <div id="staffDepositModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
-          📥 സ്റ്റാഫ് കടയിലേക്ക് പണം തന്നത്
-        </h3>
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">📥 സ്റ്റാഫ് കടയിലേക്ക് പണം തന്നത്</h3>
         <button onclick="closeStaffDepositModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
-
-      <p class="text-[10px] text-slate-500 leading-tight">
-        ഇത് കടയുടെ ഫണ്ടിൽ <b>വരവായി (Inflow)</b> കയറുകയും, ജീവനക്കാരന് കൊടുക്കാനുള്ള കണക്കിൽ തനിയെ ശരിയാവുകയും ചെയ്യും.
-      </p>
-
+      <p class="text-[10px] text-slate-500 leading-tight">ഇത് കടയുടെ ഫണ്ടിൽ <b>വരവായി (Inflow)</b> കയറുകയും ജീവനക്കാരന് കൂടുതൽ അർഹതയാവുകയും ചെയ്യും.</p>
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">ജീവനക്കാരന്റെ പേര്:</label>
@@ -708,7 +996,6 @@
           <input type="text" id="staffDepositNote" placeholder="ഉദാ: കടത്തിലേക്ക് തന്നത് / അഡ്വാൻസ് തിരികെ" class="w-full p-2 rounded-xl border bg-slate-50 outline-none" />
         </div>
       </div>
-
       <div class="pt-2 border-t flex gap-2">
         <button type="button" onclick="closeStaffDepositModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
         <button type="button" onclick="saveStaffDepositEntry()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ് ചെയ്യുക</button>
@@ -716,153 +1003,7 @@
     </div>
   </div>
 
-  <!-- POPUP MODALS FOR RECENT BREAKDOWNS -->
-  <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
-          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് ഇടപാടുകൾ (Selected Date)
-        </h3>
-        <button onclick="closeTodaySalesModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-1">
-        <span class="text-[10px] font-black text-emerald-800 uppercase block">1. ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
-        <div id="modalCashSalesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="space-y-1 pt-2 border-t">
-        <span class="text-[10px] font-black text-amber-800 uppercase block">2. ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
-        <div id="modalCreditSalesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeTodaySalesModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">
-          <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് ഇടപാടുകൾ (Selected Date)
-        </h3>
-        <button onclick="closeTodayPurchaseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-1">
-        <span class="text-[10px] font-black text-blue-900 uppercase block">1. ക്യാഷ് പർച്ചേസ് (Cash Vendors)</span>
-        <div id="modalCashPurchasesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="space-y-1 pt-2 border-t">
-        <span class="text-[10px] font-black text-indigo-900 uppercase block">2. ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
-        <div id="modalCreditPurchasesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeTodayPurchaseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-amber-900 flex items-center gap-1.5">
-          <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവുകൾ & സാലറി (Selected Date)
-        </h3>
-        <button onclick="closeTodayExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-1">
-        <span class="text-[10px] font-black text-purple-900 uppercase block">1. സാലറി നൽകിയത് (Staff Salaries)</span>
-        <div id="modalSalariesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="space-y-1 pt-2 border-t">
-        <span class="text-[10px] font-black text-amber-900 uppercase block">2. ഷോപ്പ് ചിലവുകൾ (Shop Expenses)</span>
-        <div id="modalExpensesList" class="overflow-x-auto"></div>
-      </div>
-      <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeTodayExpenseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- BASIC ADD MODALS -->
-  <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">🛒 പുതിയ ക്രെഡിറ്റ് കസ്റ്റമർ</h3>
-        <button onclick="closeNewCustomerModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-2 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">കസ്റ്റമർ പേര്:</label>
-          <input type="text" id="newCustName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500 uppercase-input" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">പഴയ കടം / ബാലൻസ്:</label>
-          <input type="number" step="any" id="newCustOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500" />
-        </div>
-      </div>
-      <div class="pt-2 border-t flex gap-2">
-        <button type="button" onclick="closeNewCustomerModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
-        <button type="button" onclick="saveNewCustomerMaster()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="newVendorModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">🚚 പുതിയ ക്രെഡിറ്റ് വെണ്ടർ</h3>
-        <button onclick="closeNewVendorModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-2 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">വെണ്ടർ പേര്:</label>
-          <input type="text" id="newVendName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500 uppercase-input" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">പഴയ ബാക്കി / കൊടുക്കാനുള്ളത്:</label>
-          <input type="number" step="any" id="newVendOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
-        </div>
-      </div>
-      <div class="pt-2 border-t flex gap-2">
-        <button type="button" onclick="closeNewVendorModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
-        <button type="button" onclick="saveNewVendorMaster()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="newEmployeeModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-purple-900 flex items-center gap-1.5">👥 പുതിയ ജീവനക്കാരനെ ചേർക്കുക</h3>
-        <button onclick="closeNewEmployeeModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-2 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">സ്റ്റാഫ് പേര്:</label>
-          <input type="text" id="newEmpName" oninput="this.value = this.value.toUpperCase();" placeholder="പേര് നൽകുക..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500 uppercase-input" />
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-bold text-slate-700 mb-0.5">മാസ ശമ്പളം:</label>
-            <input type="number" step="any" id="newEmpSalary" placeholder="0.00" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-0.5">തുടക്ക ബാക്കി:</label>
-            <input type="number" step="any" id="newEmpAdvance" placeholder="0.00" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500" />
-          </div>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-0.5">ജോയിനിങ് ഡേറ്റ്:</label>
-          <input type="date" id="newEmpJoinDate" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500 cursor-pointer" />
-        </div>
-      </div>
-      <div class="pt-2 border-t flex gap-2">
-        <button type="button" onclick="closeNewEmployeeModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
-        <button type="button" onclick="saveNewEmployeeMaster()" class="flex-1 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- MODAL: EDIT TRANSACTION -->
   <div id="editTransactionModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -901,6 +1042,7 @@
     </div>
   </div>
 
+  <!-- PIN VERIFY MODAL -->
   <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
       <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
@@ -913,7 +1055,71 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <!-- POPUP MODALS FOR DETAILS -->
+  <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5"><i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> സെയിൽസ് ഇടപാടുകൾ</h3>
+        <button onclick="closeTodaySalesModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-1">
+        <span class="text-[10px] font-black text-emerald-800 uppercase block">1. ക്യാഷ് കസ്റ്റമർമാർ</span>
+        <div id="modalCashSalesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="space-y-1 pt-2 border-t">
+        <span class="text-[10px] font-black text-amber-800 uppercase block">2. ക്രെഡിറ്റ് കസ്റ്റമർമാർ</span>
+        <div id="modalCreditSalesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodaySalesModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5"><i data-lucide="shopping-bag" class="w-4 h-4 text-blue-600"></i> പർച്ചേസ് ഇടപാടുകൾ</h3>
+        <button onclick="closeTodayPurchaseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-1">
+        <span class="text-[10px] font-black text-blue-900 uppercase block">1. ക്യാഷ് പർച്ചേസ്</span>
+        <div id="modalCashPurchasesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="space-y-1 pt-2 border-t">
+        <span class="text-[10px] font-black text-indigo-900 uppercase block">2. ക്രെഡിറ്റ് വെണ്ടർമാർ</span>
+        <div id="modalCreditPurchasesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodayPurchaseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-amber-900 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവുകൾ & സാലറി</h3>
+        <button onclick="closeTodayExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-1">
+        <span class="text-[10px] font-black text-purple-900 uppercase block">1. സാലറി നൽകിയത്</span>
+        <div id="modalSalariesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="space-y-1 pt-2 border-t">
+        <span class="text-[10px] font-black text-amber-900 uppercase block">2. ഷോപ്പ് ചിലവുകൾ</span>
+        <div id="modalExpensesList" class="overflow-x-auto"></div>
+      </div>
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeTodayExpenseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PART 2 LOGIC ENGINE CONTINUES IN JAVASCRIPT SCRIPT TAG -->
+  <!-- ======================================================== -->
+  <!-- PART 2: COMPLETE JAVASCRIPT LOGIC ENGINE -->
+  <!-- ======================================================== -->
   <script>
     let SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : [];
     let currentShopId = null;
@@ -935,18 +1141,16 @@
     let currentReportMode = 'daily';
     let currentReportDataForWA = {};
     let currentStatementDataForWA = null;
-
-    // ACTIVE MASTER TAB STATE ('customer' | 'vendor' | 'employee' | 'expense')
     let currentMasterTab = 'customer';
 
-    // PREVENT BACK-FORWARD CACHE (BFCACHE)
+    // PREVENT BACK-FORWARD CACHE (BFCACHE) POLLUTION
     window.addEventListener('pageshow', function (event) {
       if (event.persisted) {
         window.location.reload();
       }
     });
 
-    // PWA INSTALL LOGIC
+    // PWA INSTALL PROMPT
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -1101,6 +1305,8 @@
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("admin");
         initMultiShopSystem();
+        if (window.lucide) lucide.createIcons();
+        renderQuickTotalsAndRecent();
         return;
       }
 
@@ -1114,6 +1320,8 @@
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("shop");
         initMultiShopSystem(matched.id);
+        if (window.lucide) lucide.createIcons();
+        renderQuickTotalsAndRecent();
         return;
       }
 
@@ -1349,6 +1557,11 @@
         expensesMasterList.forEach(e => uDL.innerHTML += `<option value="${e.name.toUpperCase()}">`);
         employeesList.forEach(em => uDL.innerHTML += `<option value="${em.name.toUpperCase()}">`);
       }
+      const agDL = document.getElementById("agentListOptions");
+      if (agDL) {
+        agDL.innerHTML = "";
+        agentsList.forEach(a => agDL.innerHTML += `<option value="${a.name.toUpperCase()}">`);
+      }
     }
 
     function renderSaleInputs(type) {
@@ -1401,7 +1614,8 @@
             liveBal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
           }
         });
-        info.innerText = `ലൈവ് ബാലൻസ് (കിട്ടാനുള്ളത്): ${liveBal.toLocaleString('en-IN')}`;
+        let agStr = cust.agent_name ? ` | ഏജന്റ്: ${cust.agent_name}` : '';
+        info.innerText = `ലൈവ് ബാലൻസ്: ${liveBal.toLocaleString('en-IN')}${agStr}`;
         renderSaleInputs('credit');
       } else {
         info.innerText = cust ? "ക്യാഷ് കസ്റ്റമർ" : "പുതിയ കസ്റ്റമർ (ക്യാഷ് ആയി സേവ് ആകും)";
@@ -1459,7 +1673,7 @@
             liveBal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
           }
         });
-        info.innerText = `ലൈവ് ബാലൻസ് (കൊടുക്കാനുള്ളത്): ${liveBal.toLocaleString('en-IN')}`;
+        info.innerText = `ലൈവ് ബാലൻസ്: ${liveBal.toLocaleString('en-IN')}`;
         renderPurchaseInputs('credit');
       } else {
         info.innerText = vend ? "ക്യാഷ് വെണ്ടർ" : "പുതിയ വെണ്ടർ (ക്യാഷ് ആയി സേവ് ആകും)";
@@ -1467,7 +1681,6 @@
       }
     }
 
-    // SALARY ENGINE & LIVE BALANCE CALCULATION
     function getCycleStartDate(joinDate, cycleIndex) {
       let d = new Date(joinDate.getFullYear(), joinDate.getMonth() + cycleIndex, joinDate.getDate());
       let expectedMonth = (joinDate.getMonth() + cycleIndex) % 12;
@@ -1498,7 +1711,7 @@
       if (targetD < joinD) return baseAdv;
 
       let k = 0;
-      while (true) {
+      while (k < 120) {
         let nextCycleStart = getCycleStartDate(joinD, k + 1);
         if (targetD >= nextCycleStart) {
           k++;
@@ -1599,7 +1812,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // TRANSFER MODAL LOGIC
     function openTransferModal() {
       document.getElementById("depositAmount").value = "";
       document.getElementById("withdrawalAmount").value = "";
@@ -1664,7 +1876,7 @@
     }
 
     // ========================================================
-    // MASTER MANAGEMENT LOGIC (CUSTOMERS / VENDORS / STAFF / EXPENSES)
+    // MASTER MANAGEMENT (CUSTOMERS / VENDORS / STAFF / AGENTS)
     // ========================================================
     function openMasterModal() {
       document.getElementById("masterModal").classList.remove("hidden");
@@ -1678,13 +1890,12 @@
 
     function switchMasterTab(tab) {
       currentMasterTab = tab;
-      const tabs = ['customer', 'vendor', 'employee', 'expense'];
+      const tabs = ['customer', 'vendor', 'employee', 'agent', 'expense'];
       tabs.forEach(t => {
         const btn = document.getElementById(`mTabBtn-${t}`);
-        if (t === tab) {
-          btn.className = "flex-1 py-1.5 px-2 rounded-xl bg-emerald-600 text-white shadow font-black whitespace-nowrap cursor-pointer";
-        } else {
-          btn.className = "flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer";
+        if (btn) {
+          if (t === tab) btn.className = "flex-1 py-1.5 px-2 rounded-xl bg-emerald-600 text-white shadow font-black whitespace-nowrap cursor-pointer";
+          else btn.className = "flex-1 py-1.5 px-2 rounded-xl text-slate-600 font-bold whitespace-nowrap cursor-pointer";
         }
       });
       document.getElementById("masterSearchInput").value = "";
@@ -1695,7 +1906,27 @@
       if (currentMasterTab === 'customer') openNewCustomerModal();
       else if (currentMasterTab === 'vendor') openNewVendorModal();
       else if (currentMasterTab === 'employee') openNewEmployeeModal();
+      else if (currentMasterTab === 'agent') quickAddAgentPrompt();
       else if (currentMasterTab === 'expense') quickAddExpensePrompt();
+    }
+
+    async function quickAddAgentPrompt() {
+      let name = prompt("പുതിയ റൂട്ട് ഏജന്റിന്റെ പേര് നൽകുക:");
+      if (!name || !name.trim()) return;
+      name = name.trim().toUpperCase();
+
+      const newAg = { name: name };
+      if (navigator.onLine && supabaseClient) {
+        const { data } = await supabaseClient.from('agents').insert([newAg]).select();
+        if (data && data[0]) newAg.id = data[0].id;
+      } else {
+        newAg.id = 'ag_' + Date.now();
+      }
+      agentsList.push(newAg);
+      localStorage.setItem(`ALNASSR_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
+      populateDropdowns();
+      renderActiveMasterList();
+      alert("പുതിയ ഏജന്റിനെ ചേർത്തു!");
     }
 
     function renderActiveMasterList() {
@@ -1710,19 +1941,21 @@
             <thead>
               <tr class="bg-emerald-100/70 text-slate-900 font-black border-b">
                 <th class="p-2">കസ്റ്റമർ പേര്</th>
+                <th class="p-2 text-center">ഏജന്റ്</th>
                 <th class="p-2 text-center">വിഭാഗം</th>
-                <th class="p-2 text-right">പഴയ കടം / ബാലൻസ്</th>
+                <th class="p-2 text-right">പഴയ ബാലൻസ്</th>
                 <th class="p-2 text-right">⚙️ നടപടി</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 font-bold">
         `;
-        if (list.length === 0) html += `<tr><td colspan="4" class="p-4 text-center text-slate-400">കസ്റ്റമർമാർ ആരും ഇല്ല</td></tr>`;
+        if (list.length === 0) html += `<tr><td colspan="5" class="p-4 text-center text-slate-400">കസ്റ്റമർമാർ ആരും ഇല്ല</td></tr>`;
         else {
           list.forEach(c => {
             html += `
               <tr class="hover:bg-slate-100/60">
                 <td class="p-2 font-black text-slate-900">${c.name}</td>
+                <td class="p-2 text-center text-slate-600 text-[11px]">${c.agent_name || '-'}</td>
                 <td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${c.type === 'credit' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${c.type === 'credit' ? 'ക്രെഡിറ്റ്' : 'ക്യാഷ്'}</span></td>
                 <td class="p-2 text-right text-slate-800">${(parseFloat(c.opening_balance) || 0).toLocaleString('en-IN')}</td>
                 <td class="p-2 text-right whitespace-nowrap">
@@ -1798,13 +2031,40 @@
           });
         }
         html += `</tbody></table>`;
+      } else if (currentMasterTab === 'agent') {
+        let list = agentsList.filter(a => !search || (a.name || '').toLowerCase().includes(search));
+        html = `
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="bg-indigo-100/70 text-slate-900 font-black border-b">
+                <th class="p-2">റൂട്ട് ഏജന്റ് പേര്</th>
+                <th class="p-2 text-right">⚙️ നടപടി</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-bold">
+        `;
+        if (list.length === 0) html += `<tr><td colspan="2" class="p-4 text-center text-slate-400">ഏജന്റുമാർ ആരും ഇല്ല</td></tr>`;
+        else {
+          list.forEach(a => {
+            html += `
+              <tr class="hover:bg-slate-100/60">
+                <td class="p-2 font-black text-slate-900">${a.name}</td>
+                <td class="p-2 text-right whitespace-nowrap">
+                  <button onclick="openEditMasterItem('agent', '${a.name}')" title="തിരുത്തുക" class="p-1 text-blue-600 hover:text-blue-800 cursor-pointer">✏️</button>
+                  <button onclick="deleteMasterItem('agent', '${a.name}')" title="ഡിലീറ്റ്" class="p-1 text-rose-600 hover:text-rose-800 cursor-pointer">🗑️</button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+        html += `</tbody></table>`;
       } else if (currentMasterTab === 'expense') {
         let list = expensesMasterList.filter(ex => !search || (ex.name || '').toLowerCase().includes(search));
         html = `
           <table class="w-full text-xs text-left border-collapse">
             <thead>
               <tr class="bg-amber-100/70 text-slate-900 font-black border-b">
-                <th class="p-2">ചിലവ് ഇനം (Category)</th>
+                <th class="p-2">ചിലവ് ഇനം</th>
                 <th class="p-2 text-right">⚙️ നടപടി</th>
               </tr>
             </thead>
@@ -1836,6 +2096,8 @@
 
       const title = document.getElementById("editMasterModalTitle");
       const nameInp = document.getElementById("editMasterName");
+      const agentBox = document.getElementById("editMasterAgentBox");
+      const agentInp = document.getElementById("editMasterAgent");
       const openingBox = document.getElementById("editMasterOpeningBox");
       const openingLabel = document.getElementById("editMasterOpeningLabel");
       const openingInp = document.getElementById("editMasterOpening");
@@ -1848,7 +2110,9 @@
 
       if (type === 'customer') {
         const item = customersList.find(c => c.name === originalName);
-        title.innerText = "🛒 കസ്റ്റമർ തിരുത്തുക";
+        title.innerText = "🛒 കസ്റ്റമർ വിവരങ്ങൾ തിരുത്തുക";
+        agentBox.classList.remove("hidden");
+        agentInp.value = item ? (item.agent_name || '') : '';
         openingBox.classList.remove("hidden");
         openingLabel.innerText = "പഴയ കടം / ബാലൻസ്:";
         openingInp.value = item ? (item.opening_balance || 0) : 0;
@@ -1857,6 +2121,7 @@
       } else if (type === 'vendor') {
         const item = vendorsList.find(v => v.name === originalName);
         title.innerText = "🚚 വെണ്ടർ തിരുത്തുക";
+        agentBox.classList.add("hidden");
         openingBox.classList.remove("hidden");
         openingLabel.innerText = "കൊടുക്കാനുള്ള ബാക്കി തുക:";
         openingInp.value = item ? (item.opening_balance || 0) : 0;
@@ -1865,6 +2130,7 @@
       } else if (type === 'employee') {
         const item = employeesList.find(e => e.name === originalName);
         title.innerText = "👥 ജീവനക്കാരന്റെ വിവരങ്ങൾ തിരുത്തുക";
+        agentBox.classList.add("hidden");
         openingBox.classList.remove("hidden");
         openingLabel.innerText = "തുടക്ക ബാക്കി / അഡ്വാൻസ്:";
         openingInp.value = item ? (item.opening_advance || item.opening_balance || 0) : 0;
@@ -1872,8 +2138,15 @@
         salaryInp.value = item ? (item.monthly_salary || 0) : 0;
         joinBox.classList.remove("hidden");
         joinInp.value = item ? (item.joining_date || '') : '';
+      } else if (type === 'agent') {
+        title.innerText = "👤 റൂട്ട് ഏജന്റ് തിരുത്തുക";
+        agentBox.classList.add("hidden");
+        openingBox.classList.add("hidden");
+        salaryBox.classList.add("hidden");
+        joinBox.classList.add("hidden");
       } else if (type === 'expense') {
         title.innerText = "⚡ ചിലവ് ഇനം തിരുത്തുക";
+        agentBox.classList.add("hidden");
         openingBox.classList.add("hidden");
         salaryBox.classList.add("hidden");
         joinBox.classList.add("hidden");
@@ -1898,13 +2171,19 @@
       if (type === 'customer') {
         const item = customersList.find(c => c.name === originalName);
         if (!item) return;
-        const payload = { name: newName, opening_balance: opening };
+        const agentName = document.getElementById("editMasterAgent").value.trim().toUpperCase();
+        const matchedAg = agentsList.find(a => a.name.toUpperCase() === agentName);
+        const payload = { 
+          name: newName, 
+          opening_balance: opening,
+          agent_name: agentName,
+          agent_id: matchedAg ? matchedAg.id : null
+        };
         if (navigator.onLine && supabaseClient) {
           if (item.id) await supabaseClient.from('customers').update(payload).eq('id', item.id);
           else await supabaseClient.from('customers').update(payload).eq('name', originalName);
         }
-        item.name = newName;
-        item.opening_balance = opening;
+        Object.assign(item, payload);
         localStorage.setItem(`ALNASSR_${currentShopId}_CUSTOMERS`, JSON.stringify(customersList));
       } else if (type === 'vendor') {
         const item = vendorsList.find(v => v.name === originalName);
@@ -1927,11 +2206,18 @@
           if (item.id) await supabaseClient.from('employees').update(payload).eq('id', item.id);
           else await supabaseClient.from('employees').update(payload).eq('name', originalName);
         }
-        item.name = newName;
-        item.monthly_salary = salary;
-        item.opening_advance = opening;
-        item.joining_date = joinDate;
+        Object.assign(item, payload);
         localStorage.setItem(`ALNASSR_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
+      } else if (type === 'agent') {
+        const item = agentsList.find(a => a.name === originalName);
+        if (!item) return;
+        const payload = { name: newName };
+        if (navigator.onLine && supabaseClient) {
+          if (item.id) await supabaseClient.from('agents').update(payload).eq('id', item.id);
+          else await supabaseClient.from('agents').update(payload).eq('name', originalName);
+        }
+        item.name = newName;
+        localStorage.setItem(`ALNASSR_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
       } else if (type === 'expense') {
         const item = expensesMasterList.find(ex => ex.name === originalName);
         if (!item) return;
@@ -1977,6 +2263,14 @@
         }
         employeesList = employeesList.filter(e => e.name !== name);
         localStorage.setItem(`ALNASSR_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
+      } else if (type === 'agent') {
+        const item = agentsList.find(a => a.name === name);
+        if (navigator.onLine && supabaseClient && item) {
+          if (item.id) await supabaseClient.from('agents').delete().eq('id', item.id);
+          else await supabaseClient.from('agents').delete().eq('name', name);
+        }
+        agentsList = agentsList.filter(a => a.name !== name);
+        localStorage.setItem(`ALNASSR_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
       } else if (type === 'expense') {
         const item = expensesMasterList.find(ex => ex.name === name);
         if (navigator.onLine && supabaseClient && item) {
@@ -1992,13 +2286,21 @@
       alert("ഡിലീറ്റ് ചെയ്തു!");
     }
 
-    // NEW MASTER SAVE OVERRIDES (AUTO-REFRESH MASTER LIST)
     async function saveNewCustomerMaster() {
       const name = document.getElementById("newCustName").value.trim().toUpperCase();
       const opening = parseFloat(document.getElementById("newCustOpening").value) || 0;
+      const agentName = (document.getElementById("newCustAgent")?.value || '').trim().toUpperCase();
       if (!name) return alert("കസ്റ്റമർ പേര് നൽകുക!");
 
-      const newCust = { name: name, type: 'credit', opening_balance: opening };
+      const matchedAg = agentsList.find(a => a.name.toUpperCase() === agentName);
+      const newCust = { 
+        name: name, 
+        type: 'credit', 
+        opening_balance: opening,
+        agent_name: agentName,
+        agent_id: matchedAg ? matchedAg.id : null
+      };
+
       if (navigator.onLine && supabaseClient) {
         await supabaseClient.from('customers').insert([newCust]);
       }
@@ -2087,6 +2389,7 @@
 
     function openNewCustomerModal() {
       document.getElementById("newCustName").value = "";
+      if (document.getElementById("newCustAgent")) document.getElementById("newCustAgent").value = "";
       document.getElementById("newCustOpening").value = "";
       document.getElementById("newCustomerModal").classList.remove("hidden");
       document.getElementById("newCustName").focus();
@@ -2111,7 +2414,6 @@
     }
     function closeNewEmployeeModal() { document.getElementById("newEmployeeModal").classList.add("hidden"); }
 
-    // STAFF DEPOSIT & TRANSACTION ACTIONS
     async function saveStaffDepositEntry() {
       const empName = document.getElementById("staffDepositEmpName").value.trim().toUpperCase();
       const cash = parseFloat(document.getElementById("staffDepositCash").value) || 0;
@@ -2546,9 +2848,7 @@
 
         html += `
           <tr class="hover:bg-slate-50 ${row.isInflow ? 'bg-emerald-50/40 text-emerald-900' : ''}">
-            <td class="p-1.5 text-left font-black truncate max-w-[110px]" title="${row.name}">
-              ${row.name}
-            </td>
+            <td class="p-1.5 text-left font-black truncate max-w-[110px]" title="${row.name}">${row.name}</td>
             <td class="p-1.5">${col1}</td>
             <td class="p-1.5">${col2}</td>
             <td class="p-1.5 font-black ${row.isInflow ? 'text-emerald-700 font-extrabold' : 'text-slate-950'}">${col3}</td>
@@ -2577,7 +2877,6 @@
       container.innerHTML = html;
     }
 
-    // EDIT & DELETE ENGINE (STAFF DELETE LIMIT INCLUDED)
     function requestEdit(id) {
       if (String(id).startsWith('temp_')) {
         alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. ഇത് നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
@@ -2775,379 +3074,7 @@
       }
     }
 
-    // REPORTS ENGINE (DAILY / MONTHLY / STATEMENT)
-    function openReportModal() {
-      const modal = document.getElementById("reportModal");
-      if (modal) {
-        modal.classList.remove("hidden");
-        modal.style.display = "flex";
-      }
-
-      const dashDate = document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate();
-      if (document.getElementById("repFilterDate")) document.getElementById("repFilterDate").value = dashDate;
-      if (document.getElementById("repFilterMonth")) document.getElementById("repFilterMonth").value = dashDate.substring(0, 7);
-      if (document.getElementById("statMonth")) document.getElementById("statMonth").value = dashDate.substring(0, 7);
-
-      switchReportMode(currentReportMode || 'daily');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function closeReportModal() {
-      const modal = document.getElementById("reportModal");
-      if (modal) {
-        modal.classList.add("hidden");
-        modal.style.display = "none";
-      }
-    }
-
-    function switchReportMode(mode) {
-      currentReportMode = mode;
-      const repDailyBtn = document.getElementById("repDailyBtn");
-      const repMonthlyBtn = document.getElementById("repMonthlyBtn");
-      const repStatBtn = document.getElementById("repStatBtn");
-      const statementControlBar = document.getElementById("statementControlBar");
-      const statementPrintContainer = document.getElementById("statementPrintContainer");
-      const reportPrintContainer = document.getElementById("reportPrintContainer");
-      const reportDateSelectorBar = document.getElementById("reportDateSelectorBar");
-      const repFilterDate = document.getElementById("repFilterDate");
-      const repFilterMonth = document.getElementById("repFilterMonth");
-      const repFilterLabel = document.getElementById("repFilterLabel");
-
-      if (repDailyBtn) repDailyBtn.className = "px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
-      if (repMonthlyBtn) repMonthlyBtn.className = "px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
-      if (repStatBtn) repStatBtn.className = "px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold";
-
-      if (mode === 'daily') {
-        if (repDailyBtn) repDailyBtn.className = "px-2 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer font-black";
-        if (reportDateSelectorBar) reportDateSelectorBar.classList.remove("hidden");
-        if (repFilterDate) repFilterDate.classList.remove("hidden");
-        if (repFilterMonth) repFilterMonth.classList.add("hidden");
-        if (repFilterLabel) repFilterLabel.innerText = "📅 തീയതി മാറ്റുക:";
-        if (statementControlBar) statementControlBar.classList.add("hidden");
-        if (statementPrintContainer) statementPrintContainer.classList.add("hidden");
-        if (reportPrintContainer) reportPrintContainer.classList.remove("hidden");
-        renderReportData('daily');
-      } else if (mode === 'monthly') {
-        if (repMonthlyBtn) repMonthlyBtn.className = "px-2 py-1 rounded-lg bg-blue-600 text-white shadow transition cursor-pointer font-black";
-        if (reportDateSelectorBar) reportDateSelectorBar.classList.remove("hidden");
-        if (repFilterDate) repFilterDate.classList.add("hidden");
-        if (repFilterMonth) repFilterMonth.classList.remove("hidden");
-        if (repFilterLabel) repFilterLabel.innerText = "📅 മാസം മാറ്റുക:";
-        if (statementControlBar) statementControlBar.classList.add("hidden");
-        if (statementPrintContainer) statementPrintContainer.classList.add("hidden");
-        if (reportPrintContainer) reportPrintContainer.classList.remove("hidden");
-        renderReportData('monthly');
-      } else if (mode === 'statement') {
-        if (repStatBtn) repStatBtn.className = "px-2 py-1 rounded-lg bg-indigo-600 text-white shadow transition cursor-pointer font-black";
-        if (reportDateSelectorBar) reportDateSelectorBar.classList.add("hidden");
-        if (statementControlBar) statementControlBar.classList.remove("hidden");
-        if (statementPrintContainer) statementPrintContainer.classList.remove("hidden");
-        if (reportPrintContainer) reportPrintContainer.classList.add("hidden");
-        populateStatementPartyDatalist();
-        generateStatement();
-      }
-    }
-
-    function onReportDateChanged() { renderReportData('daily'); }
-    function onReportMonthChanged() { renderReportData('monthly'); }
-
-    function formatShortName(name) {
-      if (!name) return '';
-      let s = String(name).trim();
-      return s.length > 17 ? s.substring(0, 16) + '..' : s;
-    }
-
-    function renderReportData(mode) {
-      let targetDate = document.getElementById("repFilterDate")?.value || getSaudiBusinessDate();
-      let targetMonth = document.getElementById("repFilterMonth")?.value || targetDate.substring(0, 7);
-
-      let titleText = "";
-      let dateBadgeText = "";
-      let dateCondition;
-      let isBeforeTargetCondition;
-      let isTargetOrBeforeCondition;
-
-      if (mode === 'daily') {
-        dateCondition = (dStr) => cleanDate(dStr) === targetDate;
-        isBeforeTargetCondition = (dStr) => cleanDate(dStr) < targetDate;
-        isTargetOrBeforeCondition = (dStr) => cleanDate(dStr) <= targetDate;
-        titleText = "ഡെയ്‌ലി റിപ്പോർട്ട് (Daily Report)";
-        dateBadgeText = `തീയതി: ${targetDate}`;
-      } else {
-        dateCondition = (dStr) => cleanDate(dStr).startsWith(targetMonth);
-        isBeforeTargetCondition = (dStr) => cleanDate(dStr) < `${targetMonth}-01`;
-        isTargetOrBeforeCondition = (dStr) => cleanDate(dStr).substring(0, 7) <= targetMonth;
-        titleText = `മന്ത്ലി റിപ്പോർട്ട് (${targetMonth})`;
-        dateBadgeText = `മാസം: ${targetMonth}`;
-      }
-
-      document.getElementById("reportModeTitle").innerText = titleText;
-      document.getElementById("reportDateBadgeLabel").innerText = dateBadgeText;
-
-      let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
-      const offlineQueue = getOfflineQueue();
-      offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
-
-      let totSale = 0, totPur = 0, totExp = 0, totSal = 0;
-      let cashSalesMap = {};
-      let creditSalesMap = {};
-      let cashPurMap = {};
-      let creditPurMap = {};
-      let salariesMap = {};
-      let expensesMap = {};
-
-      let custCashReceipt = 0, custBankReceipt = 0;
-      let vendCashPay = 0, vendBankPay = 0;
-
-      let dayOpeningCash = openingSettings.openingCash;
-      let dayOpeningBank = openingSettings.openingBank;
-      let targetClosingCash = openingSettings.openingCash;
-      let targetClosingBank = openingSettings.openingBank;
-
-      allTx.forEach(t => {
-        if (!t) return;
-        const tDate = cleanDate(t.date);
-
-        if (isBeforeTargetCondition(tDate)) {
-          dayOpeningCash += (parseFloat(t.cash_amount) || 0);
-          dayOpeningBank += (parseFloat(t.bank_amount) || 0);
-        }
-
-        if (isTargetOrBeforeCondition(tDate)) {
-          targetClosingCash += (parseFloat(t.cash_amount) || 0);
-          targetClosingBank += (parseFloat(t.bank_amount) || 0);
-        }
-
-        if (dateCondition(t.date)) {
-          if (t.type === 'sale') {
-            let cCash = Math.abs(parseFloat(t.cash_amount) || 0);
-            let cBank = Math.abs(parseFloat(t.bank_amount) || 0);
-            let cCr = parseFloat(t.credit_amount) || 0;
-            let rawName = t.party_name || "Unknown";
-            let cleanN = cleanPartyName(rawName);
-
-            let cust = (customersList || []).find(c => c && cleanPartyName(c.name) === cleanN);
-            let isCreditCust = cust && (cust.type || '').toLowerCase() === 'credit';
-
-            if (isCreditCust) {
-              totSale += cCr;
-              custCashReceipt += cCash;
-              custBankReceipt += cBank;
-              if (!creditSalesMap[rawName]) creditSalesMap[rawName] = { name: rawName, cash: 0, bank: 0, cr: 0 };
-              creditSalesMap[rawName].cash += cCash;
-              creditSalesMap[rawName].bank += cBank;
-              creditSalesMap[rawName].cr += cCr;
-            } else {
-              let lineTotal = cCash + cBank + cCr;
-              totSale += lineTotal;
-              if (!cashSalesMap[rawName]) cashSalesMap[rawName] = { name: rawName, cash: 0, bank: 0, total: 0 };
-              cashSalesMap[rawName].cash += cCash;
-              cashSalesMap[rawName].bank += cBank;
-              cashSalesMap[rawName].total += lineTotal;
-            }
-          } else if (t.type === 'purchase') {
-            let pCash = Math.abs(parseFloat(t.cash_amount) || 0);
-            let pBank = Math.abs(parseFloat(t.bank_amount) || 0);
-            let pCr = parseFloat(t.credit_amount) || 0;
-            let rawName = t.party_name || "Unknown";
-            let cleanN = cleanPartyName(rawName);
-
-            let vend = (vendorsList || []).find(v => v && cleanPartyName(v.name) === cleanN);
-            let isCreditVend = vend && (vend.type || '').toLowerCase() === 'credit';
-
-            if (isCreditVend) {
-              totPur += pCr;
-              vendCashPay += pCash;
-              vendBankPay += pBank;
-              if (!creditPurMap[rawName]) creditPurMap[rawName] = { name: rawName, cash: 0, bank: 0, cr: 0 };
-              creditPurMap[rawName].cash += pCash;
-              creditPurMap[rawName].bank += pBank;
-              creditPurMap[rawName].cr += pCr;
-            } else {
-              let lineTotal = pCash + pBank + pCr;
-              totPur += lineTotal;
-              if (!cashPurMap[rawName]) cashPurMap[rawName] = { name: rawName, cash: 0, bank: 0, total: 0 };
-              cashPurMap[rawName].cash += pCash;
-              cashPurMap[rawName].bank += pBank;
-              cashPurMap[rawName].total += lineTotal;
-            }
-          } else if (t.type === 'expense') {
-            let eC = Math.abs(parseFloat(t.cash_amount) || 0);
-            let eB = Math.abs(parseFloat(t.bank_amount) || 0);
-            let lineTotal = eC + eB;
-            totExp += lineTotal;
-
-            let rawExp = t.party_name || "Expense";
-            let cleanExp = rawExp.split(' (')[0].trim();
-            if (!expensesMap[cleanExp]) expensesMap[cleanExp] = { name: cleanExp, cash: 0, bank: 0, total: 0 };
-            expensesMap[cleanExp].cash += eC;
-            expensesMap[cleanExp].bank += eB;
-            expensesMap[cleanExp].total += lineTotal;
-          } else if (t.type === 'salary') {
-            let rawC = parseFloat(t.cash_amount) || 0;
-            let rawB = parseFloat(t.bank_amount) || 0;
-
-            if (rawC <= 0 && rawB <= 0) {
-              let posC = Math.abs(rawC);
-              let posB = Math.abs(rawB);
-              let lineTotal = posC + posB;
-              totSal += lineTotal;
-
-              let rawSal = t.party_name || "Staff";
-              let cleanStaff = rawSal.replace(/^Staff:\s*/i, "").split(' -')[0].trim();
-              if (!salariesMap[cleanStaff]) salariesMap[cleanStaff] = { name: cleanStaff, cash: 0, bank: 0, total: 0 };
-              salariesMap[cleanStaff].cash += posC;
-              salariesMap[cleanStaff].bank += posB;
-              salariesMap[cleanStaff].total += lineTotal;
-            }
-          }
-        }
-      });
-
-      let totalCustOutstanding = 0;
-      (customersList || []).forEach(cust => {
-        if (cust && (cust.type || '').toLowerCase() === 'credit') {
-          let bal = parseFloat(cust.opening_balance) || 0;
-          let cName = cleanPartyName(cust.name);
-          allTx.forEach(t => {
-            if (t && t.type === 'sale' && cleanPartyName(t.party_name) === cName) {
-              bal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
-            }
-          });
-          totalCustOutstanding += bal;
-        }
-      });
-
-      let totalVendOutstanding = 0;
-      (vendorsList || []).forEach(vend => {
-        if (vend && (vend.type || '').toLowerCase() === 'credit') {
-          let bal = parseFloat(vend.opening_balance) || 0;
-          let vName = cleanPartyName(vend.name);
-          allTx.forEach(t => {
-            if (t && t.type === 'purchase' && cleanPartyName(t.party_name) === vName) {
-              bal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
-            }
-          });
-          totalVendOutstanding += bal;
-        }
-      });
-
-      let totalEmpPending = 0;
-      (employeesList || []).forEach(emp => {
-        totalEmpPending += calculateEmployeePendingBalance(emp, targetDate);
-      });
-
-      let totalDayOpening = dayOpeningCash + dayOpeningBank;
-      let totalTargetClosing = targetClosingCash + targetClosingBank;
-
-      document.getElementById("repOpeningLiquidBal").innerText = totalDayOpening.toLocaleString('en-IN');
-      document.getElementById("repTotalSale").innerText = totSale.toLocaleString('en-IN');
-      document.getElementById("repTotalPurchase").innerText = totPur.toLocaleString('en-IN');
-      document.getElementById("repTotalExpense").innerText = (totExp + totSal).toLocaleString('en-IN');
-      document.getElementById("repCustBal").innerText = totalCustOutstanding.toLocaleString('en-IN');
-      document.getElementById("repVendorBal").innerText = totalVendOutstanding.toLocaleString('en-IN');
-      document.getElementById("repSalaryBal").innerText = totalEmpPending.toLocaleString('en-IN');
-      document.getElementById("repLiquidBal").innerText = totalTargetClosing.toLocaleString('en-IN');
-
-      document.getElementById("salesGrandBadge").innerText = `ആകെ: ${totSale.toLocaleString('en-IN')}`;
-      document.getElementById("purchaseGrandBadge").innerText = `ആകെ: ${totPur.toLocaleString('en-IN')}`;
-
-      // TABLES IN MODAL
-      const cashSalesArr = Object.values(cashSalesMap);
-      let rCSCash = 0, rCSBank = 0, rCSTotal = 0;
-      let cashSalesHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-emerald-100 text-slate-900 font-black border-b"><th class="p-1 text-left">പേര്</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (cashSalesArr.length === 0) cashSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
-        cashSalesArr.forEach(s => {
-          rCSCash += s.cash; rCSBank += s.bank; rCSTotal += s.total;
-          cashSalesHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td><td class="p-1 text-emerald-800">${s.cash}</td><td class="p-1 text-blue-800">${s.bank}</td><td class="p-1 text-right font-black text-slate-950">${s.total}</td></tr>`;
-        });
-      }
-      cashSalesHtml += `</tbody><tfoot><tr class="bg-emerald-50 text-emerald-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCSCash}</td><td class="p-1">${rCSBank}</td><td class="p-1 text-right text-slate-950">${rCSTotal}</td></tr></tfoot></table>`;
-      document.getElementById("repCashSalesList").innerHTML = cashSalesHtml;
-
-      const creditSalesArr = Object.values(creditSalesMap);
-      let rCrSCash = 0, rCrSBank = 0, rCrSCr = 0;
-      let creditSalesHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-amber-100 text-slate-900 font-black border-b"><th class="p-1 text-left">പേര്</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ക്രെഡിറ്റ്</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (creditSalesArr.length === 0) creditSalesHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
-        creditSalesArr.forEach(s => {
-          rCrSCash += s.cash; rCrSBank += s.bank; rCrSCr += s.cr;
-          creditSalesHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td><td class="p-1 text-emerald-800">${s.cash}</td><td class="p-1 text-blue-800">${s.bank}</td><td class="p-1 text-right font-black text-amber-900">${s.cr}</td></tr>`;
-        });
-      }
-      creditSalesHtml += `</tbody><tfoot><tr class="bg-amber-50 text-amber-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCrSCash}</td><td class="p-1">${rCrSBank}</td><td class="p-1 text-right text-amber-950">${rCrSCr}</td></tr></tfoot></table>`;
-      document.getElementById("repCreditSalesList").innerHTML = creditSalesHtml;
-
-      const cashPurArr = Object.values(cashPurMap);
-      let rCPCash = 0, rCPBank = 0, rCPTotal = 0;
-      let cashPurHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-blue-100 text-slate-900 font-black border-b"><th class="p-1 text-left">വെണ്ടർ</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (cashPurArr.length === 0) cashPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
-        cashPurArr.forEach(p => {
-          rCPCash += p.cash; rCPBank += p.bank; rCPTotal += p.total;
-          cashPurHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td><td class="p-1 text-blue-800">${p.cash}</td><td class="p-1 text-indigo-800">${p.bank}</td><td class="p-1 text-right font-black text-slate-950">${p.total}</td></tr>`;
-        });
-      }
-      cashPurHtml += `</tbody><tfoot><tr class="bg-blue-50 text-blue-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCPCash}</td><td class="p-1">${rCPBank}</td><td class="p-1 text-right text-slate-950">${rCPTotal}</td></tr></tfoot></table>`;
-      document.getElementById("repCashPurchasesList").innerHTML = cashPurHtml;
-
-      const creditPurArr = Object.values(creditPurMap);
-      let rCrPCash = 0, rCrPBank = 0, rCrPCr = 0;
-      let creditPurHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-indigo-100 text-slate-900 font-black border-b"><th class="p-1 text-left">വെണ്ടർ</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ക്രെഡിറ്റ്</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (creditPurArr.length === 0) creditPurHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
-        creditPurArr.forEach(p => {
-          rCrPCash += p.cash; rCrPBank += p.bank; rCrPCr += p.cr;
-          creditPurHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${p.name}">${formatShortName(p.name)}</td><td class="p-1 text-blue-800">${p.cash}</td><td class="p-1 text-indigo-800">${p.bank}</td><td class="p-1 text-right font-black text-indigo-950">${p.cr}</td></tr>`;
-        });
-      }
-      creditPurHtml += `</tbody><tfoot><tr class="bg-indigo-50 text-indigo-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rCrPCash}</td><td class="p-1">${rCrPBank}</td><td class="p-1 text-right text-indigo-950">${rCrPCr}</td></tr></tfoot></table>`;
-      document.getElementById("repCreditPurchasesList").innerHTML = creditPurHtml;
-
-      const salArr = Object.values(salariesMap);
-      let rSalCash = 0, rSalBank = 0, rSalTotal = 0;
-      let salHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-purple-100 text-slate-900 font-black border-b"><th class="p-1 text-left">സ്റ്റാഫ്</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (salArr.length === 0) salHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">സാലറി ഇടപാടുകൾ ഇല്ല</td></tr>`;
-      else {
-        salArr.forEach(s => {
-          rSalCash += s.cash; rSalBank += s.bank; rSalTotal += s.total;
-          salHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${s.name}">${formatShortName(s.name)}</td><td class="p-1 text-purple-800">${s.cash}</td><td class="p-1 text-blue-800">${s.bank}</td><td class="p-1 text-right font-black text-purple-950">${s.total}</td></tr>`;
-        });
-      }
-      salHtml += `</tbody><tfoot><tr class="bg-purple-50 text-purple-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rSalCash}</td><td class="p-1">${rSalBank}</td><td class="p-1 text-right text-purple-950">${rSalTotal}</td></tr></tfoot></table>`;
-      document.getElementById("repSalariesList").innerHTML = salHtml;
-
-      const expArr = Object.values(expensesMap);
-      let rExpCash = 0, rExpBank = 0, rExpTotal = 0;
-      let expHtml = `<table class="w-full text-center border-collapse"><thead><tr class="bg-amber-100 text-slate-900 font-black border-b"><th class="p-1 text-left">ഇനം</th><th class="p-1">ക്യാഷ്</th><th class="p-1">ബാങ്ക്</th><th class="p-1 text-right">ആകെ</th></tr></thead><tbody class="divide-y divide-slate-100 font-bold">`;
-      if (expArr.length === 0) expHtml += `<tr><td colspan="4" class="p-1 text-center text-slate-400">ചിലവുകൾ ഇല്ല</td></tr>`;
-      else {
-        expArr.forEach(e => {
-          rExpCash += e.cash; rExpBank += e.bank; rExpTotal += e.total;
-          expHtml += `<tr><td class="p-1 text-left font-black text-slate-900 truncate" title="${e.name}">${formatShortName(e.name)}</td><td class="p-1 text-amber-800">${e.cash}</td><td class="p-1 text-blue-800">${e.bank}</td><td class="p-1 text-right font-black text-slate-950">${e.total}</td></tr>`;
-        });
-      }
-      expHtml += `</tbody><tfoot><tr class="bg-amber-50 text-amber-950 font-black border-t"><td class="p-1 text-left uppercase">ആകെ:</td><td class="p-1">${rExpCash}</td><td class="p-1">${rExpBank}</td><td class="p-1 text-right text-slate-950">${rExpTotal}</td></tr></tfoot></table>`;
-      document.getElementById("repExpensesList").innerHTML = expHtml;
-
-      currentReportDataForWA = {
-        shopName: currentShop.name,
-        title: titleText,
-        dateLabel: dateBadgeText,
-        sale: totSale.toLocaleString('en-IN'),
-        purchase: totPur.toLocaleString('en-IN'),
-        expense: (totExp + totSal).toLocaleString('en-IN'),
-        cash: targetClosingCash.toLocaleString('en-IN'),
-        bank: targetClosingBank.toLocaleString('en-IN'),
-        custPaid: (custCashReceipt + custBankReceipt).toLocaleString('en-IN'),
-        custBal: totalCustOutstanding.toLocaleString('en-IN'),
-        vendorPaid: (vendCashPay + vendBankPay).toLocaleString('en-IN'),
-        vendorBal: totalVendOutstanding.toLocaleString('en-IN'),
-        empBal: totalEmpPending.toLocaleString('en-IN')
-      };
-    }
-
+    // STATEMENT ENGINE WITH CUSTOMER ZERO-FILTERING
     function populateStatementPartyDatalist() {
       const type = document.getElementById("statPartyType").value;
       const dl = document.getElementById("statPartyDatalist");
