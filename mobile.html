@@ -56,7 +56,7 @@
         size: A4 portrait;
         margin: 4mm 6mm;
       }
-      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
+      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #staffDepositModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
         display: none !important;
       }
       body {
@@ -350,7 +350,13 @@
             <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-1.5">
               <i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i> ചിലവ് & സാലറി (Outflow)
             </h2>
-            <span id="currentExpTypeBadge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">ചിലവ്</span>
+            <div class="flex items-center gap-1">
+              <span id="currentExpTypeBadge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">ചിലവ്</span>
+              <!-- STAFF DEPOSIT BUTTON (BECOMES VISIBLE WHEN EMPLOYEE IS SELECTED) -->
+              <button type="button" onclick="openStaffDepositModal()" id="btnStaffDepositTrigger" class="hidden text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-black px-2.5 py-0.5 rounded-full touch-btn cursor-pointer shadow-sm flex items-center gap-0.5">
+                📥 സ്റ്റാഫ് തന്നത് (+)
+              </button>
+            </div>
           </div>
 
           <div>
@@ -384,7 +390,7 @@
             <span id="unifiedPartyInfo" class="text-xs font-black text-amber-700 block mt-1 truncate"></span>
           </div>
 
-          <!-- AMOUNTS -->
+          <!-- AMOUNTS PAID OUT TO STAFF / EXPENSE -->
           <div class="grid grid-cols-2 gap-2">
             <div class="bg-amber-50/80 p-2 rounded-2xl border border-amber-200">
               <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
@@ -476,6 +482,50 @@
       <span>ചിലവ് & സാലറി</span>
     </button>
   </nav>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: STAFF DEPOSIT (RECEIVE CASH/BANK FROM EMPLOYEE) -->
+  <!-- ======================================================== -->
+  <div id="staffDepositModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
+          📥 സ്റ്റാഫ് കടയിലേക്ക് പണം തന്നത്
+        </h3>
+        <button onclick="closeStaffDepositModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <p class="text-[10px] text-slate-500 leading-tight">
+        ഇത് കടയുടെ ഫണ്ടിൽ <b>വരവായി (Inflow)</b> കയറുകയും, ജീവനക്കാരന് കൊടുക്കാനുള്ള കണക്കിൽ തനിയെ ശരിയാവുകയും ചെയ്യും.
+      </p>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ജീവനക്കാരന്റെ പേര്:</label>
+          <input type="text" id="staffDepositEmpName" readonly class="w-full p-2.5 rounded-xl border bg-slate-100 font-black text-slate-800 outline-none uppercase-input" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-emerald-50 p-2 rounded-xl border border-emerald-200">
+            <label class="block text-[10px] font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് തന്നത്</label>
+            <input type="number" step="any" inputmode="decimal" id="staffDepositCash" placeholder="0.00" class="w-full p-2 rounded-lg border bg-white font-black text-center text-emerald-700 outline-none" />
+          </div>
+          <div class="bg-blue-50 p-2 rounded-xl border border-blue-200">
+            <label class="block text-[10px] font-black text-blue-900 mb-0.5 text-center">🏦 ബാങ്കിൽ തന്നത്</label>
+            <input type="number" step="any" inputmode="decimal" id="staffDepositBank" placeholder="0.00" class="w-full p-2 rounded-lg border bg-white font-black text-center text-blue-700 outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">കുറിപ്പ് (Note):</label>
+          <input type="text" id="staffDepositNote" placeholder="ഉദാ: കടത്തിലേക്ക് തന്നത് / അഡ്വാൻസ് തിരികെ" class="w-full p-2 rounded-xl border bg-slate-50 outline-none" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeStaffDepositModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveStaffDepositEntry()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ് ചെയ്യുക</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ======================================================== -->
   <!-- POPUP: TODAY'S SALES BREAKDOWN (EDIT / DELETE READY) -->
@@ -1005,7 +1055,7 @@
     function getSaudiBusinessDate() {
       try {
         const now = new Date();
-        // Saudi Arabia time: UTC+3 (180 mins)
+        // Saudi Arabia is UTC+3 (180 minutes ahead of UTC)
         const saudiTime = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
         // രാവിലെ 6:00 AM ന് മുൻപുള്ള സമയമാണെങ്കിൽ തലേദിവസത്തെ തീയതി എടുക്കുന്നു
         if (saudiTime.getHours() < 6) {
@@ -1501,6 +1551,7 @@
       }
     }
 
+    // SALARY ENGINE & LIVE BALANCE CALCULATION
     function getCycleStartDate(joinDate, cycleIndex) {
       let d = new Date(joinDate.getFullYear(), joinDate.getMonth() + cycleIndex, joinDate.getDate());
       let expectedMonth = (joinDate.getMonth() + cycleIndex) % 12;
@@ -1586,7 +1637,12 @@
         if (t && t.type === 'salary') {
           let staffClean = cleanPartyName(t.party_name);
           if (staffClean.includes(empClean)) {
-            totalPaid += Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
+            // If cash_amount < 0, shop paid staff (advances taken)
+            // If cash_amount > 0, staff gave shop money (reducing advance taken or increasing payable)
+            let cAmt = parseFloat(t.cash_amount) || 0;
+            let bAmt = parseFloat(t.bank_amount) || 0;
+            let netAdvance = -cAmt - bAmt;
+            totalPaid += netAdvance;
           }
         }
       });
@@ -1601,10 +1657,13 @@
       const badge = document.getElementById("currentExpTypeBadge");
       const btn = document.getElementById("btnSaveUnified");
       const info = document.getElementById("unifiedPartyInfo");
+      const staffDepBtn = document.getElementById("btnStaffDepositTrigger");
 
       if (emp) {
         badge.className = "text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-bold";
         badge.innerText = "സാലറി";
+        if (staffDepBtn) staffDepBtn.classList.remove("hidden");
+
         btn.className = "w-full py-3.5 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-purple-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition";
         btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> സാലറി സേവ് ചെയ്യുക`;
 
@@ -1614,6 +1673,8 @@
       } else {
         badge.className = "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold";
         badge.innerText = "ചിലവ്";
+        if (staffDepBtn) staffDepBtn.classList.add("hidden");
+
         btn.className = "w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition";
         btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> ചിലവ് സേവ് ചെയ്യുക`;
         info.innerText = "";
@@ -1621,6 +1682,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    // MODAL HANDLERS
     function openNewCustomerModal() {
       document.getElementById("newCustName").value = "";
       document.getElementById("newCustOpening").value = "";
@@ -1716,6 +1778,67 @@
       onUnifiedPartySelected();
       closeNewEmployeeModal();
       alert("പുതിയ ജീവനക്കാരനെ ചേർത്തു!");
+    }
+
+    // STAFF DEPOSIT MODAL LOGIC (MONEY RECEIVED FROM EMPLOYEE)
+    function openStaffDepositModal() {
+      const currentVal = document.getElementById("unifiedPartyInput").value.trim().toUpperCase();
+      const cleanVal = cleanPartyName(currentVal);
+      const emp = employeesList.find(e => cleanPartyName(e.name) === cleanVal);
+
+      if (!emp) return alert("ദയവായി ആദ്യം ജീവനക്കാരന്റെ പേര് തിരഞ്ഞെടുക്കുക!");
+
+      document.getElementById("staffDepositEmpName").value = emp.name;
+      document.getElementById("staffDepositCash").value = "";
+      document.getElementById("staffDepositBank").value = "";
+      document.getElementById("staffDepositNote").value = "";
+
+      document.getElementById("staffDepositModal").classList.remove("hidden");
+      document.getElementById("staffDepositCash").focus();
+    }
+
+    function closeStaffDepositModal() {
+      document.getElementById("staffDepositModal").classList.add("hidden");
+    }
+
+    async function saveStaffDepositEntry() {
+      const empName = document.getElementById("staffDepositEmpName").value.trim().toUpperCase();
+      const cash = parseFloat(document.getElementById("staffDepositCash").value) || 0;
+      const bank = parseFloat(document.getElementById("staffDepositBank").value) || 0;
+      const note = document.getElementById("staffDepositNote").value.trim();
+
+      if (!empName) return alert("ജീവനക്കാരന്റെ പേര് തിരഞ്ഞെടുക്കുക!");
+      if (cash <= 0 && bank <= 0) return alert("തുക നൽകുക!");
+
+      const finalNote = note ? `കടത്തിലേക്ക് തന്നത് (${note})` : 'കടത്തിലേക്ക് തന്നത്';
+      // POSITIVE CASH / BANK = Inflow into Shop Funds!
+      const payload = {
+        date: getSelectedDate(),
+        type: 'salary',
+        party_name: `Staff: ${empName} - ${finalNote}`,
+        cash_amount: cash,
+        bank_amount: bank,
+        credit_amount: 0
+      };
+
+      if (!navigator.onLine || !supabaseClient) {
+        pushToOfflineQueue(payload);
+        transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
+        renderQuickTotalsAndRecent();
+        alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: സ്റ്റാഫ് തന്ന വരവ് സേവ് ചെയ്തു!");
+      } else {
+        const { error } = await supabaseClient.from('transactions').insert([payload]);
+        if (error) {
+          pushToOfflineQueue(payload);
+          alert("⚠️ നെറ്റ്‌വർക്ക് തകരാർ കാരണം ഓഫ്‍ലൈനായി സേവ് ചെയ്തു.");
+        } else {
+          alert("സ്റ്റാഫ് തന്ന വരവ് വിജയകരമായി സേവ് ചെയ്തു!");
+        }
+        fetchAllData();
+      }
+
+      closeStaffDepositModal();
+      onUnifiedPartySelected();
     }
 
     async function quickAddExpensePrompt() {
@@ -1922,10 +2045,11 @@
       let payload = {};
 
       if (emp) {
+        // SHOP PAYING SALARY / ADVANCE TO STAFF (OUTFLOW)
         payload = {
           date: getSelectedDate(),
           type: 'salary',
-          party_name: `Staff: ${emp.name} - ${note || 'സാലറി'}`,
+          party_name: `Staff: ${emp.name} - ${note || 'സാലറി/അഡ്വാൻസ്'}`,
           cash_amount: -cash,
           bank_amount: -bank,
           credit_amount: 0
@@ -2028,11 +2152,35 @@
               modalCashPurchases.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt + crAmt) });
             }
           } else if (t.type === 'salary') {
-            expTotal += (cAmt + bAmt);
-            modalSalaries.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt) });
+            let rawC = parseFloat(t.cash_amount) || 0;
+            let rawB = parseFloat(t.bank_amount) || 0;
+            if (rawC > 0 || rawB > 0) {
+              // INFLOW FROM STAFF
+              modalSalaries.push({ 
+                id: t.id, 
+                name: `${t.party_name} (📥 വരവ്)`, 
+                cash: rawC, 
+                bank: rawB, 
+                total: `+${rawC + rawB}`,
+                isInflow: true 
+              });
+            } else {
+              // OUTFLOW PAID TO STAFF
+              let posC = Math.abs(rawC);
+              let posB = Math.abs(rawB);
+              expTotal += (posC + posB);
+              modalSalaries.push({ 
+                id: t.id, 
+                name: t.party_name, 
+                cash: posC, 
+                bank: posB, 
+                total: posC + posB,
+                isInflow: false 
+              });
+            }
           } else if (t.type === 'expense') {
             expTotal += (cAmt + bAmt);
-            modalExpenses.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt) });
+            modalExpenses.push({ id: t.id, name: t.party_name, cash: cAmt, bank: bAmt, total: (cAmt + bAmt), isInflow: false });
           }
         }
       });
@@ -2085,16 +2233,20 @@
         let col2 = row.bank || 0;
         let col3 = (row.cr !== undefined) ? row.cr : (row.total || 0);
 
-        total1 += col1;
-        total2 += col2;
-        total3 += col3;
+        if (!row.isInflow) {
+          total1 += col1;
+          total2 += col2;
+          total3 += (typeof col3 === 'number') ? col3 : 0;
+        }
 
         html += `
-          <tr class="hover:bg-slate-50">
-            <td class="p-1.5 text-left font-black text-slate-800 truncate max-w-[110px]" title="${row.name}">${row.name}</td>
-            <td class="p-1.5 text-slate-700">${col1}</td>
-            <td class="p-1.5 text-slate-700">${col2}</td>
-            <td class="p-1.5 font-black text-slate-950">${col3}</td>
+          <tr class="hover:bg-slate-50 ${row.isInflow ? 'bg-emerald-50/40 text-emerald-900' : ''}">
+            <td class="p-1.5 text-left font-black truncate max-w-[110px]" title="${row.name}">
+              ${row.name}
+            </td>
+            <td class="p-1.5">${col1}</td>
+            <td class="p-1.5">${col2}</td>
+            <td class="p-1.5 font-black ${row.isInflow ? 'text-emerald-700 font-extrabold' : 'text-slate-950'}">${col3}</td>
             <td class="p-1.5 text-right whitespace-nowrap">
               <button onclick="requestEdit('${row.id}')" title="തിരുത്തുക" class="text-blue-600 hover:text-blue-800 p-1 cursor-pointer">✏️</button>
               <button onclick="requestDelete('${row.id}')" title="ഡിലീറ്റ്" class="text-rose-600 hover:text-rose-800 p-1 cursor-pointer">🗑️</button>
@@ -2189,7 +2341,9 @@
 
       if (cashAmt <= 0 && bankAmt <= 0 && creditAmt <= 0) return alert("തുക നൽകുക!");
 
-      if (txn.type === 'purchase' || txn.type === 'expense' || txn.type === 'salary') {
+      const isStaffInflow = (txn.type === 'salary' && (parseFloat(txn.cash_amount) > 0 || parseFloat(txn.bank_amount) > 0));
+
+      if ((txn.type === 'purchase' || txn.type === 'expense' || txn.type === 'salary') && !isStaffInflow) {
         cashAmt = -cashAmt;
         bankAmt = -bankAmt;
       }
@@ -2525,17 +2679,22 @@
             expensesMap[cleanExp].bank += eB;
             expensesMap[cleanExp].total += lineTotal;
           } else if (t.type === 'salary') {
-            let sC = Math.abs(parseFloat(t.cash_amount) || 0);
-            let sB = Math.abs(parseFloat(t.bank_amount) || 0);
-            let lineTotal = sC + sB;
-            totSal += lineTotal;
+            let rawC = parseFloat(t.cash_amount) || 0;
+            let rawB = parseFloat(t.bank_amount) || 0;
 
-            let rawSal = t.party_name || "Staff";
-            let cleanStaff = rawSal.replace(/^Staff:\s*/i, "").split(' -')[0].trim();
-            if (!salariesMap[cleanStaff]) salariesMap[cleanStaff] = { name: cleanStaff, cash: 0, bank: 0, total: 0 };
-            salariesMap[cleanStaff].cash += sC;
-            salariesMap[cleanStaff].bank += sB;
-            salariesMap[cleanStaff].total += lineTotal;
+            if (rawC <= 0 && rawB <= 0) {
+              let posC = Math.abs(rawC);
+              let posB = Math.abs(rawB);
+              let lineTotal = posC + posB;
+              totSal += lineTotal;
+
+              let rawSal = t.party_name || "Staff";
+              let cleanStaff = rawSal.replace(/^Staff:\s*/i, "").split(' -')[0].trim();
+              if (!salariesMap[cleanStaff]) salariesMap[cleanStaff] = { name: cleanStaff, cash: 0, bank: 0, total: 0 };
+              salariesMap[cleanStaff].cash += posC;
+              salariesMap[cleanStaff].bank += posB;
+              salariesMap[cleanStaff].total += lineTotal;
+            }
           }
         }
       });
@@ -3159,17 +3318,35 @@
             if (t && t.type === 'salary' && cleanPartyName(t.party_name).includes(cleanEmpName)) {
               let tDate = cleanDate(t.date);
               if (tDate >= fromDate && tDate <= toDate) {
-                const paid = Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0);
-                totalPaidOrCollected += paid;
+                let rawC = parseFloat(t.cash_amount) || 0;
+                let rawB = parseFloat(t.bank_amount) || 0;
+                let isStaffInflow = (rawC > 0 || rawB > 0);
 
-                statementRows.push({
-                  date: tDate,
-                  desc: t.party_name.replace(/^Staff:\s*/i, ""),
-                  cash: Math.abs(parseFloat(t.cash_amount) || 0),
-                  bank: Math.abs(parseFloat(t.bank_amount) || 0),
-                  bill: 0,
-                  isAccrual: false
-                });
+                if (isStaffInflow) {
+                  // Staff gave money to shop -> Accrues to employee credit
+                  let inAmt = rawC + rawB;
+                  totalSalesOrBills += inAmt;
+                  statementRows.push({
+                    date: tDate,
+                    desc: t.party_name.replace(/^Staff:\s*/i, ""),
+                    cash: 0,
+                    bank: 0,
+                    bill: inAmt,
+                    isAccrual: false
+                  });
+                } else {
+                  // Shop paid employee
+                  const paid = Math.abs(rawC) + Math.abs(rawB);
+                  totalPaidOrCollected += paid;
+                  statementRows.push({
+                    date: tDate,
+                    desc: t.party_name.replace(/^Staff:\s*/i, ""),
+                    cash: Math.abs(rawC),
+                    bank: Math.abs(rawB),
+                    bill: 0,
+                    isAccrual: false
+                  });
+                }
               }
             }
           });
