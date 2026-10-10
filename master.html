@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ml">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-  <!-- External GitHub config.js Connection -->
+  <!-- External Central config.js Connection -->
   <script src="config.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
@@ -31,14 +31,14 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- 1. LOGIN SCREEN (നേരിട്ട് master.html തുറന്നാൽ മാത്രം കാണിക്കും) -->
+  <!-- 1. LOGIN SCREEN -->
   <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-[99999] p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border text-center space-y-4">
       <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg">
         <i data-lucide="lock" class="w-7 h-7"></i>
       </div>
       <div>
-        <h2 class="text-base font-extrabold text-slate-800">റൂഗാമ മാസ്റ്റർ പോർട്ടൽ</h2>
+        <h2 class="text-base font-extrabold text-slate-800">ALNASSR മാസ്റ്റർ പോർട്ടൽ</h2>
         <p class="text-xs text-slate-500 mt-1">തുടരാൻ ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ നൽകുക</p>
       </div>
 
@@ -82,16 +82,21 @@
 
       <!-- Shop Selector & Controls -->
       <div class="flex items-center gap-2.5">
-        <!-- ഈ ഡ്രോപ്പ്ഡൗൺ മാസ്റ്റർ പിൻ വഴി കയറുമ്പോൾ മാത്രമേ കാണിക്കൂ -->
+        <!-- SHOP SWITCHER (മാസ്റ്റർ പിൻ അടിച്ചാൽ മാത്രം കാണിക്കും) -->
         <div id="shopSwitcherWrapper" class="hidden flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-inner">
           <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
           <span class="text-xs font-semibold text-slate-300">ഷോപ്പ് മാറ്റുക:</span>
           <select id="selectedShopKey" onchange="switchActiveShop()" class="bg-slate-900 text-white text-xs font-bold rounded-lg px-2.5 py-1 outline-none border border-white/20 cursor-pointer focus:ring-2 focus:ring-emerald-400">
-            <!-- Loaded dynamically from config.js -->
+            <!-- config.js-ൽ നിന്ന് തനിയെ ലോഡ് ആകും -->
           </select>
         </div>
 
-        <!-- പ്രധാന സെയിൽസ് പേജിലേക്ക് (index.html) തിരികെ പോകാനുള്ള ബട്ടൺ -->
+        <!-- NEW EXTERNAL REPORT PORTAL BUTTON -->
+        <a id="extReportPortalBtn" href="https://samaladi786.github.io/report" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow cursor-pointer">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i> റിപ്പോർട്ട് പോർട്ടൽ
+        </a>
+
+        <!-- സെയിൽസ് പോർട്ടലിലേക്ക് (index.html) തിരികെ പോകാനുള്ള ബട്ടൺ -->
         <a href="index.html" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow cursor-pointer">
           <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> സെയിൽസ് പോർട്ടൽ
         </a>
@@ -133,11 +138,11 @@
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">തുടക്കത്തിലെ ക്യാഷ് (Opening Cash ₹):</label>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">തുടക്കത്തിലെ ക്യാഷ് (Opening Cash):</label>
             <input type="number" step="any" id="setOpeningCash" placeholder="0.00" class="w-full text-xs font-bold p-2.5 rounded-lg border bg-slate-50" />
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">തുടക്കത്തിലെ ബാങ്ക് ബാലൻസ് (Opening Bank ₹):</label>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">തുടക്കത്തിലെ ബാങ്ക് ബാലൻസ് (Opening Bank):</label>
             <input type="number" step="any" id="setOpeningBank" placeholder="0.00" class="w-full text-xs font-bold p-2.5 rounded-lg border bg-slate-50" />
           </div>
           <div class="flex items-end">
@@ -186,7 +191,7 @@
               <select id="masterCustAgent" class="text-xs p-2.5 rounded-lg border bg-slate-50">
                 <option value="">ഏജന്റ് ഇല്ല</option>
               </select>
-              <input type="number" step="any" id="masterCustOpening" placeholder="പഴയ കടം / ബാലൻസ് (₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <input type="number" step="any" id="masterCustOpening" placeholder="പഴയ കടം / ബാലൻസ്" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
             </div>
             <button onclick="addMasterItem('customers')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-1 cursor-pointer">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i> കസ്റ്റമറെ സേവ് ചെയ്യുക
@@ -210,7 +215,7 @@
                 <option value="credit">Credit Vendor</option>
                 <option value="cash">Cash Vendor</option>
               </select>
-              <input type="number" step="any" id="masterVendorOpening" placeholder="പഴയ ബാക്കി (₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <input type="number" step="any" id="masterVendorOpening" placeholder="പഴയ ബാക്കി" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
             </div>
             <button onclick="addMasterItem('vendors')" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-1 cursor-pointer">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i> വെണ്ടറെ സേവ് ചെയ്യുക
@@ -230,11 +235,11 @@
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input type="text" id="masterEmpName" placeholder="സ്റ്റാഫ് പേര് *" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
-              <input type="date" id="masterEmpJoin" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <input type="date" id="masterEmpJoin" class="text-xs p-2.5 rounded-lg border bg-slate-50 cursor-pointer" />
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input type="number" step="any" id="masterEmpSalary" placeholder="മാസ ശമ്പളം (₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
-              <input type="number" step="any" id="masterEmpOpening" placeholder="തുടക്കത്തിൽ കൊടുക്കാനുള്ള ബാക്കി (₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <input type="number" step="any" id="masterEmpSalary" placeholder="മാസ ശമ്പളം" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+              <input type="number" step="any" id="masterEmpOpening" placeholder="തുടക്കത്തിൽ കൊടുക്കാനുള്ള ബാക്കി" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
             </div>
             <button onclick="addMasterItem('employees')" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-1 cursor-pointer">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i> ജീവനക്കാരനെ സേവ് ചെയ്യുക
@@ -254,7 +259,7 @@
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <input type="text" id="masterExpName" placeholder="ചിലവ് പേര് (ഉദാ: വാടക, EB Bill) *" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
-          <input type="number" step="any" id="masterExpOpening" placeholder="പഴയ ബാക്കി തുക (Opening ₹)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
+          <input type="number" step="any" id="masterExpOpening" placeholder="പഴയ ബാക്കി തുക (Opening)" class="text-xs p-2.5 rounded-lg border bg-slate-50" />
           <button onclick="addMasterItem('expenses_master')" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-1 cursor-pointer">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> ചിലവ് ഇനം സേവ് ചെയ്യുക
           </button>
@@ -322,12 +327,12 @@
 
           <div id="filterMonthBox">
             <label class="block text-xs font-bold text-slate-600 mb-1">Select Month:</label>
-            <input type="month" id="statementMonthInput" class="w-full border rounded-lg p-2.5 text-xs bg-slate-50 font-semibold" />
+            <input type="month" id="statementMonthInput" class="w-full border rounded-lg p-2.5 text-xs bg-slate-50 font-semibold cursor-pointer" />
           </div>
 
           <div id="filterDateBox" class="hidden">
             <label class="block text-xs font-bold text-slate-600 mb-1">Select Date:</label>
-            <input type="date" id="statementDateInput" class="w-full border rounded-lg p-2.5 text-xs bg-slate-50 font-semibold" />
+            <input type="date" id="statementDateInput" class="w-full border rounded-lg p-2.5 text-xs bg-slate-50 font-semibold cursor-pointer" />
           </div>
 
           <button onclick="generateLiveStatement()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex justify-center items-center gap-2 shadow cursor-pointer">
@@ -456,8 +461,8 @@
     let pendingDeleteId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-      const isLogged = sessionStorage.getItem("RUGAMA_LOGGED_IN") === "true";
-      const userRole = sessionStorage.getItem("RUGAMA_USER_ROLE");
+      const isLogged = sessionStorage.getItem("ALNASSR_LOGGED_IN") === "true";
+      const userRole = sessionStorage.getItem("ALNASSR_USER_ROLE");
 
       if (isLogged) {
         document.getElementById("loginScreen").classList.add("hidden");
@@ -468,6 +473,12 @@
           const inp = document.getElementById("loginPasswordInput");
           if (inp) inp.focus();
         }, 300);
+      }
+
+      // External report portal URL setup
+      const reportBtn = document.getElementById("extReportPortalBtn");
+      if (reportBtn && window.GLOBAL_REPORT_PORTAL_URL) {
+        reportBtn.href = window.GLOBAL_REPORT_PORTAL_URL;
       }
 
       const today = (window.getSaudiBusinessDate && typeof window.getSaudiBusinessDate === 'function') 
@@ -496,11 +507,10 @@
         return;
       }
 
-      // എ. മാസ്റ്റർ പിൻ പരിശോധിക്കുന്നു (Super Admin)
       if (window.MASTER_PIN && enteredPin === String(window.MASTER_PIN)) {
-        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
-        sessionStorage.setItem("RUGAMA_USER_ROLE", "admin");
-        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+        sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
+        sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
+        sessionStorage.setItem("ALNASSR_ACTIVE_PIN", enteredPin);
 
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("admin");
@@ -508,13 +518,12 @@
         return;
       }
 
-      // ബി. ഓരോ ഷോപ്പിന്റെയും പിൻ പരിശോധിക്കുന്നു (Shop Staff Mode)
       const matchedShop = (window.SHOPS_CONFIG || []).find(s => String(s.pin) === enteredPin);
       if (matchedShop) {
-        sessionStorage.setItem("RUGAMA_LOGGED_IN", "true");
-        sessionStorage.setItem("RUGAMA_USER_ROLE", "shop");
-        sessionStorage.setItem("RUGAMA_ACTIVE_SHOP_ID", matchedShop.id);
-        sessionStorage.setItem("RUGAMA_ACTIVE_PIN", enteredPin);
+        sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
+        sessionStorage.setItem("ALNASSR_USER_ROLE", "shop");
+        sessionStorage.setItem("ALNASSR_ACTIVE_SHOP_ID", matchedShop.id);
+        sessionStorage.setItem("ALNASSR_ACTIVE_PIN", enteredPin);
 
         document.getElementById("loginScreen").classList.add("hidden");
         applyRolePermissions("shop");
@@ -527,7 +536,6 @@
       input.focus();
     }
 
-    // 2. റോൾ അനുസരിച്ച് ഡ്രോപ്പ്ഡൗൺ ഹൈഡ് ചെയ്യുക / കാണിക്കുക
     function applyRolePermissions(role) {
       const switcher = document.getElementById("shopSwitcherWrapper");
       if (role === 'admin') {
@@ -537,12 +545,11 @@
       }
     }
 
-    // 3. ലോഗ് ഔട്ട് ഫംഗ്ഷൻ (Logout)
     function logoutApp() {
-      sessionStorage.removeItem("RUGAMA_LOGGED_IN");
-      sessionStorage.removeItem("RUGAMA_USER_ROLE");
-      sessionStorage.removeItem("RUGAMA_ACTIVE_SHOP_ID");
-      sessionStorage.removeItem("RUGAMA_ACTIVE_PIN");
+      sessionStorage.removeItem("ALNASSR_LOGGED_IN");
+      sessionStorage.removeItem("ALNASSR_USER_ROLE");
+      sessionStorage.removeItem("ALNASSR_ACTIVE_SHOP_ID");
+      sessionStorage.removeItem("ALNASSR_ACTIVE_PIN");
 
       document.getElementById("loginScreen").classList.remove("hidden");
       const inp = document.getElementById("loginPasswordInput");
@@ -552,7 +559,6 @@
       }
     }
 
-    // 4. മൾട്ടി-ഷോപ്പ് സിസ്റ്റം ഇനിഷ്യലൈസ് ചെയ്യുന്നു
     function initMultiShopSystem(forceShopId = null) {
       const select = document.getElementById("selectedShopKey");
       select.innerHTML = "";
@@ -569,11 +575,11 @@
         select.appendChild(opt);
       });
 
-      const role = sessionStorage.getItem("RUGAMA_USER_ROLE");
+      const role = sessionStorage.getItem("ALNASSR_USER_ROLE");
       if (role === 'shop') {
-        activeShopId = forceShopId || sessionStorage.getItem("RUGAMA_ACTIVE_SHOP_ID") || window.SHOPS_CONFIG[0].id;
+        activeShopId = forceShopId || sessionStorage.getItem("ALNASSR_ACTIVE_SHOP_ID") || window.SHOPS_CONFIG[0].id;
       } else {
-        const savedShopId = localStorage.getItem("RUGAMA_SELECTED_SHOP_ID");
+        const savedShopId = localStorage.getItem("ALNASSR_SELECTED_SHOP_ID");
         const matched = window.SHOPS_CONFIG.find(s => s.id === savedShopId);
         activeShopId = matched ? matched.id : window.SHOPS_CONFIG[0].id;
       }
@@ -587,7 +593,7 @@
       if (!currentShop) return;
 
       activeShopId = currentShop.id;
-      localStorage.setItem("RUGAMA_SELECTED_SHOP_ID", activeShopId);
+      localStorage.setItem("ALNASSR_SELECTED_SHOP_ID", activeShopId);
 
       document.getElementById("shopHeaderTitle").innerText = currentShop.name;
       document.getElementById("openingShopLabel").innerText = currentShop.name;
@@ -688,7 +694,7 @@
       const opening_cash = parseFloat(document.getElementById("setOpeningCash").value) || 0;
       const opening_bank = parseFloat(document.getElementById("setOpeningBank").value) || 0;
       const currentShop = window.SHOPS_CONFIG.find(s => s.id === activeShopId);
-      const shopName = currentShop ? currentShop.name : 'റൂഗാമ സൂപ്പർ മാർക്കറ്റ്';
+      const shopName = currentShop ? currentShop.name : 'ALNASSR';
 
       if (appSettingsRecord && appSettingsRecord.id) {
         const { error } = await supabaseClient.from('app_settings').update({ opening_cash, opening_bank }).eq('id', appSettingsRecord.id);
@@ -731,7 +737,7 @@
           let ag = masterAgents.find(a => String(a.id) === String(x.agent_id) || String(a.name) === String(x.agent_id));
           return `
             <div class="py-1.5 flex justify-between items-center text-xs">
-              <span><b>${x.name}</b> (${x.type || 'credit'})${ag ? ` [Agent: ${ag.name}]` : ''} - ₹${x.opening_balance || 0}</span>
+              <span><b>${x.name}</b> (${x.type || 'credit'})${ag ? ` [Agent: ${ag.name}]` : ''} - ${(parseFloat(x.opening_balance) || 0).toLocaleString('en-IN')}</span>
               <div class="flex items-center gap-2">
                 <button onclick="openEditModal('customers', '${x.id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Edit</button>
                 <button onclick="requestPin('customers', '${x.id}')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">Delete</button>
@@ -745,7 +751,7 @@
       if(vendList) {
         vendList.innerHTML = masterVendors.length === 0 ? '<div class="py-2 text-slate-400 text-center">വെണ്ടർമാർ ഇല്ല</div>' : masterVendors.map(x => `
           <div class="py-1.5 flex justify-between items-center text-xs">
-            <span><b>${x.name}</b> (${x.type || 'credit'}) - ₹${x.opening_balance || 0}</span>
+            <span><b>${x.name}</b> (${x.type || 'credit'}) - ${(parseFloat(x.opening_balance) || 0).toLocaleString('en-IN')}</span>
             <div class="flex items-center gap-2">
               <button onclick="openEditModal('vendors', '${x.id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Edit</button>
               <button onclick="requestPin('vendors', '${x.id}')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">Delete</button>
@@ -758,7 +764,7 @@
       if(empList) {
         empList.innerHTML = masterEmployees.length === 0 ? '<div class="py-2 text-slate-400 text-center">ജീവനക്കാർ ഇല്ല</div>' : masterEmployees.map(x => `
           <div class="py-1.5 flex justify-between items-center text-xs">
-            <span><b>${x.name}</b> - ശമ്പളം: ₹${x.monthly_salary || 0} (തുടക്ക ബാക്കി: ₹${x.opening_advance || 0})</span>
+            <span><b>${x.name}</b> - ശമ്പളം: ${(parseFloat(x.monthly_salary) || 0).toLocaleString('en-IN')} (തുടക്ക ബാക്കി: ${(parseFloat(x.opening_advance) || 0).toLocaleString('en-IN')})</span>
             <div class="flex items-center gap-2">
               <button onclick="openEditModal('employees', '${x.id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Edit</button>
               <button onclick="requestPin('employees', '${x.id}')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">Delete</button>
@@ -771,7 +777,7 @@
       if(expList) {
         expList.innerHTML = masterExpensesList.length === 0 ? '<div class="py-2 text-slate-400 text-center">ചിലവ് ഇനങ്ങൾ ഇല്ല</div>' : masterExpensesList.map(x => `
           <div class="py-1.5 flex justify-between items-center text-xs">
-            <span><b>${x.name}</b> - ₹${x.opening_balance || 0}</span>
+            <span><b>${x.name}</b> - ${(parseFloat(x.opening_balance) || 0).toLocaleString('en-IN')}</span>
             <div class="flex items-center gap-2">
               <button onclick="openEditModal('expenses_master', '${x.id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Edit</button>
               <button onclick="requestPin('expenses_master', '${x.id}')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">Delete</button>
@@ -854,7 +860,7 @@
             </select>
           </div>
           <div><label class="block text-xs font-bold text-slate-600 mb-1">ഏജന്റ്</label><select id="edit_agent" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50">${agentOptions}</select></div>
-          <div><label class="block text-xs font-bold text-slate-600 mb-1">തുടക്ക ബാലൻസ് (₹)</label><input type="number" step="any" id="edit_opening" value="${record.opening_balance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">തുടക്ക ബാലൻസ്</label><input type="number" step="any" id="edit_opening" value="${record.opening_balance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
         `;
       } else if (table === 'vendors') {
         container.innerHTML = `
@@ -865,19 +871,19 @@
               <option value="cash" ${record.type === 'cash' ? 'selected':''}>Cash Vendor</option>
             </select>
           </div>
-          <div><label class="block text-xs font-bold text-slate-600 mb-1">തുടക്ക ബാക്കി (₹)</label><input type="number" step="any" id="edit_opening" value="${record.opening_balance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">തുടക്ക ബാക്കി</label><input type="number" step="any" id="edit_opening" value="${record.opening_balance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
         `;
       } else if (table === 'employees') {
         container.innerHTML = `
           <div><label class="block text-xs font-bold text-slate-600 mb-1">ജീവനക്കാരന്റെ പേര്</label><input type="text" id="edit_name" value="${record.name || ''}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
           <div><label class="block text-xs font-bold text-slate-600 mb-1">ജോയിനിംഗ് തീയതി</label><input type="date" id="edit_join" value="${record.joining_date || ''}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
-          <div><label class="block text-xs font-bold text-slate-600 mb-1">മാസ ശമ്പളം (₹)</label><input type="number" step="any" id="edit_salary" value="${record.monthly_salary || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
-          <div><label class="block text-xs font-bold text-slate-600 mb-1">തുടക്കത്തിൽ കൊടുക്കാനുള്ള ബാക്കി (₹)</label><input type="number" step="any" id="edit_advance" value="${record.opening_advance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">മാസ ശമ്പളം</label><input type="number" step="any" id="edit_salary" value="${record.monthly_salary || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">തുടക്കത്തിൽ കൊടുക്കാനുള്ള ബാക്കി</label><input type="number" step="any" id="edit_advance" value="${record.opening_advance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
         `;
       } else if (table === 'expenses_master') {
         container.innerHTML = `
           <div><label class="block text-xs font-bold text-slate-600 mb-1">ചിലവ് പേര്</label><input type="text" id="edit_name" value="${record.name || ''}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
-          <div><label class="block text-xs font-bold text-slate-600 mb-1">പഴയ ബാക്കി (₹)</label><input type="number" step="any" id="edit_opening" value="${record.opening_balance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
+          <div><label class="block text-xs font-bold text-slate-600 mb-1">പഴയ ബാക്കി</label><input type="number" step="any" id="edit_opening" value="${record.opening_balance || 0}" class="w-full text-xs p-2.5 rounded-lg border bg-slate-50" /></div>
         `;
       }
 
@@ -947,10 +953,9 @@
       pendingDeleteId = null;
     }
 
-    // 5. ഡിലീറ്റ് പിൻ പരിശോധന
     async function verifyPinAndExecute() {
       const pinVal = document.getElementById("pinInput").value.trim();
-      const sessionPin = sessionStorage.getItem("RUGAMA_ACTIVE_PIN");
+      const sessionPin = sessionStorage.getItem("ALNASSR_ACTIVE_PIN");
       const masterPin = String(window.MASTER_PIN);
 
       const currentShop = (window.SHOPS_CONFIG || []).find(s => s.id === activeShopId);
@@ -1184,10 +1189,10 @@
             <tr class="border-b text-xs hover:bg-slate-50">
               <td class="p-2 text-center font-mono text-slate-400 border">${count}</td>
               <td class="p-2 font-bold text-slate-800 border">${v.name}</td>
-              <td class="p-2 text-right font-mono border">₹${opening.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-semibold text-emerald-700 border">₹${pPurchase.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-semibold text-blue-700 border">₹${pPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-black text-rose-700 bg-rose-50/50 border">₹${closingBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono border">${opening.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-emerald-700 border">${pPurchase.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-blue-700 border">${pPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-black text-rose-700 bg-rose-50/50 border">${closingBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
             </tr>
           `;
         });
@@ -1200,7 +1205,7 @@
             </div>
             <div class="text-right bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg">
               <span class="text-[10px] text-blue-600 font-bold block uppercase">Total Payable Balance:</span>
-              <span class="text-base font-black text-blue-800 font-mono">₹${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+              <span class="text-base font-black text-blue-800 font-mono">${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
             </div>
           </div>
 
@@ -1209,20 +1214,20 @@
               <tr>
                 <th class="p-2 text-center w-12 border">#</th>
                 <th class="p-2 border">Vendor Name</th>
-                <th class="p-2 text-right border">Opening (₹)</th>
+                <th class="p-2 text-right border">Opening</th>
                 <th class="p-2 text-right border">Purchase in Period</th>
                 <th class="p-2 text-right border">Paid in Period</th>
-                <th class="p-2 text-right border bg-rose-50 text-rose-800">Closing Balance (₹)</th>
+                <th class="p-2 text-right border bg-rose-50 text-rose-800">Closing Balance</th>
               </tr>
             </thead>
             <tbody>${tableRows || '<tr><td colspan="6" class="text-center p-4 text-slate-400">No active transactions or dues found for this period.</td></tr>'}</tbody>
             <tfoot class="bg-slate-100 font-bold border">
               <tr>
                 <td colspan="2" class="p-2 text-right uppercase border">Total:</td>
-                <td class="p-2 text-right font-mono border">₹${totalOpen.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono text-emerald-800 border">₹${totalPurchases.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono text-blue-800 border">₹${totalPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono text-rose-700 font-black border">₹${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono border">${totalOpen.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-emerald-800 border">${totalPurchases.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-blue-800 border">${totalPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-rose-700 font-black border">${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
               </tr>
             </tfoot>
           </table>
@@ -1265,10 +1270,10 @@
               <td class="p-2 text-center font-mono text-slate-400 border">${count}</td>
               <td class="p-2 font-bold text-slate-800 border">${c.name}</td>
               <td class="p-2 text-slate-500 border">${ag ? ag.name : '-'}</td>
-              <td class="p-2 text-right font-mono border">₹${opening.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-semibold text-rose-600 border">₹${pBilled.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-semibold text-emerald-600 border">₹${pPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-black text-rose-700 bg-rose-50/50 border">₹${closingBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono border">${opening.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-rose-600 border">${pBilled.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-emerald-600 border">${pPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-black text-rose-700 bg-rose-50/50 border">${closingBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
             </tr>
           `;
         });
@@ -1281,7 +1286,7 @@
             </div>
             <div class="text-right bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg">
               <span class="text-[10px] text-rose-600 font-bold block uppercase">Total Receivable Due:</span>
-              <span class="text-base font-black text-rose-700 font-mono">₹${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+              <span class="text-base font-black text-rose-700 font-mono">${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
             </div>
           </div>
 
@@ -1291,20 +1296,20 @@
                 <th class="p-2 text-center w-12 border">#</th>
                 <th class="p-2 border">Customer Name</th>
                 <th class="p-2 border">Agent</th>
-                <th class="p-2 text-right border">Opening (₹)</th>
+                <th class="p-2 text-right border">Opening</th>
                 <th class="p-2 text-right border">Billed in Period</th>
                 <th class="p-2 text-right border">Paid in Period</th>
-                <th class="p-2 text-right border bg-rose-50 text-rose-800">Closing Balance (₹)</th>
+                <th class="p-2 text-right border bg-rose-50 text-rose-800">Closing Balance</th>
               </tr>
             </thead>
             <tbody>${tableRows || '<tr><td colspan="7" class="text-center p-4 text-slate-400">No active transactions or dues found for this period.</td></tr>'}</tbody>
             <tfoot class="bg-slate-100 font-bold border">
               <tr>
                 <td colspan="3" class="p-2 text-right uppercase border">Total:</td>
-                <td class="p-2 text-right font-mono border">₹${totalOpen.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono text-rose-700 border">₹${totalBilled.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono text-emerald-700 border">₹${totalPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono text-rose-700 font-black border">₹${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono border">${totalOpen.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-rose-700 border">${totalBilled.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-emerald-700 border">${totalPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-rose-700 font-black border">${totalClosing.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
               </tr>
             </tfoot>
           </table>
@@ -1347,12 +1352,12 @@
               <td class="p-2 text-center font-mono text-slate-400 border">${count}</td>
               <td class="p-2 font-bold text-slate-800 border">${e.name}</td>
               <td class="p-2 text-center font-mono text-slate-500 border">${e.joining_date || '-'}</td>
-              <td class="p-2 text-right font-mono border">₹${openingPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono border">${openingPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
               <td class="p-2 text-center font-mono font-bold text-blue-700 border">${completedMonths} Mo</td>
-              <td class="p-2 text-right font-mono font-bold text-emerald-700 border">₹${earnedSalary.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-bold text-purple-700 bg-purple-50/50 border">₹${advanceInPeriod.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-semibold text-amber-700 border">₹${advanceCumulative.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-black ${netPayable >= 0 ? 'text-emerald-700 bg-emerald-50/50' : 'text-rose-700 bg-rose-50/50'} border">₹${netPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-bold text-emerald-700 border">${earnedSalary.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-bold text-purple-700 bg-purple-50/50 border">${advanceInPeriod.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-semibold text-amber-700 border">${advanceCumulative.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-black ${netPayable >= 0 ? 'text-emerald-700 bg-emerald-50/50' : 'text-rose-700 bg-rose-50/50'} border">${netPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
             </tr>
           `;
         });
@@ -1365,7 +1370,7 @@
             </div>
             <div class="text-right bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-lg">
               <span class="text-[10px] text-purple-600 font-bold block uppercase">Total Balance Payable:</span>
-              <span class="text-sm font-black ${totalNet >= 0 ? 'text-emerald-800' : 'text-rose-800'} font-mono">₹${totalNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+              <span class="text-sm font-black ${totalNet >= 0 ? 'text-emerald-800' : 'text-rose-800'} font-mono">${totalNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
             </div>
           </div>
 
@@ -1380,7 +1385,7 @@
                 <th class="p-2 text-right border text-emerald-800">Earned Salary</th>
                 <th class="p-2 text-right border bg-purple-50 text-purple-800">Advance in Period</th>
                 <th class="p-2 text-right border">Total Advance</th>
-                <th class="p-2 text-right border">Net Payable (₹)</th>
+                <th class="p-2 text-right border">Net Payable</th>
               </tr>
             </thead>
             <tbody>${tableRows || '<tr><td colspan="9" class="text-center p-4 text-slate-400">No active employees found.</td></tr>'}</tbody>
@@ -1389,10 +1394,10 @@
                 <td colspan="3" class="p-2 text-right uppercase border">Total:</td>
                 <td class="p-2 text-right font-mono border">-</td>
                 <td class="p-2 border text-center">-</td>
-                <td class="p-2 text-right font-mono text-emerald-800 border">₹${totalEarned.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono text-purple-800 border">₹${totalPeriodAdv.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono text-amber-700 border">₹${totalCumAdv.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono ${totalNet >= 0 ? 'text-emerald-800' : 'text-rose-800'} font-black border">₹${totalNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-emerald-800 border">${totalEarned.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-purple-800 border">${totalPeriodAdv.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-amber-700 border">${totalCumAdv.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono ${totalNet >= 0 ? 'text-emerald-800' : 'text-rose-800'} font-black border">${totalNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
               </tr>
             </tfoot>
           </table>
@@ -1443,9 +1448,9 @@
               <td class="p-2 text-center font-mono text-slate-400 border">${count}</td>
               <td class="p-2 font-bold text-slate-800 border">${ag.name}</td>
               <td class="p-2 text-center font-mono border">${myCusts.length}</td>
-              <td class="p-2 text-right font-mono font-bold text-rose-700 border">₹${agentCustDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-bold text-emerald-700 border">₹${collectedInPeriod.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-              <td class="p-2 text-right font-mono font-black text-slate-800 bg-slate-50 border">₹${(agentCustDue - collectedInPeriod).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-bold text-rose-700 border">${agentCustDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-bold text-emerald-700 border">${collectedInPeriod.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="p-2 text-right font-mono font-black text-slate-800 bg-slate-50 border">${(agentCustDue - collectedInPeriod).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
             </tr>
           `;
         });
@@ -1458,7 +1463,7 @@
             </div>
             <div class="text-right bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-lg">
               <span class="text-[10px] text-teal-700 font-bold block uppercase">Total Agent Due:</span>
-              <span class="text-sm font-black text-teal-800 font-mono">₹${grandCustomerDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+              <span class="text-sm font-black text-teal-800 font-mono">${grandCustomerDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
             </div>
           </div>
 
@@ -1468,18 +1473,18 @@
                 <th class="p-2 text-center w-12 border">#</th>
                 <th class="p-2 border">Agent Name</th>
                 <th class="p-2 text-center border">Customers Count</th>
-                <th class="p-2 text-right border text-rose-800">Total Customer Due (₹)</th>
-                <th class="p-2 text-right border text-emerald-800">Collected in Period (₹)</th>
-                <th class="p-2 text-right border">Net Remaining Due (₹)</th>
+                <th class="p-2 text-right border text-rose-800">Total Customer Due</th>
+                <th class="p-2 text-right border text-emerald-800">Collected in Period</th>
+                <th class="p-2 text-right border">Net Remaining Due</th>
               </tr>
             </thead>
             <tbody>${tableRows || '<tr><td colspan="6" class="text-center p-4 text-slate-400">No active agents or dues found.</td></tr>'}</tbody>
             <tfoot class="bg-slate-100 font-bold border">
               <tr>
                 <td colspan="3" class="p-2 text-right uppercase border">Total:</td>
-                <td class="p-2 text-right font-mono text-rose-700 border">₹${grandCustomerDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono text-emerald-700 border">₹${grandCollected.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                <td class="p-2 text-right font-mono font-black border">₹${(grandCustomerDue - grandCollected).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-rose-700 border">${grandCustomerDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono text-emerald-700 border">${grandCollected.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td class="p-2 text-right font-mono font-black border">${(grandCustomerDue - grandCollected).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
               </tr>
             </tfoot>
           </table>
@@ -1497,9 +1502,9 @@
           <tr class="border-b bg-slate-50 font-bold text-xs">
             <td class="p-2 border">-</td>
             <td class="p-2 border">Opening Balance</td>
-            <td class="p-2 text-right font-mono border">₹${opening.toFixed(2)}</td>
-            <td class="p-2 text-right font-mono border">₹0.00</td>
-            <td class="p-2 text-right font-mono text-blue-900 border">₹${running.toFixed(2)}</td>
+            <td class="p-2 text-right font-mono border">${opening.toFixed(2)}</td>
+            <td class="p-2 text-right font-mono border">0.00</td>
+            <td class="p-2 text-right font-mono text-blue-900 border">${running.toFixed(2)}</td>
           </tr>
         `;
 
@@ -1512,9 +1517,9 @@
             <tr class="border-b text-xs hover:bg-slate-50">
               <td class="p-2 font-mono text-slate-500 border">${t.date || '-'}</td>
               <td class="p-2 border">${t.type || 'Transaction'}</td>
-              <td class="p-2 text-right font-mono text-emerald-700 border">₹${purchase.toFixed(2)}</td>
-              <td class="p-2 text-right font-mono text-blue-700 border">₹${paid.toFixed(2)}</td>
-              <td class="p-2 text-right font-mono font-bold border">₹${running.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono text-emerald-700 border">${purchase.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono text-blue-700 border">${paid.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono font-bold border">${running.toFixed(2)}</td>
             </tr>
           `;
         });
@@ -1538,7 +1543,7 @@
                 <th class="p-2 border">Particulars</th>
                 <th class="p-2 text-right border">Purchase (Cr)</th>
                 <th class="p-2 text-right border">Paid (Dr)</th>
-                <th class="p-2 text-right border">Balance (₹)</th>
+                <th class="p-2 text-right border">Balance</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -1547,7 +1552,7 @@
           <div class="flex justify-end mt-4">
             <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl text-right">
               <span class="text-xs text-blue-700 font-bold">Net Closing Balance:</span>
-              <div class="text-lg font-black text-blue-900 font-mono">₹${running.toFixed(2)}</div>
+              <div class="text-lg font-black text-blue-900 font-mono">${running.toFixed(2)}</div>
             </div>
           </div>
         `;
@@ -1564,9 +1569,9 @@
           <tr class="border-b bg-slate-50 font-bold text-xs">
             <td class="p-2 border">-</td>
             <td class="p-2 border">Opening Balance</td>
-            <td class="p-2 text-right font-mono border">₹${opening.toFixed(2)}</td>
-            <td class="p-2 text-right font-mono border">₹0.00</td>
-            <td class="p-2 text-right font-mono text-emerald-800 border">₹${running.toFixed(2)}</td>
+            <td class="p-2 text-right font-mono border">${opening.toFixed(2)}</td>
+            <td class="p-2 text-right font-mono border">0.00</td>
+            <td class="p-2 text-right font-mono text-emerald-800 border">${running.toFixed(2)}</td>
           </tr>
         `;
 
@@ -1579,9 +1584,9 @@
             <tr class="border-b text-xs hover:bg-slate-50">
               <td class="p-2 font-mono text-slate-500 border">${t.date || '-'}</td>
               <td class="p-2 border">${t.type || 'Bill / Payment'}</td>
-              <td class="p-2 text-right font-mono text-rose-600 border">₹${debit.toFixed(2)}</td>
-              <td class="p-2 text-right font-mono text-emerald-600 border">₹${credit.toFixed(2)}</td>
-              <td class="p-2 text-right font-mono font-bold border">₹${running.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono text-rose-600 border">${debit.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono text-emerald-600 border">${credit.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono font-bold border">${running.toFixed(2)}</td>
             </tr>
           `;
         });
@@ -1605,7 +1610,7 @@
                 <th class="p-2 border">Particulars</th>
                 <th class="p-2 text-right border">Debit (Due)</th>
                 <th class="p-2 text-right border">Credit (Paid)</th>
-                <th class="p-2 text-right border">Balance (₹)</th>
+                <th class="p-2 text-right border">Balance</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -1614,7 +1619,7 @@
           <div class="flex justify-end mt-4">
             <div class="bg-rose-50 border border-rose-200 p-3 rounded-xl text-right">
               <span class="text-xs text-rose-700 font-bold">Net Closing Due:</span>
-              <div class="text-lg font-black text-rose-900 font-mono">₹${running.toFixed(2)}</div>
+              <div class="text-lg font-black text-rose-900 font-mono">${running.toFixed(2)}</div>
             </div>
           </div>
         `;
@@ -1647,9 +1652,9 @@
           <tr class="border-b bg-slate-50 font-bold text-xs">
             <td class="p-2 border">-</td>
             <td class="p-2 border">Opening Balance Due to Staff</td>
-            <td class="p-2 text-right font-mono border text-blue-800">₹${openingPayable.toFixed(2)}</td>
-            <td class="p-2 text-right font-mono border">₹0.00</td>
-            <td class="p-2 text-right font-mono font-bold border text-blue-900">₹${runningLedgerBal.toFixed(2)}</td>
+            <td class="p-2 text-right font-mono border text-blue-800">${openingPayable.toFixed(2)}</td>
+            <td class="p-2 text-right font-mono border">0.00</td>
+            <td class="p-2 text-right font-mono font-bold border text-blue-900">${runningLedgerBal.toFixed(2)}</td>
           </tr>
         `;
 
@@ -1659,9 +1664,9 @@
             <tr class="border-b bg-emerald-50/40 font-bold text-xs">
               <td class="p-2 border font-mono">${e.joining_date || '-'}</td>
               <td class="p-2 border">Earned Salary (${completedMonths} Month(s) Completed)</td>
-              <td class="p-2 text-right font-mono border text-emerald-800">+₹${earnedSalary.toFixed(2)}</td>
-              <td class="p-2 text-right font-mono border">₹0.00</td>
-              <td class="p-2 text-right font-mono font-bold border text-emerald-900">₹${runningLedgerBal.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono border text-emerald-800">+${earnedSalary.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono border">0.00</td>
+              <td class="p-2 text-right font-mono font-bold border text-emerald-900">${runningLedgerBal.toFixed(2)}</td>
             </tr>
           `;
         }
@@ -1673,9 +1678,9 @@
             <tr class="border-b text-xs hover:bg-slate-50">
               <td class="p-2 font-mono text-slate-500 border">${t.date || '-'}</td>
               <td class="p-2 border">${t.type || 'Advance / Payment Taken'}</td>
-              <td class="p-2 text-right font-mono border">₹0.00</td>
-              <td class="p-2 text-right font-mono text-purple-700 font-bold border">₹${advAmt.toFixed(2)}</td>
-              <td class="p-2 text-right font-mono font-bold border ${runningLedgerBal >= 0 ? 'text-emerald-800' : 'text-rose-800'}">₹${runningLedgerBal.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono border">0.00</td>
+              <td class="p-2 text-right font-mono text-purple-700 font-bold border">${advAmt.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono font-bold border ${runningLedgerBal >= 0 ? 'text-emerald-800' : 'text-rose-800'}">${runningLedgerBal.toFixed(2)}</td>
             </tr>
           `;
         });
@@ -1695,27 +1700,27 @@
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-4">
             <div class="bg-slate-50 p-3 rounded-xl border text-center">
               <span class="text-xs text-slate-500 font-semibold">Monthly Salary Rate</span>
-              <div class="text-base font-extrabold text-slate-800 font-mono mt-1">₹${sal.toFixed(2)}</div>
+              <div class="text-base font-extrabold text-slate-800 font-mono mt-1">${sal.toFixed(2)}</div>
             </div>
             <div class="bg-blue-50 p-3 rounded-xl border border-blue-200 text-center">
               <span class="text-xs text-blue-700 font-semibold">Opening Due to Staff</span>
-              <div class="text-base font-extrabold text-blue-900 font-mono mt-1">₹${openingPayable.toFixed(2)}</div>
+              <div class="text-base font-extrabold text-blue-900 font-mono mt-1">${openingPayable.toFixed(2)}</div>
               <span class="text-[10px] text-blue-600 font-bold">(Kodukkan Ullathu)</span>
             </div>
             <div class="bg-purple-50 p-3 rounded-xl border border-purple-200 text-center">
               <span class="text-xs text-purple-700 font-semibold">Advance in Period</span>
-              <div class="text-base font-extrabold text-purple-900 font-mono mt-1">₹${advanceInPeriod.toFixed(2)}</div>
-              <span class="text-[10px] text-purple-600 font-bold font-mono">Total Taken: ₹${advanceCumulative.toFixed(2)}</span>
+              <div class="text-base font-extrabold text-purple-900 font-mono mt-1">${advanceInPeriod.toFixed(2)}</div>
+              <span class="text-[10px] text-purple-600 font-bold font-mono">Total Taken: ${advanceCumulative.toFixed(2)}</span>
             </div>
             <div class="${netPayable >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'} p-3 rounded-xl border text-center">
               <span class="text-xs ${netPayable >= 0 ? 'text-emerald-700' : 'text-rose-700'} font-semibold">${netPayable >= 0 ? 'Net Balance Payable to Staff' : 'Advance Due from Staff'}</span>
-              <div class="text-base font-extrabold ${netPayable >= 0 ? 'text-emerald-900' : 'text-rose-900'} font-mono mt-1">₹${Math.abs(netPayable).toFixed(2)}</div>
+              <div class="text-base font-extrabold ${netPayable >= 0 ? 'text-emerald-900' : 'text-rose-900'} font-mono mt-1">${Math.abs(netPayable).toFixed(2)}</div>
               <span class="text-[10px] ${netPayable >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-bold font-mono">${netPayable >= 0 ? 'Kodukkan Ullathu' : 'Thirike Tharan Ullathu'}</span>
             </div>
           </div>
 
           <div class="bg-slate-50 border rounded-lg p-2.5 text-xs flex justify-between items-center text-slate-600 mb-3">
-            <span><i data-lucide="info" class="w-3.5 h-3.5 inline mr-1 text-blue-600"></i> Completed: <b>${completedMonths} Month(s)</b> (Earned: ₹${earnedSalary.toFixed(2)}) | Next 1-Month Salary Due Date:</span>
+            <span><i data-lucide="info" class="w-3.5 h-3.5 inline mr-1 text-blue-600"></i> Completed: <b>${completedMonths} Month(s)</b> (Earned: ${earnedSalary.toFixed(2)}) | Next 1-Month Salary Due Date:</span>
             <span class="font-bold font-mono text-slate-800">${nextDueDate}</span>
           </div>
 
@@ -1727,7 +1732,7 @@
                 <th class="p-2 border">Particulars</th>
                 <th class="p-2 text-right border text-emerald-800">Earned / Due (Cr)</th>
                 <th class="p-2 text-right border text-purple-800">Advance Paid (Dr)</th>
-                <th class="p-2 text-right border">Net Balance (₹)</th>
+                <th class="p-2 text-right border">Net Balance</th>
               </tr>
             </thead>
             <tbody>${ledgerRows}</tbody>
@@ -1769,7 +1774,7 @@
               <td class="p-2 font-mono text-slate-400 border">${i + 1}</td>
               <td class="p-2 font-bold text-slate-800 border">${c.name}</td>
               <td class="p-2 border">${c.type || 'credit'}</td>
-              <td class="p-2 text-right font-mono font-bold text-rose-700 border">₹${due.toFixed(2)}</td>
+              <td class="p-2 text-right font-mono font-bold text-rose-700 border">${due.toFixed(2)}</td>
             </tr>
           `;
         }).join('');
@@ -1782,7 +1787,7 @@
               <td class="p-2 font-mono text-slate-400 border">${idx + 1}</td>
               <td class="p-2 font-mono border">${t.date || '-'}</td>
               <td class="p-2 border">${t.note || t.type || 'Collection'}</td>
-              <td class="p-2 text-right font-mono font-bold text-emerald-700 border">₹${Math.abs(parseFloat(t.amount || 0)).toFixed(2)}</td>
+              <td class="p-2 text-right font-mono font-bold text-emerald-700 border">${Math.abs(parseFloat(t.amount || 0)).toFixed(2)}</td>
             </tr>
           `;
         }).join('');
@@ -1802,18 +1807,18 @@
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div class="border rounded-xl p-3 bg-rose-50/50">
               <span class="text-xs font-bold text-rose-800 block">Assigned Customers Total Due:</span>
-              <span class="text-lg font-black font-mono text-rose-700">₹${custTotalDue.toFixed(2)}</span>
+              <span class="text-lg font-black font-mono text-rose-700">${custTotalDue.toFixed(2)}</span>
             </div>
             <div class="border rounded-xl p-3 bg-emerald-50/50">
               <span class="text-xs font-bold text-emerald-800 block">Total Collected in Period:</span>
-              <span class="text-lg font-black font-mono text-emerald-700">₹${totalColl.toFixed(2)}</span>
+              <span class="text-lg font-black font-mono text-emerald-700">${totalColl.toFixed(2)}</span>
             </div>
           </div>
 
           <h4 class="font-bold text-xs text-slate-700 mb-2">1. Assigned Customers Outstanding</h4>
           <table class="w-full text-left border-collapse border text-xs mb-4">
             <thead class="bg-slate-100 text-[11px] uppercase border text-slate-700 font-bold">
-              <tr><th class="p-2 border w-12">#</th><th class="p-2 border">Customer</th><th class="p-2 border">Type</th><th class="p-2 text-right border">Due Balance (₹)</th></tr>
+              <tr><th class="p-2 border w-12">#</th><th class="p-2 border">Customer</th><th class="p-2 border">Type</th><th class="p-2 text-right border">Due Balance</th></tr>
             </thead>
             <tbody>${custRows || '<tr><td colspan="4" class="text-center p-3 text-slate-400">No customers linked.</td></tr>'}</tbody>
           </table>
@@ -1821,7 +1826,7 @@
           <h4 class="font-bold text-xs text-slate-700 mb-2">2. Agent Collection Receipts</h4>
           <table class="w-full text-left border-collapse border text-xs">
             <thead class="bg-slate-100 text-[11px] uppercase border text-slate-700 font-bold">
-              <tr><th class="p-2 border w-12">#</th><th class="p-2 border">Date</th><th class="p-2 border">Particulars / Note</th><th class="p-2 text-right border">Amount (₹)</th></tr>
+              <tr><th class="p-2 border w-12">#</th><th class="p-2 border">Date</th><th class="p-2 border">Particulars / Note</th><th class="p-2 text-right border">Amount</th></tr>
             </thead>
             <tbody>${txnRows || '<tr><td colspan="4" class="text-center p-3 text-slate-400">No collection entries found.</td></tr>'}</tbody>
           </table>
