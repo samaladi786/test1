@@ -56,7 +56,7 @@
         size: A4 portrait;
         margin: 4mm 6mm;
       }
-      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #staffDepositModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
+      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #staffDepositModal, #transferModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
         display: none !important;
       }
       body {
@@ -187,6 +187,11 @@
       </div>
 
       <div class="flex items-center gap-1.5 shrink-0">
+        <!-- CASH / BANK TRANSFER BUTTON -->
+        <button onclick="openTransferModal()" title="ക്യാഷ് / ബാങ്ക് മാറ്റം" class="px-2 py-1.5 bg-purple-700 hover:bg-purple-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
+          <i data-lucide="repeat" class="w-3.5 h-3.5"></i> മാറ്റം
+        </button>
+
         <button onclick="openReportModal()" title="റിപ്പോർട്ടുകൾ & സ്റ്റേറ്റ്മെന്റ്" class="px-2.5 py-1.5 bg-violet-700 hover:bg-violet-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow touch-btn cursor-pointer">
           <i data-lucide="file-text" class="w-3.5 h-3.5"></i> റിപ്പോർട്ട്
         </button>
@@ -209,7 +214,7 @@
     </div>
   </header>
 
-  <!-- DEDICATED FULL-WIDTH DATE NAVIGATION BAR (NEVER CUTS OFF) -->
+  <!-- DEDICATED FULL-WIDTH DATE NAVIGATION BAR -->
   <div id="mobileDateNavBar" class="bg-slate-800 text-white px-3 py-1.5 border-b border-slate-700/80 shadow-inner flex items-center justify-between gap-1.5 sticky top-[57px] z-30">
     <button 
       type="button" 
@@ -352,7 +357,7 @@
             </h2>
             <div class="flex items-center gap-1">
               <span id="currentExpTypeBadge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">ചിലവ്</span>
-              <!-- STAFF DEPOSIT BUTTON (BECOMES VISIBLE WHEN EMPLOYEE IS SELECTED) -->
+              <!-- STAFF DEPOSIT BUTTON -->
               <button type="button" onclick="openStaffDepositModal()" id="btnStaffDepositTrigger" class="hidden text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-black px-2.5 py-0.5 rounded-full touch-btn cursor-pointer shadow-sm flex items-center gap-0.5">
                 📥 സ്റ്റാഫ് തന്നത് (+)
               </button>
@@ -442,7 +447,7 @@
         </div>
       </div>
 
-      <!-- LIVE LIQUID FUNDS CARD -->
+      <!-- LIVE LIQUID FUNDS CARD (WITH QUICK TRANSFER BUTTON) -->
       <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-2.5 border border-slate-700 text-white flex items-center justify-between text-xs font-bold shadow-md">
         <div class="space-y-0.5">
           <span class="text-[9px] text-slate-400 font-extrabold uppercase flex items-center gap-1">
@@ -450,9 +455,12 @@
           </span>
           <span id="liveTotalLiquid" class="text-sm font-black text-emerald-400 font-mono">0.00</span>
         </div>
-        <div class="flex gap-1.5 text-[10px] text-slate-200">
+        <div class="flex items-center gap-1.5 text-[10px] text-slate-200">
           <span id="liveHandCash" class="bg-slate-800/90 px-2 py-1 rounded-lg border border-slate-700">💵 ക്യാഷ്: 0</span>
           <span id="liveBankCash" class="bg-slate-800/90 px-2 py-1 rounded-lg border border-slate-700">🏦 ബാങ്ക്: 0</span>
+          <button onclick="openTransferModal()" class="bg-purple-700/80 hover:bg-purple-600 px-2 py-1 rounded-lg border border-purple-500/50 text-white font-extrabold touch-btn cursor-pointer">
+            🔁 മാറ്റം
+          </button>
         </div>
       </div>
     </div>
@@ -482,6 +490,40 @@
       <span>ചിലവ് & സാലറി</span>
     </button>
   </nav>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CASH / BANK TRANSFER -->
+  <!-- ======================================================== -->
+  <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-4">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-purple-900 flex items-center gap-1.5">
+          <i data-lucide="repeat" class="w-4 h-4 text-purple-600"></i> ക്യാഷ് / ബാങ്ക് മാറ്റം (Transfer)
+        </h3>
+        <button onclick="closeTransferModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <!-- 1. DEPOSIT -->
+        <div class="bg-blue-50/80 p-3 rounded-2xl border border-blue-200 space-y-1.5">
+          <label class="block font-black text-blue-900 text-[11px]">ബാങ്കിലേക്ക് ഇടുക (Cash to Bank):</label>
+          <div class="flex gap-2">
+            <input type="number" step="any" inputmode="decimal" id="depositAmount" placeholder="തുക" class="flex-1 p-2 rounded-xl border bg-white font-black text-center text-blue-700 outline-none" />
+            <button onclick="saveDeposit()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow touch-btn cursor-pointer">ഇടുക</button>
+          </div>
+        </div>
+
+        <!-- 2. WITHDRAWAL -->
+        <div class="bg-emerald-50/80 p-3 rounded-2xl border border-emerald-200 space-y-1.5">
+          <label class="block font-black text-emerald-900 text-[11px]">കയ്യിലേക്ക് എടുക്കുക (Bank to Cash):</label>
+          <div class="flex gap-2">
+            <input type="number" step="any" inputmode="decimal" id="withdrawalAmount" placeholder="തുക" class="flex-1 p-2 rounded-xl border bg-white font-black text-center text-emerald-700 outline-none" />
+            <button onclick="saveWithdrawal()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow touch-btn cursor-pointer">എടുക്കുക</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ======================================================== -->
   <!-- MODAL: STAFF DEPOSIT (RECEIVE CASH/BANK FROM EMPLOYEE) -->
@@ -527,9 +569,7 @@
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- POPUP: TODAY'S SALES BREAKDOWN (EDIT / DELETE READY) -->
-  <!-- ======================================================== -->
+  <!-- POPUP MODALS FOR SALES / PURCHASES / EXPENSES -->
   <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -538,28 +578,20 @@
         </h3>
         <button onclick="closeTodaySalesModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
-
       <div class="space-y-1">
         <span class="text-[10px] font-black text-emerald-800 uppercase block">1. ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
         <div id="modalCashSalesList" class="overflow-x-auto"></div>
       </div>
-
       <div class="space-y-1 pt-2 border-t">
         <span class="text-[10px] font-black text-amber-800 uppercase block">2. ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
         <div id="modalCreditSalesList" class="overflow-x-auto"></div>
       </div>
-
       <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeTodaySalesModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">
-          തിരികെ പോകുക
-        </button>
+        <button onclick="closeTodaySalesModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
       </div>
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- POPUP: TODAY'S PURCHASES BREAKDOWN (EDIT / DELETE READY) -->
-  <!-- ======================================================== -->
   <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -568,28 +600,20 @@
         </h3>
         <button onclick="closeTodayPurchaseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
-
       <div class="space-y-1">
         <span class="text-[10px] font-black text-blue-900 uppercase block">1. ക്യാഷ് പർച്ചേസ് (Cash Vendors)</span>
         <div id="modalCashPurchasesList" class="overflow-x-auto"></div>
       </div>
-
       <div class="space-y-1 pt-2 border-t">
         <span class="text-[10px] font-black text-indigo-900 uppercase block">2. ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
         <div id="modalCreditPurchasesList" class="overflow-x-auto"></div>
       </div>
-
       <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeTodayPurchaseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">
-          തിരികെ പോകുക
-        </button>
+        <button onclick="closeTodayPurchaseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
       </div>
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- POPUP: TODAY'S EXPENSES BREAKDOWN (EDIT / DELETE READY) -->
-  <!-- ======================================================== -->
   <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -598,21 +622,16 @@
         </h3>
         <button onclick="closeTodayExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
-
       <div class="space-y-1">
         <span class="text-[10px] font-black text-purple-900 uppercase block">1. സാലറി നൽകിയത് (Staff Salaries)</span>
         <div id="modalSalariesList" class="overflow-x-auto"></div>
       </div>
-
       <div class="space-y-1 pt-2 border-t">
         <span class="text-[10px] font-black text-amber-900 uppercase block">2. ഷോപ്പ് ചിലവുകൾ (Shop Expenses)</span>
         <div id="modalExpensesList" class="overflow-x-auto"></div>
       </div>
-
       <div class="pt-2 border-t flex justify-end">
-        <button onclick="closeTodayExpenseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">
-          തിരികെ പോകുക
-        </button>
+        <button onclick="closeTodayExpenseModal()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer">തിരികെ പോകുക</button>
       </div>
     </div>
   </div>
@@ -621,12 +640,9 @@
   <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
-          🛒 പുതിയ ക്രെഡിറ്റ് കസ്റ്റമർ
-        </h3>
+        <h3 class="text-xs font-black text-emerald-900 flex items-center gap-1.5">🛒 പുതിയ ക്രെഡിറ്റ് കസ്റ്റമർ</h3>
         <button onclick="closeNewCustomerModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
-
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">കസ്റ്റമർ പേര്:</label>
@@ -637,7 +653,6 @@
           <input type="number" step="any" id="newCustOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-emerald-500" />
         </div>
       </div>
-
       <div class="pt-2 border-t flex gap-2">
         <button type="button" onclick="closeNewCustomerModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
         <button type="button" onclick="saveNewCustomerMaster()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
@@ -649,12 +664,9 @@
   <div id="newVendorModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">
-          🚚 പുതിയ ക്രെഡിറ്റ് വെണ്ടർ
-        </h3>
+        <h3 class="text-xs font-black text-blue-900 flex items-center gap-1.5">🚚 പുതിയ ക്രെഡിറ്റ് വെണ്ടർ</h3>
         <button onclick="closeNewVendorModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
-
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">വെണ്ടർ പേര്:</label>
@@ -665,7 +677,6 @@
           <input type="number" step="any" id="newVendOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none focus:border-blue-500" />
         </div>
       </div>
-
       <div class="pt-2 border-t flex gap-2">
         <button type="button" onclick="closeNewVendorModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
         <button type="button" onclick="saveNewVendorMaster()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
@@ -677,12 +688,9 @@
   <div id="newEmployeeModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-purple-900 flex items-center gap-1.5">
-          👥 പുതിയ ജീവനക്കാരനെ ചേർക്കുക
-        </h3>
+        <h3 class="text-xs font-black text-purple-900 flex items-center gap-1.5">👥 പുതിയ ജീവനക്കാരനെ ചേർക്കുക</h3>
         <button onclick="closeNewEmployeeModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
-
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">സ്റ്റാഫ് പേര്:</label>
@@ -703,7 +711,6 @@
           <input type="date" id="newEmpJoinDate" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none focus:border-purple-500 cursor-pointer" />
         </div>
       </div>
-
       <div class="pt-2 border-t flex gap-2">
         <button type="button" onclick="closeNewEmployeeModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
         <button type="button" onclick="saveNewEmployeeMaster()" class="flex-1 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
@@ -715,12 +722,9 @@
   <div id="editTransactionModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5">
-          ✏️ ഇടപാട് തിരുത്തുക
-        </h3>
+        <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5">✏️ ഇടപാട് തിരുത്തുക</h3>
         <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
       </div>
-
       <input type="hidden" id="editTxnId" />
       <div class="space-y-2 text-xs">
         <div>
@@ -746,7 +750,6 @@
           <input type="number" step="any" id="editTxnCredit" class="w-full p-2 rounded-xl border bg-slate-50 font-bold" />
         </div>
       </div>
-
       <div class="pt-2 border-t flex gap-2">
         <button type="button" onclick="closeEditModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
         <button type="button" onclick="saveEditedTransaction()" class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow cursor-pointer">അപ്‌ഡേറ്റ്</button>
@@ -768,12 +771,13 @@
   </div>
 
   <!-- ======================================================== -->
-  <!-- MODAL: REPORTS & STATEMENTS (A4 BOLD WITH SIGNATURES) -->
+  <!-- MODAL: REPORTS & STATEMENTS (A4 BOLD WITH SIGNATURES & STICKY HEADER) -->
   <!-- ======================================================== -->
   <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-4xl w-full bg-white p-3 sm:p-5 shadow-2xl rounded-3xl border space-y-2.5 my-auto max-h-[96vh] overflow-y-auto">
+    <div class="max-w-4xl w-full bg-white p-3 sm:p-5 shadow-2xl rounded-3xl border space-y-2.5 my-auto max-h-[96vh] overflow-y-auto relative">
       
-      <div class="flex items-center justify-between border-b pb-2 no-print">
+      <!-- STICKY TOP MODAL CONTROLS -->
+      <div class="sticky top-0 bg-white/95 backdrop-blur-sm border-b pb-2 pt-1 z-30 flex items-center justify-between no-print">
         <div class="flex flex-wrap items-center gap-1.5">
           <h3 class="text-xs sm:text-sm font-bold text-slate-800">📊 ബിസിനസ്സ് റിപ്പോർട്ട് & സ്റ്റേറ്റ്മെന്റ്</h3>
           <div class="flex bg-slate-100 p-0.5 rounded-xl text-[10px] font-bold border">
@@ -782,7 +786,7 @@
             <button onclick="switchReportMode('statement')" id="repStatBtn" class="px-2 py-1 rounded-lg text-slate-600 transition cursor-pointer font-bold">📄 സ്റ്റേറ്റ്മെന്റ്</button>
           </div>
         </div>
-        <button onclick="closeReportModal()" class="text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer">✕</button>
+        <button onclick="closeReportModal()" title="ക്ലോസ് ചെയ്യുക" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-sm flex items-center justify-center cursor-pointer shadow-sm">✕</button>
       </div>
 
       <!-- FILTER BAR -->
@@ -881,19 +885,16 @@
 
         <!-- CONTINUOUS 2-COLUMN FLOW CONTAINER -->
         <div class="report-continuous-flow border-t pt-1.5">
-          
           <!-- BLOCK 1: SALES -->
           <div class="report-block bg-slate-50 p-2 rounded-xl border border-emerald-200 space-y-1">
             <h3 class="font-extrabold text-emerald-900 text-[11px] flex items-center justify-between border-b pb-0.5">
               <span>🛒 സെയിൽസ് ഇടപാടുകൾ</span>
               <span id="salesGrandBadge" class="text-[9.5px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
             </h3>
-            
             <div class="space-y-0.5">
               <span class="text-[9px] font-extrabold text-emerald-800 uppercase block">💵 ക്യാഷ് കസ്റ്റമർമാർ (Cash Sales)</span>
               <div id="repCashSalesList" class="overflow-x-auto"></div>
             </div>
-
             <div class="space-y-0.5 pt-1 border-t border-emerald-200/60">
               <span class="text-[9px] font-extrabold text-amber-800 uppercase block">🛒 ക്രെഡിറ്റ് കസ്റ്റമർമാർ (Credit Sales & Collection)</span>
               <div id="repCreditSalesList" class="overflow-x-auto"></div>
@@ -906,12 +907,10 @@
               <span>🚚 പർച്ചേസ് ഇടപാടുകൾ</span>
               <span id="purchaseGrandBadge" class="text-[9.5px] font-black bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded">ആകെ: 0</span>
             </h3>
-
             <div class="space-y-0.5">
               <span class="text-[9px] font-extrabold text-blue-800 uppercase block">💵 ക്യാഷ് പർച്ചേസ് (Cash Vendors)</span>
               <div id="repCashPurchasesList" class="overflow-x-auto"></div>
             </div>
-
             <div class="space-y-0.5 pt-1 border-t border-blue-200/60">
               <span class="text-[9px] font-extrabold text-indigo-800 uppercase block">🚚 ക്രെഡിറ്റ് വെണ്ടർമാർ (Credit Purchases & Payments)</span>
               <div id="repCreditPurchasesList" class="overflow-x-auto"></div>
@@ -933,7 +932,6 @@
             </h3>
             <div id="repExpensesList" class="overflow-x-auto"></div>
           </div>
-
         </div>
 
         <!-- MANUAL SIGNATURE BOX AT REPORT BOTTOM -->
@@ -947,7 +945,6 @@
             <div>തീയതി (Date): ............................................</div>
           </div>
         </div>
-
       </div>
 
       <!-- STATEMENT PRINT CONTAINER -->
@@ -996,13 +993,16 @@
         </div>
       </div>
 
-      <!-- ACTION BUTTONS -->
+      <!-- ACTION BUTTONS AT BOTTOM (INCLUDES DIRECT CLOSE BUTTON) -->
       <div class="pt-2 no-print flex gap-2 justify-center flex-wrap border-t">
         <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
           🖨️ PDF ആയി സേവ് / പ്രിന്റ്
         </button>
         <button onclick="shareActiveReportWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
           🟢 വാട്‌സ്ആപ്പിലേക്ക് സെന്റ് ചെയ്യുക
+        </button>
+        <button onclick="closeReportModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow cursor-pointer flex items-center gap-1.5">
+          ✕ ക്ലോസ് ചെയ്യുക
         </button>
       </div>
     </div>
@@ -1055,9 +1055,7 @@
     function getSaudiBusinessDate() {
       try {
         const now = new Date();
-        // Saudi Arabia is UTC+3 (180 minutes ahead of UTC)
         const saudiTime = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
-        // രാവിലെ 6:00 AM ന് മുൻപുള്ള സമയമാണെങ്കിൽ തലേദിവസത്തെ തീയതി എടുക്കുന്നു
         if (saudiTime.getHours() < 6) {
           saudiTime.setDate(saudiTime.getDate() - 1);
         }
@@ -1090,7 +1088,6 @@
       renderQuickTotalsAndRecent();
     }
 
-    // ULTRA-FAST DATE STEPPING (PREVIOUS / NEXT DAY)
     function changeBusinessDate(delta) {
       const dtInput = document.getElementById("mobileFilterDate");
       let currentStr = (dtInput && dtInput.value) ? dtInput.value : getSaudiBusinessDate();
@@ -1150,7 +1147,6 @@
       const isLogged = sessionStorage.getItem("ALNASSR_LOGGED_IN") === "true";
       const userRole = sessionStorage.getItem("ALNASSR_USER_ROLE");
 
-      // Set date immediately on DOM load
       const dtInput = document.getElementById("mobileFilterDate");
       if (dtInput) dtInput.value = getSaudiBusinessDate();
 
@@ -1296,7 +1292,6 @@
         supabaseClient = window.supabase.createClient(currentShop.url, currentShop.key);
       }
 
-      // Ensure date is properly populated
       const dtInput = document.getElementById("mobileFilterDate");
       if (dtInput && !dtInput.value) dtInput.value = getSaudiBusinessDate();
 
@@ -1621,6 +1616,7 @@
       return totalSalary;
     }
 
+    // ACCURATELY FILTER ADVANCES UP TO asOfDateStr (AVOIDS DOUBLE DEDUCTION BUG)
     function calculateEmployeePendingBalance(emp, asOfDateStr) {
       if (!emp) return 0;
       const refDate = asOfDateStr || (document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate());
@@ -1637,8 +1633,10 @@
         if (t && t.type === 'salary') {
           let staffClean = cleanPartyName(t.party_name);
           if (staffClean.includes(empClean)) {
-            // If cash_amount < 0, shop paid staff (advances taken)
-            // If cash_amount > 0, staff gave shop money (reducing advance taken or increasing payable)
+            let tDate = cleanDate(t.date);
+            // CRITICAL FIX: Only consider advances/deposits on or before refDate!
+            if (refDate && tDate > refDate) return;
+
             let cAmt = parseFloat(t.cash_amount) || 0;
             let bAmt = parseFloat(t.bank_amount) || 0;
             let netAdvance = -cAmt - bAmt;
@@ -1680,6 +1678,70 @@
         info.innerText = "";
       }
       if (window.lucide) lucide.createIcons();
+    }
+
+    // TRANSFER MODAL LOGIC (CASH / BANK)
+    function openTransferModal() {
+      document.getElementById("depositAmount").value = "";
+      document.getElementById("withdrawalAmount").value = "";
+      document.getElementById("transferModal").classList.remove("hidden");
+    }
+    function closeTransferModal() {
+      document.getElementById("transferModal").classList.add("hidden");
+    }
+
+    async function saveDeposit() {
+      let amt = parseFloat(document.getElementById("depositAmount").value) || 0;
+      let date = getSelectedDate();
+      if (amt <= 0) return alert("തുക നൽകുക!");
+
+      let payload = {
+        date: date,
+        type: 'transfer',
+        party_name: 'Deposit (Cash to Bank)',
+        cash_amount: -amt,
+        bank_amount: amt,
+        credit_amount: 0
+      };
+
+      if (!navigator.onLine || !supabaseClient) {
+        pushToOfflineQueue(payload);
+        transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
+        renderQuickTotalsAndRecent();
+        alert("ബാങ്കിലേക്ക് നിക്ഷേപിച്ച തുക സേവ് ചെയ്തു!");
+      } else {
+        await supabaseClient.from('transactions').insert([payload]);
+        alert("ബാങ്കിലേക്ക് നിക്ഷേപിച്ചു!");
+        fetchAllData();
+      }
+      closeTransferModal();
+    }
+
+    async function saveWithdrawal() {
+      let amt = parseFloat(document.getElementById("withdrawalAmount").value) || 0;
+      let date = getSelectedDate();
+      if (amt <= 0) return alert("തുക നൽകുക!");
+
+      let payload = {
+        date: date,
+        type: 'transfer',
+        party_name: 'Withdrawal (Bank to Cash)',
+        cash_amount: amt,
+        bank_amount: -amt,
+        credit_amount: 0
+      };
+
+      if (!navigator.onLine || !supabaseClient) {
+        pushToOfflineQueue(payload);
+        transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
+        renderQuickTotalsAndRecent();
+        alert("കയ്യിലേക്ക് എടുത്ത തുക സേവ് ചെയ്തു!");
+      } else {
+        await supabaseClient.from('transactions').insert([payload]);
+        alert("കയ്യിലേക്ക് പിൻവലിച്ചു!");
+        fetchAllData();
+      }
+      closeTransferModal();
     }
 
     // MODAL HANDLERS
@@ -1780,7 +1842,7 @@
       alert("പുതിയ ജീവനക്കാരനെ ചേർത്തു!");
     }
 
-    // STAFF DEPOSIT MODAL LOGIC (MONEY RECEIVED FROM EMPLOYEE)
+    // STAFF DEPOSIT MODAL LOGIC
     function openStaffDepositModal() {
       const currentVal = document.getElementById("unifiedPartyInput").value.trim().toUpperCase();
       const cleanVal = cleanPartyName(currentVal);
@@ -1811,7 +1873,6 @@
       if (cash <= 0 && bank <= 0) return alert("തുക നൽകുക!");
 
       const finalNote = note ? `കടത്തിലേക്ക് തന്നത് (${note})` : 'കടത്തിലേക്ക് തന്നത്';
-      // POSITIVE CASH / BANK = Inflow into Shop Funds!
       const payload = {
         date: getSelectedDate(),
         type: 'salary',
@@ -1858,7 +1919,7 @@
       onUnifiedPartySelected();
     }
 
-    // BREAKDOWN MODALS OPEN / CLOSE
+    // BREAKDOWN MODALS
     function openTodaySalesModal() {
       document.getElementById("todaySalesModal").classList.remove("hidden");
       if (window.lucide) lucide.createIcons();
@@ -1877,7 +1938,7 @@
     }
     function closeTodayExpenseModal() { document.getElementById("todayExpenseModal").classList.add("hidden"); }
 
-    // OFFLINE QUEUE ENGINE
+    // OFFLINE QUEUE
     function getOfflineQueue() {
       try {
         return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`)) || [];
@@ -2045,7 +2106,6 @@
       let payload = {};
 
       if (emp) {
-        // SHOP PAYING SALARY / ADVANCE TO STAFF (OUTFLOW)
         payload = {
           date: getSelectedDate(),
           type: 'salary',
@@ -2155,7 +2215,6 @@
             let rawC = parseFloat(t.cash_amount) || 0;
             let rawB = parseFloat(t.bank_amount) || 0;
             if (rawC > 0 || rawB > 0) {
-              // INFLOW FROM STAFF
               modalSalaries.push({ 
                 id: t.id, 
                 name: `${t.party_name} (📥 വരവ്)`, 
@@ -2165,7 +2224,6 @@
                 isInflow: true 
               });
             } else {
-              // OUTFLOW PAID TO STAFF
               let posC = Math.abs(rawC);
               let posB = Math.abs(rawB);
               expTotal += (posC + posB);
@@ -2194,7 +2252,6 @@
       document.getElementById("liveHandCash").innerText = `💵 ക്യാഷ്: ${curCash.toLocaleString('en-IN')}`;
       document.getElementById("liveBankCash").innerText = `🏦 ബാങ്ക്: ${curBank.toLocaleString('en-IN')}`;
 
-      // POPULATE TODAY'S MODAL BREAKDOWN TABLES
       renderModalTable("modalCashSalesList", modalCashSales, ["കസ്റ്റമർ", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'cash_sale');
       renderModalTable("modalCreditSalesList", modalCreditSales, ["കസ്റ്റമർ", "ക്യാഷ് റസീറ്റ്", "ബാങ്ക് റസീറ്റ്", "ക്രെഡിറ്റ് സെയിൽ"], 'credit_sale');
       renderModalTable("modalCashPurchasesList", modalCashPurchases, ["വെണ്ടർ", "ക്യാഷ്", "ബാങ്ക്", "ആകെ"], 'cash_pur');
@@ -2461,7 +2518,7 @@
     }
 
     // ========================================================
-    // REPORTS & STATEMENTS ENGINE (ACCURATE HISTORICAL CLOSING)
+    // REPORTS & STATEMENTS ENGINE
     // ========================================================
     function openReportModal() {
       const modal = document.getElementById("reportModal");
@@ -2591,11 +2648,8 @@
       let custCashReceipt = 0, custBankReceipt = 0;
       let vendCashPay = 0, vendBankPay = 0;
 
-      // OPENING LIQUID FUND BEFORE TARGET
       let dayOpeningCash = openingSettings.openingCash;
       let dayOpeningBank = openingSettings.openingBank;
-
-      // CLOSING LIQUID FUND AS OF TARGET DATE/MONTH
       let targetClosingCash = openingSettings.openingCash;
       let targetClosingBank = openingSettings.openingBank;
 
@@ -3037,13 +3091,13 @@
 
       let firstParty = "";
       if (type === 'customer') {
+        dl.innerHTML += `<option value="ALL CUSTOMERS">`;
         customersList.forEach(c => {
           if (c && c.name) {
             dl.innerHTML += `<option value="${c.name.toUpperCase()}">`;
-            if (!firstParty) firstParty = c.name.toUpperCase();
           }
         });
-        if (inp && firstParty) inp.value = firstParty;
+        if (inp) inp.value = "ALL CUSTOMERS";
       } else if (type === 'vendor') {
         dl.innerHTML += `<option value="ALL VENDORS">`;
         vendorsList.forEach(v => {
@@ -3102,10 +3156,12 @@
       let statementRows = [];
       let isAgentMode = (type === 'agent');
       let isAllVendorsMode = (type === 'vendor' && (partyVal === 'ALL VENDORS' || partyVal === 'ALL'));
+      let isAllCustomersMode = (type === 'customer' && (partyVal === 'ALL CUSTOMERS' || partyVal === 'ALL'));
       let agentCustomersSummary = [];
       let vendorsConsolidatedSummary = [];
+      let customersConsolidatedSummary = [];
 
-      if (type === 'customer') {
+      if (type === 'customer' && !isAllCustomersMode) {
         const custClean = cleanPartyName(partyVal);
         const cust = customersList.find(c => c && cleanPartyName(c.name) === custClean);
         partyName = cust ? cust.name.toUpperCase() : partyVal;
@@ -3143,6 +3199,72 @@
             }
           }
         });
+      } else if (isAllCustomersMode) {
+        partyName = `TOTAL CUSTOMERS MONTHLY STATEMENT`;
+        let totalCustOpening = 0;
+        let totalCustSales = 0;
+        let totalCustPaid = 0;
+        let totalCustClosing = 0;
+
+        customersList.forEach(cust => {
+          if (!cust) return;
+          let custOpeningBal = parseFloat(cust.opening_balance) || 0;
+          let periodCredit = 0;
+          let periodCash = 0;
+          let periodBank = 0;
+          let cName = cleanPartyName(cust.name);
+
+          allTx.forEach(t => {
+            if (t && cleanPartyName(t.party_name) === cName && t.type === 'sale') {
+              const tDate = cleanDate(t.date);
+              const cr = parseFloat(t.credit_amount) || 0;
+              const ca = Math.abs(parseFloat(t.cash_amount) || 0);
+              const ba = Math.abs(parseFloat(t.bank_amount) || 0);
+
+              if (tDate < fromDate) {
+                custOpeningBal += (cr - ca - ba);
+              } else if (tDate.startsWith(monthVal)) {
+                periodCredit += cr;
+                periodCash += ca;
+                periodBank += ba;
+              }
+            }
+          });
+
+          const periodPaid = periodCash + periodBank;
+          const custClosingBal = custOpeningBal + periodCredit - periodPaid;
+
+          // ZERO FILTERING: Don't show if zero activity and zero balances
+          const hasActivityOrBalance = (
+            Math.abs(custOpeningBal) > 0.01 ||
+            periodCredit > 0.01 ||
+            periodPaid > 0.01 ||
+            Math.abs(custClosingBal) > 0.01
+          );
+          if (!hasActivityOrBalance) return;
+
+          totalCustOpening += custOpeningBal;
+          totalCustSales += periodCredit;
+          totalCustPaid += periodPaid;
+          totalCustClosing += custClosingBal;
+
+          customersConsolidatedSummary.push({
+            name: cust.name,
+            opening: custOpeningBal,
+            sales: periodCredit,
+            cash: periodCash,
+            bank: periodBank,
+            paid: periodPaid,
+            closing: custClosingBal
+          });
+        });
+
+        customersConsolidatedSummary.sort((a, b) => b.closing - a.closing);
+
+        openingBal = totalCustOpening;
+        totalSalesOrBills = totalCustSales;
+        totalPaidOrCollected = totalCustPaid;
+        runningBal = totalCustClosing;
       } else if (type === 'vendor' && !isAllVendorsMode) {
         const vendClean = cleanPartyName(partyVal);
         const vend = vendorsList.find(v => v && cleanPartyName(v.name) === vendClean);
@@ -3257,6 +3379,7 @@
           const selYear = parseInt(monthVal.split('-')[0]);
           const selMonth = parseInt(monthVal.split('-')[1]) - 1;
 
+          // PRIOR MONTH END TO GET CLEAN OPENING BALANCE
           const priorMonthEnd = new Date(selYear, selMonth, 0);
           const y = priorMonthEnd.getFullYear();
           const m = String(priorMonthEnd.getMonth() + 1).padStart(2, '0');
@@ -3323,7 +3446,6 @@
                 let isStaffInflow = (rawC > 0 || rawB > 0);
 
                 if (isStaffInflow) {
-                  // Staff gave money to shop -> Accrues to employee credit
                   let inAmt = rawC + rawB;
                   totalSalesOrBills += inAmt;
                   statementRows.push({
@@ -3335,7 +3457,6 @@
                     isAccrual: false
                   });
                 } else {
-                  // Shop paid employee
                   const paid = Math.abs(rawC) + Math.abs(rawB);
                   totalPaidOrCollected += paid;
                   statementRows.push({
@@ -3445,7 +3566,51 @@
 
       let tableHtml = "";
 
-      if (isAgentMode) {
+      if (isAllCustomersMode) {
+        tableHtml = `
+          <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
+            <thead>
+              <tr class="bg-emerald-900 text-white font-black text-center border-b">
+                <th class="p-1 w-6">#</th>
+                <th class="p-1 w-2/6 text-left">Customer</th>
+                <th class="p-1 w-1/6">Opening</th>
+                <th class="p-1 w-1/6">Credit Sales</th>
+                <th class="p-1 w-1/6">Paid / Coll</th>
+                <th class="p-1 w-1/6 bg-emerald-950">Due</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-bold">
+        `;
+        if (customersConsolidatedSummary.length === 0) {
+          tableHtml += `<tr><td colspan="6" class="p-2 text-center text-slate-400 font-bold">No active customers found</td></tr>`;
+        } else {
+          customersConsolidatedSummary.forEach((r, idx) => {
+            tableHtml += `
+              <tr class="text-center hover:bg-slate-50">
+                <td class="p-1 text-slate-500">${idx + 1}</td>
+                <td class="p-1 text-left text-slate-900 truncate" title="${r.name}">${formatShortName(r.name)}</td>
+                <td class="p-1 text-slate-600">${r.opening.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-amber-700">${r.sales.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-700">${r.paid.toLocaleString('en-IN')}</td>
+                <td class="p-1 font-black text-emerald-900 bg-emerald-50/50">${r.closing.toLocaleString('en-IN')}</td>
+              </tr>
+            `;
+          });
+        }
+        tableHtml += `
+            </tbody>
+            <tfoot>
+              <tr class="bg-emerald-100 text-emerald-950 font-black text-center border-t">
+                <td colspan="2" class="p-1 text-left uppercase">TOTAL ALL CUSTOMERS:</td>
+                <td class="p-1">${openingBal.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-amber-900">${totalSalesOrBills.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-900">${totalPaidOrCollected.toLocaleString('en-IN')}</td>
+                <td class="p-1 text-emerald-900 bg-emerald-200">${runningBal.toLocaleString('en-IN')}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else if (isAgentMode) {
         tableHtml = `
           <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-sm table-fixed">
             <thead>
@@ -3589,7 +3754,9 @@
         rows: statementRows,
         agentSummary: agentCustomersSummary,
         vendorSummary: vendorsConsolidatedSummary,
-        isAllVendors: isAllVendorsMode
+        customerSummary: customersConsolidatedSummary,
+        isAllVendors: isAllVendorsMode,
+        isAllCustomers: isAllCustomersMode
       };
     }
 
@@ -3617,6 +3784,23 @@
 
           waText += `--------------------------------\n` +
                     `🔴 *Total Outstanding to Collect:* ${d.closingBal}`;
+        } else if (d.isAllCustomers) {
+          waText = `📊 *${currentShop.name.toUpperCase()} - TOTAL CUSTOMERS STATEMENT*\n` +
+                   `📅 *Month:* ${d.month}\n` +
+                   `--------------------------------\n` +
+                   `🔹 *Total Old Opening:* ${d.openingBal}\n` +
+                   `🛒 *Total Month Sales:* ${d.totalSales}\n` +
+                   `💵 *Total Month Collected:* ${d.totalPaid}\n` +
+                   `🔴 *Total Net Balance Due:* ${d.closingBal}\n` +
+                   `--------------------------------\n` +
+                   `*ACTIVE CUSTOMERS BREAKDOWN:*\n`;
+
+          (d.customerSummary || []).forEach(c => {
+            waText += `▪ *${c.name}*: Open: ${c.opening} | Sales: ${c.sales} | Paid: ${c.paid} | Due: ${c.closing}\n`;
+          });
+
+          waText += `--------------------------------\n` +
+                    `🔴 *Total Net Outstanding Due:* ${d.closingBal}`;
         } else if (d.isAllVendors) {
           waText = `📊 *${currentShop.name.toUpperCase()} - TOTAL VENDORS STATEMENT*\n` +
                    `📅 *Month:* ${d.month}\n` +
