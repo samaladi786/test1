@@ -167,16 +167,21 @@
       </div>
 
       <form onsubmit="event.preventDefault(); verifyLogin();" class="space-y-4">
+        <!-- UPDATED 4-DIGIT NUMERIC AUTO-LOGIN INPUT -->
         <input 
           type="password" 
           inputmode="numeric" 
-          maxlength="8" 
+          pattern="[0-9]*"
+          maxlength="4" 
           id="loginPasswordInput" 
           placeholder="••••" 
           autocomplete="current-password" 
           autofocus 
+          onclick="this.select()"
+          onfocus="this.select()"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4); if(this.value.length === 4) { verifyLogin(); }"
           onkeydown="if(event.key === 'Enter') { event.preventDefault(); verifyLogin(); }"
-          class="text-center text-2xl tracking-[0.4em] font-black w-44 py-3 border-2 rounded-2xl mx-auto block outline-none focus:border-emerald-600 bg-slate-50" 
+          class="text-center text-2xl tracking-[0.4em] font-black w-44 py-3 border-2 rounded-2xl mx-auto block outline-none focus:border-emerald-600 bg-slate-50 cursor-pointer" 
         />
         <button 
           type="button" 
@@ -860,7 +865,7 @@
         </div>
         <div>
           <label class="block font-bold text-rose-700 mb-0.5">പരമാവധി ക്രെഡിറ്റ് ലിമിറ്റ്:</label>
-          <input type="number" step="any" id="newCustCreditLimit" placeholder="ഉദാ: 1000" class="w-full p-2 rounded-xl border-2 border-rose-200 bg-rose-50/40 font-black outline-none" />
+          <input type="number" step="any" id="newCustCreditLimit" placeholder="ഉദാ: 1000" class="w-full p-2.5 rounded-xl border-2 border-rose-200 bg-rose-50/40 font-black outline-none" />
         </div>
       </div>
       <div class="pt-2 border-t flex gap-2">
@@ -1201,7 +1206,20 @@
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
       <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
       <p id="pinSubText" class="text-xs text-slate-500">തുടരാൻ ലോഗിൻ പിൻ നൽകുക</p>
-      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" id="pinInput" placeholder="••••" class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-rose-500" onkeydown="if(event.key === 'Enter') verifyPinAndExecute()" />
+      <!-- UPDATED 4-DIGIT NUMERIC AUTO-EXECUTE INPUT -->
+      <input 
+        type="password" 
+        inputmode="numeric" 
+        pattern="[0-9]*" 
+        maxlength="4" 
+        id="pinInput" 
+        placeholder="••••" 
+        onclick="this.select()"
+        onfocus="this.select()"
+        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4); if(this.value.length === 4) { verifyPinAndExecute(); }"
+        onkeydown="if(event.key === 'Enter') verifyPinAndExecute()" 
+        class="text-center text-2xl tracking-[0.4em] font-black w-36 py-2 border-2 rounded-xl mx-auto block outline-none focus:border-rose-500 cursor-pointer" 
+      />
       <div class="flex gap-2 pt-2">
         <button onclick="closePinModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-xs font-semibold cursor-pointer">റദ്ദാക്കുക</button>
         <button onclick="verifyPinAndExecute()" class="flex-1 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer">സ്ഥിരീകരിക്കുക</button>
