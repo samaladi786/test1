@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) lucide.createIcons();
 });
 
-// LOGIN LOGIC (ROLE ISOLATION: MOBILE STAYS SHOP, DESKTOP GETS ADMIN)
+// LOGIN LOGIC
 function verifyLogin() {
   try {
     const input = document.getElementById("loginPasswordInput");
@@ -249,7 +249,7 @@ function logoutApp() {
 function goToDesktopPortal() {
   const userRole = sessionStorage.getItem("ALNASSR_MOBILE_ROLE") || sessionStorage.getItem("ALNASSR_USER_ROLE");
   if (userRole === 'admin') {
-    window.open("index.html", "_blank");
+    window.open("dashboard.html", "_blank");
     return;
   }
   pendingAction = 'open_desktop_portal';
@@ -762,7 +762,7 @@ function onUnifiedPartySelected() {
     badge.innerText = "ചിലവ്";
     if (staffDepBtn) staffDepBtn.classList.add("hidden");
 
-    if (expItem && (expItem.opening_balance > 0 || expItem.type === 'utility')) {
+    if (expItem) {
       if (addBillBtn) addBillBtn.classList.remove("hidden");
       const liveBal = calculateUtilityExpenseLiveBalance(expItem);
       info.innerText = `അടയ്ക്കാനുള്ള ലൈവ് കുടിശ്ശിക: ${liveBal.toLocaleString('en-IN')}`;
@@ -777,7 +777,7 @@ function onUnifiedPartySelected() {
   if (window.lucide) lucide.createIcons();
 }
 
-// UTILITY BILL MODAL (+BILL)
+// UTILITY BILL MODAL (+BILL) - INSTANT LOCAL UPDATE
 function openAddUtilityBillModal() {
   const currentVal = document.getElementById("unifiedPartyInput").value.trim().toUpperCase();
   const cleanVal = cleanPartyName(currentVal);
@@ -812,18 +812,28 @@ async function saveUtilityBillAddition() {
     credit_amount: amt
   };
 
+  // 1. തത്സമയം ഫോണിലെ മെമ്മറിയിലേക്ക് ആഡ് ചെയ്യുന്നു (Instant Local Update)
+  const tempId = 'temp_bill_' + Date.now();
+  const localRecord = { ...payload, id: tempId };
+  transactionsList.unshift(localRecord);
+  localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+
   if (!navigator.onLine || !supabaseClient) {
     pushToOfflineQueue(payload);
-    transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
     renderQuickTotalsAndRecent();
     alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: പുതിയ ബില്ല് ഫോണിൽ സേവ് ചെയ്തു!");
   } else {
-    await supabaseClient.from('transactions').insert([payload]);
+    const { data } = await supabaseClient.from('transactions').insert([payload]).select();
+    if (data && data[0]) {
+      localRecord.id = data[0].id;
+      localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+    }
+    renderQuickTotalsAndRecent();
     alert("പുതിയ ബില്ല് തുക വിജയകരമായി ചേർത്തു!");
-    fetchAllData();
   }
 
   closeAddUtilityBillModal();
+  // സ്ക്രീനിലെ ലൈവ് കുടിശ്ശിക തുക തത്സമയം അപ്‌ഡേറ്റ് ആകാൻ
   onUnifiedPartySelected();
 }
 
@@ -1126,7 +1136,7 @@ async function syncOfflineQueue() {
   if (queue.length > remaining.length) fetchAllData();
 }
 
-// TRANSACTIONS SAVING (WITH CREDIT LIMIT WARNING CHECK)
+// TRANSACTIONS SAVING
 async function saveSaleEntry() {
   let rawName = document.getElementById("saleCustomerInput").value.trim().toUpperCase();
   if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
@@ -1149,7 +1159,6 @@ async function saveSaleEntry() {
 
   if (cash <= 0 && bank <= 0 && credit <= 0) return alert("തുക നൽകുക!");
 
-  // CREDIT LIMIT WARNING PROMPT
   if (cust && cust.credit_limit && parseFloat(cust.credit_limit) > 0 && credit > 0) {
     const limit = parseFloat(cust.credit_limit);
     let liveBal = parseFloat(cust.opening_balance) || 0;
@@ -1262,7 +1271,7 @@ async function saveUnifiedExpSalEntry() {
     let exp = expensesMasterList.find(e => cleanPartyName(e.name) === cleanPartyName(expName));
 
     if (!exp) {
-      const newExp = { name: expName, opening_balance: 0 };
+      const newExp = { name: expName, type: 'regular', opening_balance: 0 };
       if (navigator.onLine && supabaseClient) {
         try { await supabaseClient.from('expenses_master').insert([newExp]); } catch (e) {}
       }
@@ -1299,7 +1308,7 @@ async function saveUnifiedExpSalEntry() {
   onUnifiedPartySelected();
 }
 
-// HOME DASHBOARD TOTALS (ZERO-FIX IMPLEMENTED)
+// HOME DASHBOARD TOTALS
 function renderQuickTotalsAndRecent() {
   const selectedDate = getSelectedDate();
   let saleTotal = 0, purTotal = 0, expTotal = 0;
@@ -1471,7 +1480,7 @@ function renderModalTable(containerId, dataList, headers, type) {
   container.innerHTML = html;
 }
 
-// EDIT & DELETE TRANSACTIONS (SUPER ADMIN MASTER PIN PROTECTED)
+// EDIT & DELETE TRANSACTIONS
 function requestEdit(id) {
   if (String(id).startsWith('temp_')) {
     alert("ഓഫ്‍ലൈനിൽ എടുത്ത എൻട്രിയാണിത്. ഇത് നെറ്റ് വരുമ്പോൾ സിങ്ക് ആകും.");
@@ -1614,7 +1623,7 @@ async function verifyPinAndExecute() {
     if (pinVal === masterPin) {
       sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
       closePinModal();
-      window.open("index.html", "_blank");
+      window.open("dashboard.html", "_blank");
     } else {
       alert("അഡ്മിൻ മാസ്റ്റർ പിൻ തെറ്റാണ്!");
       document.getElementById("pinInput").value = "";
@@ -1696,7 +1705,7 @@ function triggerMasterAdd() {
   else if (currentMasterTab === 'vendor') openNewVendorModal();
   else if (currentMasterTab === 'employee') openNewEmployeeModal();
   else if (currentMasterTab === 'agent') quickAddAgentPrompt();
-  else if (currentMasterTab === 'expense') quickAddExpensePrompt();
+  else if (currentMasterTab === 'expense') openNewExpenseModal();
 }
 
 async function quickAddAgentPrompt() {
@@ -2190,24 +2199,49 @@ async function saveNewEmployeeMaster() {
   alert("പുതിയ ജീവനക്കാരനെ ചേർത്തു!");
 }
 
-async function quickAddExpensePrompt() {
-  let name = prompt("പുതിയ ചിലവ് / ബില്ല് ഇനം നൽകുക:");
-  if (!name || !name.trim()) return;
-  name = name.trim().toUpperCase();
+// NEW EXPENSE / UTILITY MASTER
+function openNewExpenseModal() {
+  document.getElementById("newExpName").value = "";
+  document.getElementById("newExpOpening").value = "";
+  document.getElementById("newExpType").value = "utility";
+  document.getElementById("newExpenseModal").classList.remove("hidden");
+  document.getElementById("newExpName").focus();
+}
 
-  const newExp = { name: name, opening_balance: 0 };
+function closeNewExpenseModal() {
+  document.getElementById("newExpenseModal").classList.add("hidden");
+}
+
+async function saveNewExpenseMaster() {
+  const name = document.getElementById("newExpName").value.trim().toUpperCase();
+  const type = document.getElementById("newExpType").value;
+  const opening = parseFloat(document.getElementById("newExpOpening").value) || 0;
+  if (!name) return alert("ചിലവ് ഇനത്തിന്റെ പേര് നൽകുക!");
+
+  const newExp = { name: name, type: type, opening_balance: opening };
   if (navigator.onLine && supabaseClient) {
-    await supabaseClient.from('expenses_master').insert([newExp]);
+    const { data } = await supabaseClient.from('expenses_master').insert([newExp]).select();
+    if (data && data[0]) newExp.id = data[0].id;
+  } else {
+    newExp.id = 'exp_' + Date.now();
   }
+
   expensesMasterList.push(newExp);
   localStorage.setItem(`ALNASSR_${currentShopId}_EXPENSES`, JSON.stringify(expensesMasterList));
   populateDropdowns();
 
   document.getElementById("unifiedPartyInput").value = name;
   onUnifiedPartySelected();
+  closeNewExpenseModal();
   renderActiveMasterList();
+  alert("പുതിയ ചിലവ് ഇനം വിജയകരമായി ചേർത്തു!");
 }
 
+function quickAddExpensePrompt() {
+  openNewExpenseModal();
+}
+
+// MODALS CONTROLLER HELPERS
 function openNewCustomerModal() {
   document.getElementById("newCustName").value = "";
   if (document.getElementById("newCustAgent")) document.getElementById("newCustAgent").value = "";
