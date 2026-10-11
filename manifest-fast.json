@@ -1,16 +1,26 @@
 {
   "name": "ALNASSR ഫാസ്റ്റ് POS",
   "short_name": "Fast POS",
-  "id": "/fast-pos-app",
+  "description": "ALNASSR Multi-Shop Super Fast POS",
+  "id": "alnassr-fast-pos-app",
   "start_url": "fast.html",
+  "scope": "fast.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
