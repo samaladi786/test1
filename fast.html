@@ -21,9 +21,34 @@
     input[type=number] { -moz-appearance: textfield; }
     .touch-btn:active { transform: scale(0.97); }
     .uppercase-input { text-transform: uppercase; }
+
+    /* COMPACT 58mm / 80mm THERMAL RECEIPT PRINT STYLES */
+    @media print {
+      body * { visibility: hidden !important; }
+      #thermalReceiptContainer, #thermalReceiptContainer * { visibility: visible !important; }
+      #thermalReceiptContainer {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-width: 76mm !important;
+        padding: 2mm !important;
+        margin: 0 !important;
+        background: white !important;
+        color: black !important;
+        font-family: monospace, monospace !important;
+        font-size: 11px !important;
+        line-height: 1.25 !important;
+        font-weight: 700 !important;
+      }
+      @page {
+        size: auto;
+        margin: 0mm;
+      }
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col pb-6">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col pb-8">
 
   <!-- 1. LOGIN SCREEN -->
   <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-[99999] p-4 backdrop-blur-sm">
@@ -33,7 +58,7 @@
       </div>
       <div>
         <h2 class="text-base font-extrabold text-slate-900">ALNASSR ഫാസ്റ്റ് POS</h2>
-        <p class="text-xs text-slate-500 mt-1">ഷോപ്പ് പിൻ നൽകുക</p>
+        <p class="text-xs text-slate-500 mt-1">ഷോപ്പ് പിൻ അല്ലെങ്കിൽ മാസ്റ്റർ പിൻ നൽകുക</p>
       </div>
 
       <form onsubmit="event.preventDefault(); verifyFastLogin();" class="space-y-4">
@@ -63,7 +88,12 @@
         <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black border border-emerald-500/30 shrink-0">
           <i data-lucide="zap" class="w-4 h-4"></i>
         </div>
-        <div class="truncate">
+        <div class="truncate flex-1">
+          <!-- MULTI-SHOP SELECTOR (VISIBLE FOR MASTER PIN) -->
+          <div id="fastShopSelectorWrap" class="hidden">
+            <select id="fastShopSelector" onchange="onFastShopChanged(this.value)" class="bg-slate-800 text-emerald-400 font-extrabold text-xs px-2 py-0.5 rounded-lg border border-slate-700 outline-none cursor-pointer max-w-[150px] truncate">
+            </select>
+          </div>
           <h1 id="fastShopTitle" class="text-xs font-black text-white truncate">ALNASSR POS</h1>
           <span id="fastStatusBadge" class="text-[9.5px] font-extrabold text-emerald-400">🟢 ഫാസ്റ്റ് മോഡ്</span>
         </div>
@@ -83,21 +113,21 @@
     </div>
   </header>
 
-  <!-- 3. DATE BAR & TAB SWITCHER -->
+  <!-- 3. DATE BAR & TAB SWITCHER (ORDER: 1. പർച്ചേസ് | 2. ചിലവ് | 3. സെയിൽസ്) -->
   <div class="bg-slate-800 text-white px-3 py-1.5 border-b border-slate-700 shadow-inner sticky top-[51px] z-30">
     <div class="max-w-md mx-auto flex items-center justify-between gap-1.5">
       <input 
         type="date" 
         id="fastBusinessDate" 
         onchange="onFastDateChanged(this.value)" 
-        class="bg-slate-900 text-emerald-400 font-black px-2.5 py-1 rounded-xl border border-slate-600 text-xs outline-none cursor-pointer flex-1 max-w-[140px]" 
+        class="bg-slate-900 text-emerald-400 font-black px-2.5 py-1 rounded-xl border border-slate-600 text-xs outline-none cursor-pointer flex-1 max-w-[130px]" 
       />
 
       <!-- 3 TABS -->
       <div class="flex bg-slate-900 p-0.5 rounded-xl border border-slate-700 text-xs font-black flex-1 justify-end">
-        <button onclick="switchFastTab('sale')" id="fastTab-sale" class="py-1 px-3 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer">സെയിൽസ്</button>
-        <button onclick="switchFastTab('purchase')" id="fastTab-purchase" class="py-1 px-3 rounded-lg text-slate-400 transition cursor-pointer">പർച്ചേസ്</button>
-        <button onclick="switchFastTab('expense')" id="fastTab-expense" class="py-1 px-3 rounded-lg text-slate-400 transition cursor-pointer">ചിലവ്</button>
+        <button onclick="switchFastTab('purchase')" id="fastTab-purchase" class="py-1 px-2.5 rounded-lg bg-blue-600 text-white shadow transition cursor-pointer">1. പർച്ചേസ്</button>
+        <button onclick="switchFastTab('expense')" id="fastTab-expense" class="py-1 px-2.5 rounded-lg text-slate-400 transition cursor-pointer">2. ചിലവ്</button>
+        <button onclick="switchFastTab('sale')" id="fastTab-sale" class="py-1 px-2.5 rounded-lg text-slate-400 transition cursor-pointer">3. സെയിൽസ്</button>
       </div>
     </div>
   </div>
@@ -105,39 +135,8 @@
   <!-- 4. MAIN WORKSPACE CONTAINER -->
   <main class="w-full max-w-md mx-auto px-3 pt-3 flex-1 flex flex-col justify-between space-y-3">
 
-    <!-- TAB 1: SALE ENTRY -->
-    <div id="fastView-sale" class="space-y-2.5">
-      <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">കസ്റ്റമർ പേര്:</label>
-          <div class="relative">
-            <input 
-              list="customerListOptions" 
-              id="fastSaleCustomerInput" 
-              onclick="this.select()" 
-              onfocus="this.select()" 
-              oninput="this.value = this.value.toUpperCase(); onFastCustomerSelected();" 
-              onchange="onFastCustomerSelected()" 
-              value="SHOPE" 
-              placeholder="കസ്റ്റമർ പേര്..." 
-              class="w-full text-base font-black p-3 pr-8 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none uppercase-input" 
-            />
-            <button type="button" onclick="clearFastInput('fastSaleCustomerInput', onFastCustomerSelected)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">✕</button>
-          </div>
-          <datalist id="customerListOptions"></datalist>
-          <span id="fastCustInfo" class="text-xs font-black text-emerald-700 block mt-1 truncate">ക്യാഷ് കസ്റ്റമർ</span>
-        </div>
-
-        <div id="fastSaleAmountsBox" class="pt-0.5"></div>
-
-        <button onclick="saveFastSaleEntry()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
-          <i data-lucide="check-circle" class="w-5 h-5"></i> സെയിൽ സേവ് ചെയ്യുക
-        </button>
-      </div>
-    </div>
-
-    <!-- TAB 2: PURCHASE ENTRY -->
-    <div id="fastView-purchase" class="hidden space-y-2.5">
+    <!-- TAB 1: PURCHASE ENTRY -->
+    <div id="fastView-purchase" class="space-y-2.5">
       <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">വെണ്ടർ പേര്:</label>
@@ -166,7 +165,7 @@
       </div>
     </div>
 
-    <!-- TAB 3: EXPENSE & SALARY ENTRY -->
+    <!-- TAB 2: EXPENSE & SALARY ENTRY -->
     <div id="fastView-expense" class="hidden space-y-2.5">
       <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3">
         <div>
@@ -213,13 +212,41 @@
       </div>
     </div>
 
+    <!-- TAB 3: SALE ENTRY (WITH MULTI MADA MACHINE INPUTS) -->
+    <div id="fastView-sale" class="hidden space-y-2.5">
+      <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">കസ്റ്റമർ പേര്:</label>
+          <div class="relative">
+            <input 
+              list="customerListOptions" 
+              id="fastSaleCustomerInput" 
+              onclick="this.select()" 
+              onfocus="this.select()" 
+              oninput="this.value = this.value.toUpperCase(); onFastCustomerSelected();" 
+              onchange="onFastCustomerSelected()" 
+              value="SHOPE" 
+              placeholder="കസ്റ്റമർ പേര്..." 
+              class="w-full text-base font-black p-3 pr-8 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none uppercase-input" 
+            />
+            <button type="button" onclick="clearFastInput('fastSaleCustomerInput', onFastCustomerSelected)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">✕</button>
+          </div>
+          <datalist id="customerListOptions"></datalist>
+          <span id="fastCustInfo" class="text-xs font-black text-emerald-700 block mt-1 truncate">ക്യാഷ് കസ്റ്റമർ</span>
+        </div>
+
+        <!-- DYNAMIC SALE AMOUNTS BOX -->
+        <div id="fastSaleAmountsBox" class="space-y-2"></div>
+
+        <button onclick="saveFastSaleEntry()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="check-circle" class="w-5 h-5"></i> സെയിൽ സേവ് ചെയ്യുക
+        </button>
+      </div>
+    </div>
+
     <!-- BOTTOM STRIP: TODAY'S TOTALS -->
     <div class="space-y-2 pt-1">
       <div class="grid grid-cols-3 gap-1.5 text-center text-xs font-bold">
-        <div class="bg-emerald-950 text-white p-2 rounded-2xl border border-emerald-800">
-          <span class="text-[9px] text-emerald-300 block uppercase font-extrabold">സെയിൽസ്</span>
-          <span id="fastTodaySaleTotal" class="text-xs font-black">0</span>
-        </div>
         <div class="bg-blue-950 text-white p-2 rounded-2xl border border-blue-800">
           <span class="text-[9px] text-blue-300 block uppercase font-extrabold">പർച്ചേസ്</span>
           <span id="fastTodayPurTotal" class="text-xs font-black">0</span>
@@ -227,6 +254,10 @@
         <div class="bg-amber-950 text-white p-2 rounded-2xl border border-amber-800">
           <span class="text-[9px] text-amber-300 block uppercase font-extrabold">ചിലവുകൾ</span>
           <span id="fastTodayExpTotal" class="text-xs font-black">0</span>
+        </div>
+        <div class="bg-emerald-950 text-white p-2 rounded-2xl border border-emerald-800">
+          <span class="text-[9px] text-emerald-300 block uppercase font-extrabold">സെയിൽസ്</span>
+          <span id="fastTodaySaleTotal" class="text-xs font-black">0</span>
         </div>
       </div>
 
@@ -242,10 +273,10 @@
   </main>
 
   <!-- ======================================================== -->
-  <!-- MODAL: DAILY CASH CLOSING & WHATSAPP REPORT GENERATOR     -->
+  <!-- MODAL: DAILY CASH CLOSING, THERMAL PRINT & WHATSAPP       -->
   <!-- ======================================================== -->
   <div id="closingModal" class="fixed inset-0 bg-slate-950/85 flex items-center justify-center z-[99999] hidden p-3 overflow-y-auto backdrop-blur-sm">
-    <div class="max-w-sm w-full bg-white rounded-3xl shadow-2xl border p-4 space-y-3.5 my-auto max-h-[92vh] overflow-y-auto relative">
+    <div class="max-w-sm w-full bg-white rounded-3xl shadow-2xl border p-4 space-y-3.5 my-auto max-h-[94vh] overflow-y-auto relative">
       
       <div class="flex items-center justify-between border-b pb-2">
         <div class="flex items-center gap-2">
@@ -254,7 +285,7 @@
           </div>
           <div>
             <h3 class="text-xs font-black text-slate-900">ഡെയ്‌ലി ക്യാഷ് ക്ലോസിംഗ്</h3>
-            <p class="text-[9.5px] font-bold text-slate-500">കൗണ്ടർ ക്യാഷ് & വാട്‌സ്ആപ്പ് റിപ്പോർട്ട്</p>
+            <p class="text-[9.5px] font-bold text-slate-500">കൗണ്ടർ ക്യാഷ്, തെർമൽ പ്രിന്റ് & വാട്‌സ്ആപ്പ്</p>
           </div>
         </div>
         <button onclick="closeClosingModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-xs flex items-center justify-center cursor-pointer">✕</button>
@@ -274,54 +305,52 @@
             placeholder="0.00" 
             class="w-full text-center text-lg font-black p-2 rounded-xl border-2 border-emerald-400 bg-white text-emerald-800 outline-none" 
           />
-          <div class="flex justify-between text-[10px] text-slate-500 pt-0.5">
-            <span>മാറ്റിവെക്കുന്ന സ്ഥിരം ഫ്ലോട്ട്:</span>
-            <span class="font-bold text-slate-700 font-mono">500.00</span>
-          </div>
         </div>
 
-        <!-- 2. MULTIPLE MADA POS MACHINES -->
-        <div class="bg-blue-50 p-2.5 rounded-2xl border border-blue-200 space-y-2">
+        <!-- 2. AUTO-PULLED TODAY'S CASH PURCHASES -->
+        <div class="bg-blue-50/80 p-2.5 rounded-2xl border border-blue-200 space-y-1.5">
+          <div class="flex justify-between items-center text-blue-950 font-black text-[11px]">
+            <span>2. ഡ്രോയർ ക്യാഷ് പർച്ചേസ് (Auto):</span>
+            <span id="closeAutoPurTotalDisplay" class="font-mono text-blue-800">0.00</span>
+          </div>
+          <div id="closeAutoPurListContainer" class="space-y-1 max-h-24 overflow-y-auto text-[10.5px]"></div>
+        </div>
+
+        <!-- 3. AUTO-PULLED TODAY'S CASH EXPENSES -->
+        <div class="bg-amber-50/80 p-2.5 rounded-2xl border border-amber-200 space-y-1.5">
+          <div class="flex justify-between items-center text-amber-950 font-black text-[11px]">
+            <span>3. ഡ്രോയർ ക്യാഷ് ചിലവുകൾ (Auto):</span>
+            <span id="closeAutoExpTotalDisplay" class="font-mono text-amber-800">0.00</span>
+          </div>
+          <div id="closeAutoExpListContainer" class="space-y-1 max-h-24 overflow-y-auto text-[10.5px]"></div>
+        </div>
+
+        <!-- 4. EXTRA MANUAL CLOSING EXPENSES (NOT SENT TO CLOUD DATABASE) -->
+        <div class="bg-purple-50/80 p-2.5 rounded-2xl border border-purple-200 space-y-2">
           <div class="flex justify-between items-center">
-            <label class="font-black text-blue-950 text-[11px]">2. മാദ മെഷീനുകൾ (Bank POS):</label>
-            <button type="button" onclick="addMadaMachineRow()" class="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-lg touch-btn cursor-pointer">
-              + മെഷീൻ ചേർക്കുക
+            <div>
+              <label class="font-black text-purple-950 text-[11px] block">4. അധിക ചിലവ് / മാനേജർ വാങ്ങിയത്:</label>
+              <span class="text-[9px] text-purple-700 font-bold block">(ക്ലൗഡിൽ കയറില്ല, റിപ്പോർട്ടിൽ മാത്രം വരും)</span>
+            </div>
+            <button type="button" onclick="addManualExtraExpenseRow()" class="text-[10px] bg-purple-700 text-white font-bold px-2 py-0.5 rounded-lg touch-btn cursor-pointer">
+              + ചേർക്കുക
             </button>
           </div>
-          <div id="madaMachinesListContainer" class="space-y-1.5">
-            <!-- Injected via JavaScript -->
-          </div>
-          <div class="flex justify-between font-black text-blue-900 text-[11px] pt-1 border-t border-blue-200/60">
-            <span>ആകെ ബാങ്ക്/മാദ:</span>
-            <span id="closeTotalMadaDisplay" class="font-mono">0.00</span>
+          <div id="manualExtraExpensesContainer" class="space-y-1.5"></div>
+          <div class="flex justify-between font-black text-purple-900 text-[11px] pt-1 border-t border-purple-200/60">
+            <span>ആകെ അധിക ചിലവുകൾ:</span>
+            <span id="closeManualExtraTotalDisplay" class="font-mono">0.00</span>
           </div>
         </div>
 
-        <!-- 3. MANUAL DRAWER CASH EXPENSES (PAYOUTS) -->
-        <div class="bg-amber-50 p-2.5 rounded-2xl border border-amber-200 space-y-2">
-          <div class="flex justify-between items-center">
-            <label class="font-black text-amber-950 text-[11px]">3. ഡ്രോയറിൽ നിന്ന് ചിലവാക്കിയത്:</label>
-            <button type="button" onclick="addDrawerExpenseRow()" class="text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded-lg touch-btn cursor-pointer">
-              + ചിലവ് ചേർക്കുക
-            </button>
-          </div>
-          <div id="drawerExpensesListContainer" class="space-y-1.5">
-            <!-- Injected via JavaScript -->
-          </div>
-          <div class="flex justify-between font-black text-amber-900 text-[11px] pt-1 border-t border-amber-200/60">
-            <span>ആകെ ചിലവുകൾ:</span>
-            <span id="closeTotalDrawerExpDisplay" class="font-mono">0.00</span>
-          </div>
-        </div>
-
-        <!-- SUMMARY CARD -->
+        <!-- 5. SUMMARY STATS CARD -->
         <div class="bg-slate-900 text-white p-3 rounded-2xl space-y-1.5 font-bold text-[11px] border border-slate-700">
           <div class="flex justify-between text-emerald-400 font-black text-xs border-b border-white/10 pb-1">
-            <span>🟢 മാനേജർക്ക് നൽകേണ്ട അറ്റ ക്യാഷ്:</span>
+            <span>🟢 മാനേജർക്ക് നൽകിയ ക്യാഷ്:</span>
             <span id="closeHandoverCashDisplay" class="font-mono">0.00</span>
           </div>
           <div class="flex justify-between text-slate-300 pt-0.5">
-            <span>ഇന്നത്തെ ആകെ ക്യാഷ് ബിസിനസ്സ്:</span>
+            <span>ഇന്നത്തെ ആകെ ക്യാഷ് കച്ചവടം:</span>
             <span id="closeTotalCashBizDisplay" class="font-mono">0.00</span>
           </div>
           <div class="flex justify-between text-slate-300">
@@ -336,10 +365,13 @@
 
       </div>
 
-      <!-- WHATSAPP SEND BUTTON -->
+      <!-- DUAL ACTIONS: PRINT & WHATSAPP -->
       <div class="pt-2 border-t space-y-2">
-        <button onclick="sendClosingWhatsAppReport()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
-          <i data-lucide="send" class="w-4 h-4"></i> വാട്‌സ്ആപ്പ് വഴി മാനേജർക്ക് അയക്കുക
+        <button onclick="printThermalReceipt()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-2xl text-xs shadow touch-btn cursor-pointer flex items-center justify-center gap-1.5">
+          <i data-lucide="printer" class="w-4 h-4"></i> 🖨️ തെർമൽ സ്ലിപ്പ് പ്രിന്റ് ചെയ്യുക
+        </button>
+        <button onclick="sendClosingWhatsAppReport()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
+          <i data-lucide="send" class="w-4 h-4"></i> 🟢 വാട്‌സ്ആപ്പ് വഴി അയക്കുക
         </button>
         <button onclick="closeClosingModal()" class="w-full py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs cursor-pointer">
           റദ്ദാക്കുക
@@ -349,14 +381,16 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- HIDDEN CONTAINER FOR THERMAL PRINTER (58mm/80mm COMPACT) -->
+  <div id="thermalReceiptContainer" class="hidden"></div>
+
+  <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
     const SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : [];
-    const FIXED_FLOAT_AMOUNT = 500.00; // സ്ഥിരമായി ഡ്രോയറിൽ മാറ്റിവെക്കുന്ന ഫ്ലോട്ട് തുക
-
     let currentShopId = null;
     let currentShop = null;
     let supabaseClient = null;
+    let isSuperAdmin = false;
 
     let customersList = [];
     let vendorsList = [];
@@ -364,9 +398,11 @@
     let expensesMasterList = [];
     let transactionsList = [];
 
-    // Closing state
-    let madaMachinesList = [ { name: "മെഷീൻ 1", amount: "" } ];
-    let drawerExpensesList = [ { desc: "ചിലവ്", amount: "" } ];
+    // Sales Mada Machine inputs state
+    let salesMadaMachines = [ { name: "മാദ 1", amount: "" } ];
+
+    // Manual closing extra items (purely local, NOT sent to Supabase)
+    let manualClosingExtras = [ { desc: "മാനേജർ വാങ്ങിയത്", amount: "" } ];
 
     function getSaudiBusinessDate() {
       try {
@@ -403,10 +439,9 @@
         document.getElementById("loginScreen").classList.remove("hidden");
       }
 
-      renderFastSaleInputs('cash');
       renderFastPurchaseInputs('cash');
-      renderMadaMachinesList();
-      renderDrawerExpensesList();
+      renderFastSaleInputs('cash');
+      renderManualExtraExpenseRows();
       if (window.lucide) lucide.createIcons();
     });
 
@@ -417,21 +452,59 @@
     }
 
     function attemptLoginWithPin(pin) {
-      const matched = SHOPS.find(s => String(s.pin) === pin);
       const masterPin = String(window.MASTER_PIN);
+      const isMaster = (pin === masterPin);
+      const matched = SHOPS.find(s => String(s.pin) === pin);
 
-      if (!matched && pin !== masterPin) {
+      if (!isMaster && !matched) {
         alert("പിൻ തെറ്റാണ്!");
         document.getElementById("fastLoginPin").value = "";
         return;
       }
 
-      currentShop = matched || SHOPS[0];
-      currentShopId = currentShop.id;
+      isSuperAdmin = isMaster;
       localStorage.setItem("ALNASSR_FAST_PIN", pin);
-
-      document.getElementById("fastShopTitle").innerText = currentShop.name;
       document.getElementById("loginScreen").classList.add("hidden");
+
+      const selectorWrap = document.getElementById("fastShopSelectorWrap");
+      const titleEl = document.getElementById("fastShopTitle");
+
+      if (isMaster) {
+        selectorWrap.classList.remove("hidden");
+        titleEl.classList.add("hidden");
+        populateShopSelectorDropdown();
+        currentShop = SHOPS[0];
+      } else {
+        selectorWrap.classList.add("hidden");
+        titleEl.classList.remove("hidden");
+        currentShop = matched;
+      }
+
+      connectActiveFastShop();
+    }
+
+    function populateShopSelectorDropdown() {
+      const sel = document.getElementById("fastShopSelector");
+      sel.innerHTML = "";
+      SHOPS.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.id;
+        opt.textContent = s.name;
+        sel.appendChild(opt);
+      });
+      if (currentShopId) sel.value = currentShopId;
+    }
+
+    function onFastShopChanged(shopId) {
+      currentShop = SHOPS.find(s => s.id === shopId) || SHOPS[0];
+      connectActiveFastShop();
+    }
+
+    function connectActiveFastShop() {
+      currentShopId = currentShop.id;
+      document.getElementById("fastShopTitle").innerText = currentShop.name;
+      const sel = document.getElementById("fastShopSelector");
+      if (sel) sel.value = currentShopId;
 
       if (window.supabase && currentShop.url && currentShop.key) {
         supabaseClient = window.supabase.createClient(currentShop.url, currentShop.key);
@@ -450,18 +523,18 @@
     }
 
     function switchFastTab(tab) {
-      document.getElementById("fastView-sale").classList.add("hidden");
       document.getElementById("fastView-purchase").classList.add("hidden");
       document.getElementById("fastView-expense").classList.add("hidden");
+      document.getElementById("fastView-sale").classList.add("hidden");
 
       document.getElementById(`fastView-${tab}`).classList.remove("hidden");
 
-      ['sale', 'purchase', 'expense'].forEach(t => {
+      ['purchase', 'expense', 'sale'].forEach(t => {
         const btn = document.getElementById(`fastTab-${t}`);
         if (t === tab) {
-          btn.className = `py-1 px-3 rounded-lg text-white shadow transition cursor-pointer font-black ${t === 'sale' ? 'bg-emerald-600' : t === 'purchase' ? 'bg-blue-600' : 'bg-amber-600'}`;
+          btn.className = `py-1 px-2.5 rounded-lg text-white shadow transition cursor-pointer font-black ${t === 'purchase' ? 'bg-blue-600' : t === 'expense' ? 'bg-amber-600' : 'bg-emerald-600'}`;
         } else {
-          btn.className = "py-1 px-3 rounded-lg text-slate-400 transition cursor-pointer font-bold";
+          btn.className = "py-1 px-2.5 rounded-lg text-slate-400 transition cursor-pointer font-bold";
         }
       });
       if (window.lucide) lucide.createIcons();
@@ -519,66 +592,9 @@
       }
     }
 
-    // SALE INPUTS
-    function renderFastSaleInputs(type) {
-      const box = document.getElementById("fastSaleAmountsBox");
-      if (!box) return;
-
-      if (type === 'credit') {
-        box.innerHTML = `
-          <div class="grid grid-cols-3 gap-1.5">
-            <div class="bg-emerald-50 p-2 rounded-2xl border border-emerald-200">
-              <label class="block text-[9.5px] font-black text-emerald-900 mb-0.5 text-center truncate">💵 ക്യാഷ് റസീറ്റ്</label>
-              <input type="number" step="any" inputmode="decimal" id="fastSaleCash" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-emerald-800" />
-            </div>
-            <div class="bg-blue-50 p-2 rounded-2xl border border-blue-200">
-              <label class="block text-[9.5px] font-black text-blue-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് റസീറ്റ്</label>
-              <input type="number" step="any" inputmode="decimal" id="fastSaleBank" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-blue-800" />
-            </div>
-            <div class="bg-amber-50 p-2 rounded-2xl border border-amber-200">
-              <label class="block text-[9.5px] font-black text-amber-900 mb-0.5 text-center truncate">🛒 ക്രെഡിറ്റ് സെയിൽ</label>
-              <input type="number" step="any" inputmode="decimal" id="fastSaleCredit" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-amber-800" />
-            </div>
-          </div>
-        `;
-      } else {
-        box.innerHTML = `
-          <div class="grid grid-cols-2 gap-2">
-            <div class="bg-emerald-50 p-2.5 rounded-2xl border border-emerald-200">
-              <label class="block text-xs font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് സെയിൽ</label>
-              <input type="number" step="any" inputmode="decimal" id="fastSaleCash" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none text-emerald-800" />
-            </div>
-            <div class="bg-blue-50 p-2.5 rounded-2xl border border-blue-200">
-              <label class="block text-xs font-black text-blue-900 mb-0.5 text-center">🏦 ബാങ്ക് സെയിൽ</label>
-              <input type="number" step="any" inputmode="decimal" id="fastSaleBank" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none text-blue-800" />
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    function onFastCustomerSelected() {
-      const val = document.getElementById("fastSaleCustomerInput").value.trim();
-      const cleanName = cleanPartyName(val);
-      const cust = customersList.find(c => cleanPartyName(c.name) === cleanName);
-      const info = document.getElementById("fastCustInfo");
-
-      if (cust && (cust.type || '').toLowerCase() === 'credit') {
-        let liveBal = parseFloat(cust.opening_balance) || 0;
-        transactionsList.forEach(t => {
-          if (t && cleanPartyName(t.party_name) === cleanName && t.type === 'sale') {
-            liveBal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
-          }
-        });
-        info.innerText = `ലൈവ് ബാലൻസ്: ${liveBal.toLocaleString('en-IN')}`;
-        renderFastSaleInputs('credit');
-      } else {
-        info.innerText = cust ? "ക്യാഷ് കസ്റ്റമർ" : "പുതിയ കസ്റ്റമർ (ക്യാഷ് ആയി സേവ് ആകും)";
-        renderFastSaleInputs('cash');
-      }
-    }
-
-    // PURCHASE INPUTS
+    // ========================================================
+    // TAB 1: PURCHASE LOGIC
+    // ========================================================
     function renderFastPurchaseInputs(type) {
       const box = document.getElementById("fastPurchaseAmountsBox");
       if (!box) return;
@@ -637,6 +653,38 @@
       }
     }
 
+    async function saveFastPurchaseEntry() {
+      let rawName = document.getElementById("fastPurchaseVendorInput").value.trim().toUpperCase();
+      if (!rawName) return alert("വെണ്ടർ പേര് നൽകുക!");
+
+      const cash = parseFloat(document.getElementById("fastPurCash")?.value) || 0;
+      const bank = parseFloat(document.getElementById("fastPurBank")?.value) || 0;
+      const credit = parseFloat(document.getElementById("fastPurCredit")?.value) || 0;
+
+      if (cash <= 0 && bank <= 0 && credit <= 0) return alert("തുക നൽകുക!");
+
+      const date = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const payload = {
+        date: date,
+        type: 'purchase',
+        party_name: rawName,
+        cash_amount: -cash,
+        bank_amount: -bank,
+        credit_amount: credit
+      };
+
+      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
+      transactionsList.unshift(payload);
+      renderFastTotalsAndRecent();
+
+      document.getElementById("fastPurchaseVendorInput").value = "";
+      onFastVendorSelected();
+      alert("പർച്ചേസ് സേവ് ചെയ്തു!");
+    }
+
+    // ========================================================
+    // TAB 2: EXPENSE & SALARY LOGIC
+    // ========================================================
     function onFastUnifiedSelected() {
       const val = document.getElementById("fastUnifiedPartyInput").value.trim();
       const cleanVal = cleanPartyName(val);
@@ -670,64 +718,6 @@
         info.innerText = "";
       }
       if (window.lucide) lucide.createIcons();
-    }
-
-    async function saveFastSaleEntry() {
-      let rawName = document.getElementById("fastSaleCustomerInput").value.trim().toUpperCase();
-      if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
-
-      const cash = parseFloat(document.getElementById("fastSaleCash")?.value) || 0;
-      const bank = parseFloat(document.getElementById("fastSaleBank")?.value) || 0;
-      const credit = parseFloat(document.getElementById("fastSaleCredit")?.value) || 0;
-
-      if (cash <= 0 && bank <= 0 && credit <= 0) return alert("തുക നൽകുക!");
-
-      const date = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
-      const payload = {
-        date: date,
-        type: 'sale',
-        party_name: rawName,
-        cash_amount: cash,
-        bank_amount: bank,
-        credit_amount: credit
-      };
-
-      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
-      transactionsList.unshift(payload);
-      renderFastTotalsAndRecent();
-
-      document.getElementById("fastSaleCustomerInput").value = "SHOPE";
-      onFastCustomerSelected();
-      alert("സെയിൽ സേവ് ചെയ്തു!");
-    }
-
-    async function saveFastPurchaseEntry() {
-      let rawName = document.getElementById("fastPurchaseVendorInput").value.trim().toUpperCase();
-      if (!rawName) return alert("വെണ്ടർ പേര് നൽകുക!");
-
-      const cash = parseFloat(document.getElementById("fastPurCash")?.value) || 0;
-      const bank = parseFloat(document.getElementById("fastPurBank")?.value) || 0;
-      const credit = parseFloat(document.getElementById("fastPurCredit")?.value) || 0;
-
-      if (cash <= 0 && bank <= 0 && credit <= 0) return alert("തുക നൽകുക!");
-
-      const date = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
-      const payload = {
-        date: date,
-        type: 'purchase',
-        party_name: rawName,
-        cash_amount: -cash,
-        bank_amount: -bank,
-        credit_amount: credit
-      };
-
-      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
-      transactionsList.unshift(payload);
-      renderFastTotalsAndRecent();
-
-      document.getElementById("fastPurchaseVendorInput").value = "";
-      onFastVendorSelected();
-      alert("പർച്ചേസ് സേവ് ചെയ്തു!");
     }
 
     async function saveFastUnifiedEntry() {
@@ -764,6 +754,135 @@
       alert("സേവ് ചെയ്തു!");
     }
 
+    // ========================================================
+    // TAB 3: SALE LOGIC (WITH MULTI MADA MACHINE INPUTS)
+    // ========================================================
+    function renderFastSaleInputs(type) {
+      const box = document.getElementById("fastSaleAmountsBox");
+      if (!box) return;
+
+      let madaRowsHtml = "";
+      salesMadaMachines.forEach((m, idx) => {
+        madaRowsHtml += `
+          <div class="flex gap-1 items-center">
+            <input type="text" value="${m.name}" oninput="salesMadaMachines[${idx}].name = this.value" placeholder="മെഷീൻ" class="w-20 p-1.5 rounded-lg border bg-white font-bold text-[11px]" />
+            <input type="number" step="any" inputmode="decimal" value="${m.amount}" oninput="salesMadaMachines[${idx}].amount = this.value;" placeholder="0.00" class="flex-1 p-1.5 text-center font-black rounded-lg border bg-white text-blue-800 text-xs" />
+            ${salesMadaMachines.length > 1 ? `<button type="button" onclick="removeSalesMadaRow(${idx}, '${type}')" class="text-rose-600 font-black p-1">✕</button>` : ''}
+          </div>
+        `;
+      });
+
+      if (type === 'credit') {
+        box.innerHTML = `
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-emerald-50 p-2.5 rounded-2xl border border-emerald-200">
+              <label class="block text-[10px] font-black text-emerald-900 mb-0.5 text-center truncate">💵 ക്യാഷ് റസീറ്റ്</label>
+              <input type="number" step="any" inputmode="decimal" id="fastSaleCash" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-emerald-800" />
+            </div>
+            <div class="bg-amber-50 p-2.5 rounded-2xl border border-amber-200">
+              <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center truncate">🛒 ക്രെഡിറ്റ് സെയിൽ</label>
+              <input type="number" step="any" inputmode="decimal" id="fastSaleCredit" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-amber-800" />
+            </div>
+          </div>
+
+          <div class="bg-blue-50 p-2.5 rounded-2xl border border-blue-200 space-y-1.5">
+            <div class="flex justify-between items-center text-blue-950 font-black text-[10.5px]">
+              <span>🏦 ബാങ്ക് / മാദ മെഷീനുകൾ:</span>
+              <button type="button" onclick="addSalesMadaRow('${type}')" class="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-lg touch-btn">
+                + മാദ ചേർക്കുക
+              </button>
+            </div>
+            <div class="space-y-1">${madaRowsHtml}</div>
+          </div>
+        `;
+      } else {
+        box.innerHTML = `
+          <div class="bg-emerald-50 p-2.5 rounded-2xl border border-emerald-200">
+            <label class="block text-xs font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് സെയിൽ</label>
+            <input type="number" step="any" inputmode="decimal" id="fastSaleCash" placeholder="0.00" class="w-full text-center text-base font-black p-2 rounded-xl border bg-white outline-none text-emerald-800" />
+          </div>
+
+          <div class="bg-blue-50 p-2.5 rounded-2xl border border-blue-200 space-y-1.5">
+            <div class="flex justify-between items-center text-blue-950 font-black text-[11px]">
+              <span>🏦 ബാങ്ക് / മാദ മെഷീനുകൾ:</span>
+              <button type="button" onclick="addSalesMadaRow('${type}')" class="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-lg touch-btn">
+                + മാദ ചേർക്കുക
+              </button>
+            </div>
+            <div class="space-y-1">${madaRowsHtml}</div>
+          </div>
+        `;
+      }
+    }
+
+    function addSalesMadaRow(currentType) {
+      salesMadaMachines.push({ name: `മാദ ${salesMadaMachines.length + 1}`, amount: "" });
+      renderFastSaleInputs(currentType);
+    }
+
+    function removeSalesMadaRow(idx, currentType) {
+      if (salesMadaMachines.length <= 1) return;
+      salesMadaMachines.splice(idx, 1);
+      renderFastSaleInputs(currentType);
+    }
+
+    function onFastCustomerSelected() {
+      const val = document.getElementById("fastSaleCustomerInput").value.trim();
+      const cleanName = cleanPartyName(val);
+      const cust = customersList.find(c => cleanPartyName(c.name) === cleanName);
+      const info = document.getElementById("fastCustInfo");
+
+      if (cust && (cust.type || '').toLowerCase() === 'credit') {
+        let liveBal = parseFloat(cust.opening_balance) || 0;
+        transactionsList.forEach(t => {
+          if (t && cleanPartyName(t.party_name) === cleanName && t.type === 'sale') {
+            liveBal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
+          }
+        });
+        info.innerText = `ലൈവ് ബാലൻസ്: ${liveBal.toLocaleString('en-IN')}`;
+        renderFastSaleInputs('credit');
+      } else {
+        info.innerText = cust ? "ക്യാഷ് കസ്റ്റമർ" : "പുതിയ കസ്റ്റമർ (ക്യാഷ് ആയി സേവ് ആകും)";
+        renderFastSaleInputs('cash');
+      }
+    }
+
+    async function saveFastSaleEntry() {
+      let rawName = document.getElementById("fastSaleCustomerInput").value.trim().toUpperCase();
+      if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
+
+      const cash = parseFloat(document.getElementById("fastSaleCash")?.value) || 0;
+      const credit = parseFloat(document.getElementById("fastSaleCredit")?.value) || 0;
+
+      let bankSum = 0;
+      salesMadaMachines.forEach(m => { bankSum += (parseFloat(m.amount) || 0); });
+
+      if (cash <= 0 && bankSum <= 0 && credit <= 0) return alert("തുക നൽകുക!");
+
+      const date = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const payload = {
+        date: date,
+        type: 'sale',
+        party_name: rawName,
+        cash_amount: cash,
+        bank_amount: bankSum,
+        credit_amount: credit
+      };
+
+      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
+      transactionsList.unshift(payload);
+      renderFastTotalsAndRecent();
+
+      // Reset mada inputs for next sale
+      salesMadaMachines = [ { name: "മാദ 1", amount: "" } ];
+      document.getElementById("fastSaleCustomerInput").value = "SHOPE";
+      onFastCustomerSelected();
+      alert("സെയിൽ സേവ് ചെയ്തു!");
+    }
+
+    // ========================================================
+    // RECENT & TOTALS
+    // ========================================================
     function renderFastTotalsAndRecent() {
       const curDate = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
       let sTot = 0, pTot = 0, eTot = 0;
@@ -810,10 +929,11 @@
     }
 
     // ========================================================
-    // CLOSING & WHATSAPP REPORT MODAL LOGIC (FIXED FLOAT 500)
+    // CLOSING LOGIC (AUTO-PULL + LOCAL EXTRAS + THERMAL PRINT)
     // ========================================================
     function openClosingModal() {
       document.getElementById("closingModal").classList.remove("hidden");
+      populateClosingAutoItems();
       recalculateClosingLiveMath();
       if (window.lucide) lucide.createIcons();
     }
@@ -822,134 +942,253 @@
       document.getElementById("closingModal").classList.add("hidden");
     }
 
-    function addMadaMachineRow() {
-      madaMachinesList.push({ name: `മെഷീൻ ${madaMachinesList.length + 1}`, amount: "" });
-      renderMadaMachinesList();
+    function addManualExtraExpenseRow() {
+      manualClosingExtras.push({ desc: "", amount: "" });
+      renderManualExtraExpenseRows();
       recalculateClosingLiveMath();
     }
 
-    function removeMadaMachineRow(idx) {
-      if (madaMachinesList.length <= 1) return;
-      madaMachinesList.splice(idx, 1);
-      renderMadaMachinesList();
+    function removeManualExtraExpenseRow(idx) {
+      if (manualClosingExtras.length <= 1) return;
+      manualClosingExtras.splice(idx, 1);
+      renderManualExtraExpenseRows();
       recalculateClosingLiveMath();
     }
 
-    function renderMadaMachinesList() {
-      const container = document.getElementById("madaMachinesListContainer");
+    function renderManualExtraExpenseRows() {
+      const container = document.getElementById("manualExtraExpensesContainer");
       if (!container) return;
       let html = "";
-      madaMachinesList.forEach((m, idx) => {
+      manualClosingExtras.forEach((e, idx) => {
         html += `
           <div class="flex gap-1.5 items-center">
-            <input type="text" value="${m.name}" oninput="madaMachinesList[${idx}].name = this.value" placeholder="മെഷീൻ പേര്" class="flex-1 p-1.5 rounded-lg border bg-white font-bold text-xs" />
-            <input type="number" step="any" inputmode="decimal" value="${m.amount}" oninput="madaMachinesList[${idx}].amount = this.value; recalculateClosingLiveMath();" placeholder="0.00" class="w-24 p-1.5 text-center font-black rounded-lg border bg-white text-blue-800 text-xs" />
-            ${madaMachinesList.length > 1 ? `<button type="button" onclick="removeMadaMachineRow(${idx})" class="text-rose-600 font-black p-1">✕</button>` : ''}
+            <input type="text" value="${e.desc}" oninput="manualClosingExtras[${idx}].desc = this.value" placeholder="വിവരണം (ഉദാ: മാനേജർ)" class="flex-1 p-1.5 rounded-lg border bg-white font-bold text-xs" />
+            <input type="number" step="any" inputmode="decimal" value="${e.amount}" oninput="manualClosingExtras[${idx}].amount = this.value; recalculateClosingLiveMath();" placeholder="0.00" class="w-24 p-1.5 text-center font-black rounded-lg border bg-white text-purple-800 text-xs" />
+            ${manualClosingExtras.length > 1 ? `<button type="button" onclick="removeManualExtraExpenseRow(${idx})" class="text-rose-600 font-black p-1">✕</button>` : ''}
           </div>
         `;
       });
       container.innerHTML = html;
     }
 
-    function addDrawerExpenseRow() {
-      drawerExpensesList.push({ desc: "", amount: "" });
-      renderDrawerExpensesList();
-      recalculateClosingLiveMath();
-    }
+    function populateClosingAutoItems() {
+      const curDate = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const purBox = document.getElementById("closeAutoPurListContainer");
+      const expBox = document.getElementById("closeAutoExpListContainer");
 
-    function removeDrawerExpenseRow(idx) {
-      if (drawerExpensesList.length <= 1) return;
-      drawerExpensesList.splice(idx, 1);
-      renderDrawerExpensesList();
-      recalculateClosingLiveMath();
-    }
+      let autoPurTotal = 0;
+      let autoExpTotal = 0;
+      let autoMadaTotal = 0;
 
-    function renderDrawerExpensesList() {
-      const container = document.getElementById("drawerExpensesListContainer");
-      if (!container) return;
-      let html = "";
-      drawerExpensesList.forEach((e, idx) => {
-        html += `
-          <div class="flex gap-1.5 items-center">
-            <input type="text" value="${e.desc}" oninput="drawerExpensesList[${idx}].desc = this.value" placeholder="ചിലവ് വിവരണം" class="flex-1 p-1.5 rounded-lg border bg-white font-bold text-xs" />
-            <input type="number" step="any" inputmode="decimal" value="${e.amount}" oninput="drawerExpensesList[${idx}].amount = this.value; recalculateClosingLiveMath();" placeholder="0.00" class="w-24 p-1.5 text-center font-black rounded-lg border bg-white text-amber-800 text-xs" />
-            ${drawerExpensesList.length > 1 ? `<button type="button" onclick="removeDrawerExpenseRow(${idx})" class="text-rose-600 font-black p-1">✕</button>` : ''}
-          </div>
-        `;
+      let purLines = [];
+      let expLines = [];
+
+      transactionsList.forEach(t => {
+        if (!t) return;
+        const tDate = cleanDate(t.date);
+        if (tDate === curDate) {
+          const cashAmt = Math.abs(parseFloat(t.cash_amount) || 0);
+          const bankAmt = Math.abs(parseFloat(t.bank_amount) || 0);
+
+          if (t.type === 'purchase' && cashAmt > 0) {
+            autoPurTotal += cashAmt;
+            purLines.push(`<div class="flex justify-between py-0.5 border-b last:border-0"><span class="truncate pr-1">${t.party_name}</span><span class="font-bold">${cashAmt.toFixed(2)}</span></div>`);
+          } else if ((t.type === 'expense' || t.type === 'salary') && cashAmt > 0) {
+            autoExpTotal += cashAmt;
+            expLines.push(`<div class="flex justify-between py-0.5 border-b last:border-0"><span class="truncate pr-1">${t.party_name}</span><span class="font-bold">${cashAmt.toFixed(2)}</span></div>`);
+          }
+
+          if (t.type === 'sale' && bankAmt > 0) {
+            autoMadaTotal += bankAmt;
+          }
+        }
       });
-      container.innerHTML = html;
+
+      purBox.innerHTML = purLines.length > 0 ? purLines.join('') : '<div class="text-slate-400">ക്യാഷ് പർച്ചേസ് ഇല്ല</div>';
+      expBox.innerHTML = expLines.length > 0 ? expLines.join('') : '<div class="text-slate-400">ക്യാഷ് ചിലവുകൾ ഇല്ല</div>';
+
+      document.getElementById("closeAutoPurTotalDisplay").innerText = autoPurTotal.toFixed(2);
+      document.getElementById("closeAutoExpTotalDisplay").innerText = autoExpTotal.toFixed(2);
+      document.getElementById("closeTotalBankBizDisplay").innerText = autoMadaTotal.toFixed(2);
     }
 
     function recalculateClosingLiveMath() {
       const physicalCash = parseFloat(document.getElementById("closePhysicalCashInput")?.value) || 0;
-      const floatCash = FIXED_FLOAT_AMOUNT;
+      const autoPurTotal = parseFloat(document.getElementById("closeAutoPurTotalDisplay")?.innerText) || 0;
+      const autoExpTotal = parseFloat(document.getElementById("closeAutoExpTotalDisplay")?.innerText) || 0;
+      const autoMadaTotal = parseFloat(document.getElementById("closeTotalBankBizDisplay")?.innerText) || 0;
 
-      let totalMada = 0;
-      madaMachinesList.forEach(m => { totalMada += (parseFloat(m.amount) || 0); });
+      let manualExtraTotal = 0;
+      manualClosingExtras.forEach(e => { manualExtraTotal += (parseFloat(e.amount) || 0); });
 
-      let totalDrawerExp = 0;
-      drawerExpensesList.forEach(e => { totalDrawerExp += (parseFloat(e.amount) || 0); });
+      // No float deduction: Handover is exact physical cash
+      const handoverCash = physicalCash;
+      const totalCashBiz = physicalCash + autoPurTotal + autoExpTotal + manualExtraTotal;
+      const grandTotalBiz = totalCashBiz + autoMadaTotal;
 
-      const handoverCash = physicalCash - floatCash;
-      const totalCashBiz = physicalCash + totalDrawerExp;
-      const grandTotalBiz = totalCashBiz + totalMada;
-
-      document.getElementById("closeTotalMadaDisplay").innerText = totalMada.toFixed(2);
-      document.getElementById("closeTotalDrawerExpDisplay").innerText = totalDrawerExp.toFixed(2);
+      document.getElementById("closeManualExtraTotalDisplay").innerText = manualExtraTotal.toFixed(2);
       document.getElementById("closeHandoverCashDisplay").innerText = handoverCash.toFixed(2);
       document.getElementById("closeTotalCashBizDisplay").innerText = totalCashBiz.toFixed(2);
-      document.getElementById("closeTotalBankBizDisplay").innerText = totalMada.toFixed(2);
       document.getElementById("closeGrandBizDisplay").innerText = grandTotalBiz.toFixed(2);
     }
 
-    function sendClosingWhatsAppReport() {
+    function generateReceiptPlainTextData() {
       const curDate = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
       const shopName = currentShop ? currentShop.name : "ALNASSR";
-
       const physicalCash = parseFloat(document.getElementById("closePhysicalCashInput")?.value) || 0;
-      const floatCash = FIXED_FLOAT_AMOUNT;
-      const handoverCash = physicalCash - floatCash;
 
-      let totalDrawerExp = 0;
-      let expLines = [];
-      drawerExpensesList.forEach(e => {
-        const amt = parseFloat(e.amount) || 0;
-        if (amt > 0) {
-          totalDrawerExp += amt;
-          expLines.push(`  ▪️ ${e.desc || 'ചിലവ്'}: ${amt.toFixed(2)}`);
+      let autoPurTotal = 0;
+      let autoExpTotal = 0;
+      let autoMadaTotal = 0;
+      let purRows = [];
+      let expRows = [];
+
+      transactionsList.forEach(t => {
+        if (!t) return;
+        const tDate = cleanDate(t.date);
+        if (tDate === curDate) {
+          const cashAmt = Math.abs(parseFloat(t.cash_amount) || 0);
+          const bankAmt = Math.abs(parseFloat(t.bank_amount) || 0);
+
+          if (t.type === 'purchase' && cashAmt > 0) {
+            autoPurTotal += cashAmt;
+            purRows.push({ name: t.party_name, amt: cashAmt });
+          } else if ((t.type === 'expense' || t.type === 'salary') && cashAmt > 0) {
+            autoExpTotal += cashAmt;
+            expRows.push({ name: t.party_name, amt: cashAmt });
+          }
+
+          if (t.type === 'sale' && bankAmt > 0) {
+            autoMadaTotal += bankAmt;
+          }
         }
       });
 
-      let totalMada = 0;
-      madaMachinesList.forEach(m => {
-        const amt = parseFloat(m.amount) || 0;
-        if (amt > 0) totalMada += amt;
+      let manualExtraTotal = 0;
+      let extraRows = [];
+      manualClosingExtras.forEach(e => {
+        const amt = parseFloat(e.amount) || 0;
+        if (amt > 0) {
+          manualExtraTotal += amt;
+          extraRows.push({ name: e.desc || 'അധിക ചിലവ്', amt: amt });
+        }
       });
 
-      const totalCashBiz = physicalCash + totalDrawerExp;
-      const grandTotalBiz = totalCashBiz + totalMada;
+      const totalCashBiz = physicalCash + autoPurTotal + autoExpTotal + manualExtraTotal;
+      const grandTotalBiz = totalCashBiz + autoMadaTotal;
+
+      return {
+        shopName,
+        curDate,
+        handoverCash: physicalCash,
+        purRows,
+        autoPurTotal,
+        expRows,
+        autoExpTotal,
+        extraRows,
+        manualExtraTotal,
+        totalCashBiz,
+        autoMadaTotal,
+        grandTotalBiz
+      };
+    }
+
+    function printThermalReceipt() {
+      const d = generateReceiptPlainTextData();
+      const container = document.getElementById("thermalReceiptContainer");
+
+      let receiptHtml = `
+        <div style="text-align:center;">
+          ================================<br>
+          <b>ALNASSR QUICK POS CLOSING</b><br>
+          തീയതി: ${d.curDate} | ശാഖ: ${d.shopName}<br>
+          ================================
+        </div>
+        <br>
+        <div>
+          <b>കൗണ്ടർ ക്യാഷ് കൈമാറ്റം:</b><br>
+          മാനേജർക്ക് നൽകിയ ക്യാഷ് : ${d.handoverCash.toFixed(2)}<br>
+          --------------------------------
+        </div>
+      `;
+
+      if (d.purRows.length > 0) {
+        receiptHtml += `<div><b>ഡ്രോയർ ക്യാഷ് പർച്ചേസ്:</b><br>`;
+        d.purRows.forEach(r => {
+          receiptHtml += `- ${r.name.substring(0, 16)} : ${r.amt.toFixed(2)}<br>`;
+        });
+        receiptHtml += `ആകെ പർച്ചേസ് : ${d.autoPurTotal.toFixed(2)}<br>--------------------------------</div>`;
+      }
+
+      if (d.expRows.length > 0) {
+        receiptHtml += `<div><b>ഡ്രോയർ ചിലവുകൾ:</b><br>`;
+        d.expRows.forEach(r => {
+          receiptHtml += `- ${r.name.substring(0, 16)} : ${r.amt.toFixed(2)}<br>`;
+        });
+        receiptHtml += `ആകെ ചിലവുകൾ : ${d.autoExpTotal.toFixed(2)}<br>--------------------------------</div>`;
+      }
+
+      if (d.extraRows.length > 0) {
+        receiptHtml += `<div><b>അധിക ചിലവ് & മാനേജർ:</b><br>`;
+        d.extraRows.forEach(r => {
+          receiptHtml += `- ${r.name.substring(0, 16)} : ${r.amt.toFixed(2)}<br>`;
+        });
+        receiptHtml += `ആകെ അധികം : ${d.manualExtraTotal.toFixed(2)}<br>--------------------------------</div>`;
+      }
+
+      receiptHtml += `
+        <div>
+          <b>ഇന്നത്തെ ആകെ ബിസിനസ്സ്:</b><br>
+          ആകെ ക്യാഷ് കച്ചവടം : ${d.totalCashBiz.toFixed(2)}<br>
+          ആകെ ബാങ്ക് (മാദ) : ${d.autoMadaTotal.toFixed(2)}<br>
+          --------------------------------<br>
+          <b>ആകെ ടോട്ടൽ ബിസിനസ്സ് : ${d.grandTotalBiz.toFixed(2)}</b><br>
+          ================================<br>
+          റിപ്പോർട്ട്: ക്യാഷ്യർ
+        </div>
+      `;
+
+      container.innerHTML = receiptHtml;
+      container.classList.remove("hidden");
+      window.print();
+      container.classList.add("hidden");
+    }
+
+    function sendClosingWhatsAppReport() {
+      const d = generateReceiptPlainTextData();
 
       let waText = `*ALNASSR QUICK POS - DAILY CLOSING REPORT*\n` +
-                   `തീയതി: ${curDate} | ഷോപ്പ്: ${shopName}\n` +
+                   `തീയതി: ${d.curDate} | ഷോപ്പ്: ${d.shopName}\n` +
                    `--------------------------------\n` +
                    `*കൗണ്ടർ ക്യാഷ് കൈമാറ്റം:*\n` +
-                   `  ▪️ ക്ലോസിംഗ് സമയത്തെ ക്യാഷ്: ${physicalCash.toFixed(2)}\n` +
-                   `  ▪️ മാറ്റിവെച്ച സ്ഥിരം ഫ്ലോട്ട്: ${floatCash.toFixed(2)}\n` +
-                   `--------------------------------\n` +
-                   `*മാനേജർക്ക് ഏൽപ്പിച്ച അറ്റ ക്യാഷ്: ${handoverCash.toFixed(2)}*\n` +
+                   `*മാനേജർക്ക് നൽകിയ ക്യാഷ്: ${d.handoverCash.toFixed(2)}*\n` +
                    `--------------------------------\n`;
 
-      if (expLines.length > 0) {
-        waText += `*ഡ്രോയറിൽ നിന്ന് ചിലവാക്കിയത്:*\n` +
-                  expLines.join('\n') + `\n` +
-                  `  ആകെ ചിലവുകൾ: ${totalDrawerExp.toFixed(2)}\n` +
+      if (d.purRows.length > 0) {
+        waText += `*ഡ്രോയർ ക്യാഷ് പർച്ചേസ്:*\n`;
+        d.purRows.forEach(r => { waText += `  ▪️ ${r.name}: ${r.amt.toFixed(2)}\n`; });
+        waText += `  ആകെ പർച്ചേസ്: ${d.autoPurTotal.toFixed(2)}\n` +
+                  `--------------------------------\n`;
+      }
+
+      if (d.expRows.length > 0) {
+        waText += `*ഡ്രോയർ ക്യാഷ് ചിലവുകൾ:*\n`;
+        d.expRows.forEach(r => { waText += `  ▪️ ${r.name}: ${r.amt.toFixed(2)}\n`; });
+        waText += `  ആകെ ചിലവുകൾ: ${d.autoExpTotal.toFixed(2)}\n` +
+                  `--------------------------------\n`;
+      }
+
+      if (d.extraRows.length > 0) {
+        waText += `*അധിക ചിലവ് & മാനേജർ വാങ്ങിയത്:*\n`;
+        d.extraRows.forEach(r => { waText += `  ▪️ ${r.name}: ${r.amt.toFixed(2)}\n`; });
+        waText += `  ആകെ അധിക ചിലവുകൾ: ${d.manualExtraTotal.toFixed(2)}\n` +
                   `--------------------------------\n`;
       }
 
       waText += `*ഇന്നത്തെ ആകെ ബിസിനസ്സ് സംഗ്രഹം:*\n` +
-                `  ▪️ ആകെ ക്യാഷ്: ${totalCashBiz.toFixed(2)}\n` +
-                `  ▪️ ആകെ ബാങ്ക് (മാദ): ${totalMada.toFixed(2)}\n` +
-                `*ആകെ ടോട്ടൽ: ${grandTotalBiz.toFixed(2)}*\n` +
+                `  ▪️ ആകെ ക്യാഷ് കച്ചവടം: ${d.totalCashBiz.toFixed(2)}\n` +
+                `  ▪️ ആകെ ബാങ്ക് (മാദ): ${d.autoMadaTotal.toFixed(2)}\n` +
+                `*ആകെ ടോട്ടൽ: ${d.grandTotalBiz.toFixed(2)}*\n` +
                 `--------------------------------\n` +
                 `തയ്യാറാക്കിയത്: ക്യാഷ്യർ`;
 
