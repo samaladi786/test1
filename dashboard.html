@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>ALNASSR മൾട്ടി-ഷോപ്പ് ഡാഷ്‌ബോർഡ്</title>
+
+  <!-- PWA & MOBILE ICONS -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#0f172a">
+
+  <!-- TAILWIND, ICONS & SUPABASE -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- CENTRAL CONFIG FILE -->
+  <script src="config.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
+    body { 
+      font-family: 'Manrope', 'Noto Sans Malayalam', sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    .touch-btn:active { transform: scale(0.97); }
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col pb-10">
+
+  <!-- 1. STICKY TOP HEADER -->
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-4 py-3">
+    <div class="flex items-center justify-between gap-2 max-w-lg mx-auto">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-black">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-sm font-black tracking-wide text-white">ALNASSR സൂപ്പർ ഡാഷ്‌ബോർഡ്</h1>
+          <p class="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            എല്ലാ ഷോപ്പുകളുടെയും ലൈവ് സ്റ്റാറ്റസ്
+          </p>
+        </div>
+      </div>
+
+      <button onclick="fetchAllShopsData()" title="റിഫ്രഷ്" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 text-xs touch-btn cursor-pointer shadow">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. DATE & MODE NAVIGATION BAR -->
+  <div class="bg-slate-800 text-white px-3 py-2 border-b border-slate-700 shadow-inner sticky top-[57px] z-30">
+    <div class="max-w-lg mx-auto space-y-2">
+      <!-- DATE CONTROLS -->
+      <div class="flex items-center justify-between gap-1.5">
+        <button onclick="changeDate(-1)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-black px-2.5 py-1.5 rounded-xl border border-slate-600 touch-btn cursor-pointer">
+          ◀
+        </button>
+
+        <input 
+          type="date" 
+          id="dashFilterDate" 
+          onchange="onDateChanged(this.value)" 
+          class="bg-slate-900 text-emerald-400 font-black px-3 py-1.5 rounded-xl border border-slate-600 text-center text-xs outline-none cursor-pointer flex-1 shadow-inner" 
+        />
+
+        <button onclick="changeDate(1)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-black px-2.5 py-1.5 rounded-xl border border-slate-600 touch-btn cursor-pointer">
+          ▶
+        </button>
+
+        <button onclick="setTodayDate()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-3 py-1.5 rounded-xl border border-emerald-500 touch-btn shadow cursor-pointer">
+          ഇന്ന്
+        </button>
+      </div>
+
+      <!-- VIEW TOGGLE: DAILY VS MONTHLY -->
+      <div class="flex bg-slate-900/80 p-0.5 rounded-xl border border-slate-700 text-xs font-black text-center">
+        <button id="viewModeDailyBtn" onclick="switchViewMode('daily')" class="flex-1 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer">
+          ഡെയ്‌ലി (Daily)
+        </button>
+        <button id="viewModeMonthlyBtn" onclick="switchViewMode('monthly')" class="flex-1 py-1 rounded-lg text-slate-400 transition cursor-pointer">
+          മന്ത്ലി (Monthly)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MAIN CONTENT WORKSPACE -->
+  <main class="w-full max-w-lg mx-auto px-3 pt-3 flex-1 space-y-3.5">
+
+    <!-- ALL SHOPS COMBINED MASTER CARD -->
+    <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 rounded-3xl p-4 text-white shadow-xl border border-slate-700 space-y-3">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300">ആകെ സംയോജിത കണക്ക് (All Shops)</span>
+        </div>
+        <span id="masterDateLabel" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">--</span>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-emerald-950/40 p-2.5 rounded-2xl border border-emerald-500/30">
+          <span class="text-[9px] text-emerald-300 block font-black uppercase">ആകെ സെയിൽസ്</span>
+          <h2 id="masterTotalSales" class="text-sm font-black text-emerald-400 mt-0.5">0</h2>
+        </div>
+        <div class="bg-blue-950/40 p-2.5 rounded-2xl border border-blue-500/30">
+          <span class="text-[9px] text-blue-300 block font-black uppercase">ആകെ പർച്ചേസ്</span>
+          <h2 id="masterTotalPurchases" class="text-sm font-black text-blue-400 mt-0.5">0</h2>
+        </div>
+        <div class="bg-amber-950/40 p-2.5 rounded-2xl border border-amber-500/30">
+          <span class="text-[9px] text-amber-300 block font-black uppercase">ആകെ ചിലവുകൾ</span>
+          <h2 id="masterTotalExpenses" class="text-sm font-black text-amber-400 mt-0.5">0</h2>
+        </div>
+      </div>
+
+      <!-- MASTER LIQUID FUNDS AS OF SELECTED DATE -->
+      <div class="bg-white/5 rounded-2xl p-2.5 border border-white/10 flex items-center justify-between text-xs">
+        <div>
+          <span class="text-[9px] text-slate-400 font-extrabold block uppercase">ആകെ ലിക്വിഡ് ഫണ്ട് (അന്ന് കയ്യിലുള്ളത്)</span>
+          <span id="masterTotalLiquid" class="text-sm font-black text-emerald-400 font-mono">0.00 SR</span>
+        </div>
+        <div class="text-right text-[10px] text-slate-300 font-bold space-y-0.5">
+          <div id="masterTotalCash">💵 ക്യാഷ്: 0</div>
+          <div id="masterTotalBank">🏦 ബാങ്ക്: 0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC SHOP CARDS TITLE -->
+    <div class="flex items-center justify-between px-1">
+      <h2 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+        <i data-lucide="store" class="w-4 h-4 text-emerald-600"></i> കടകൾ തിരിച്ചുള്ള കാർഡുകൾ
+      </h2>
+      <span id="shopsCountBadge" class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-black">0 കടകൾ</span>
+    </div>
+
+    <!-- CONTAINER FOR DYNAMIC SHOP CARDS -->
+    <div id="shopsContainer" class="space-y-3">
+      <div class="p-8 text-center text-slate-400 text-xs font-bold">
+        <i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-600"></i>
+        ഷോപ്പുകളിലെ വിവരങ്ങൾ ശേഖരിക്കുന്നു...
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 1: INDIVIDUAL SHOP DETAILED FINANCIAL SUMMARY      -->
+  <!-- ======================================================== -->
+  <div id="shopDetailModal" class="fixed inset-0 bg-slate-950/80 flex items-center justify-center z-[9999] hidden p-3 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl border p-4 space-y-3.5 my-auto max-h-[94vh] overflow-y-auto relative">
+      
+      <!-- HEADER -->
+      <div class="flex items-center justify-between border-b pb-2">
+        <div class="flex items-center gap-2">
+          <div id="modalShopLogoBox" class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-800 border overflow-hidden">
+            🏪
+          </div>
+          <div>
+            <h3 id="modalShopTitle" class="text-sm font-black text-slate-900 uppercase">ALNASSR</h3>
+            <p id="modalShopPeriodLabel" class="text-[10px] font-bold text-slate-500">തീയതി: --</p>
+          </div>
+        </div>
+        <button onclick="closeShopDetailModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-sm flex items-center justify-center cursor-pointer shadow-sm">✕</button>
+      </div>
+
+      <!-- BOX 1: SALES BREAKDOWN -->
+      <div class="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-200 space-y-1.5 text-xs font-bold">
+        <div class="flex justify-between items-center border-b border-emerald-200/60 pb-1">
+          <span class="text-emerald-950 font-black flex items-center gap-1"><i data-lucide="shopping-cart" class="w-3.5 h-3.5 text-emerald-600"></i> സെയിൽസ് സംഗ്രഹം</span>
+          <span id="dtlSaleTotal" class="text-sm font-black text-emerald-800">0</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1 text-[11px] pt-0.5 text-center">
+          <div><span class="text-[9px] text-slate-500 block uppercase">💵 ക്യാഷ്</span><span id="dtlSaleCash" class="text-slate-800 font-black">0</span></div>
+          <div><span class="text-[9px] text-slate-500 block uppercase">🏦 ബാങ്ക്</span><span id="dtlSaleBank" class="text-slate-800 font-black">0</span></div>
+          <div><span class="text-[9px] text-slate-500 block uppercase">🛒 ക്രെഡിറ്റ്</span><span id="dtlSaleCredit" class="text-amber-800 font-black">0</span></div>
+        </div>
+      </div>
+
+      <!-- BOX 2: PURCHASE BREAKDOWN -->
+      <div class="bg-blue-50/70 p-3 rounded-2xl border border-blue-200 space-y-1.5 text-xs font-bold">
+        <div class="flex justify-between items-center border-b border-blue-200/60 pb-1">
+          <span class="text-blue-950 font-black flex items-center gap-1"><i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-blue-600"></i> പർച്ചേസ് സംഗ്രഹം</span>
+          <span id="dtlPurTotal" class="text-sm font-black text-blue-800">0</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1 text-[11px] pt-0.5 text-center">
+          <div><span class="text-[9px] text-slate-500 block uppercase">💵 ക്യാഷ്</span><span id="dtlPurCash" class="text-slate-800 font-black">0</span></div>
+          <div><span class="text-[9px] text-slate-500 block uppercase">🏦 ബാങ്ക്</span><span id="dtlPurBank" class="text-slate-800 font-black">0</span></div>
+          <div><span class="text-[9px] text-slate-500 block uppercase">🚚 ക്രെഡിറ്റ്</span><span id="dtlPurCredit" class="text-indigo-800 font-black">0</span></div>
+        </div>
+      </div>
+
+      <!-- BOX 3: EXPENSE & SALARY -->
+      <div class="bg-amber-50/70 p-3 rounded-2xl border border-amber-200 space-y-1.5 text-xs font-bold">
+        <div class="flex justify-between items-center border-b border-amber-200/60 pb-1">
+          <span class="text-amber-950 font-black flex items-center gap-1"><i data-lucide="receipt" class="w-3.5 h-3.5 text-amber-600"></i> ചിലവുകൾ & സാലറി</span>
+          <span id="dtlOutflowTotal" class="text-sm font-black text-amber-800">0</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-[11px] pt-0.5">
+          <div class="flex justify-between"><span class="text-slate-600">⚡ ഷോപ്പ് ചിലവുകൾ:</span><span id="dtlExpensesOnly" class="text-slate-900 font-black">0</span></div>
+          <div class="flex justify-between"><span class="text-slate-600">👥 സാലറി നൽകിയത്:</span><span id="dtlSalaryOnly" class="text-purple-900 font-black">0</span></div>
+        </div>
+      </div>
+
+      <!-- BOX 4: HISTORICAL LIQUID FUNDS AS OF DATE -->
+      <div class="bg-slate-900 text-white p-3 rounded-2xl shadow-inner space-y-1.5 text-xs font-bold">
+        <div class="flex justify-between items-center border-b border-white/10 pb-1">
+          <span class="text-slate-300 font-black flex items-center gap-1"><i data-lucide="wallet" class="w-3.5 h-3.5 text-emerald-400"></i> അന്നത്തെ ലിക്വിഡ് ഫണ്ട് നില</span>
+          <span id="dtlLiquidTotal" class="text-sm font-black text-emerald-400 font-mono">0.00</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 pt-0.5">
+          <div>💵 കൗണ്ടർ ക്യാഷ്: <span id="dtlLiquidCash" class="font-black text-white">0</span></div>
+          <div>🏦 ബാങ്ക് ബാലൻസ്: <span id="dtlLiquidBank" class="font-black text-white">0</span></div>
+        </div>
+      </div>
+
+      <!-- BOX 5: OUTSTANDINGS & BALANCES (CLICKABLE POPUP TRIGGERS) -->
+      <div class="space-y-1.5">
+        <span class="text-[10px] font-black uppercase text-slate-500 tracking-wider block px-1">
+          📌 ആകെ കുടിശ്ശികകൾ (വിശദാംശങ്ങൾക്ക് ക്ലിക്ക് ചെയ്യുക)
+        </span>
+        <div class="grid grid-cols-2 gap-2">
+          
+          <!-- CUSTOMER OUTSTANDING -->
+          <div onclick="openRankingModal('customer')" class="bg-teal-50 hover:bg-teal-100 p-2.5 rounded-2xl border border-teal-200 cursor-pointer transition touch-btn space-y-0.5">
+            <span class="text-[9.5px] font-black text-teal-900 uppercase flex items-center justify-between">
+              <span>🔺 കസ്റ്റമർ ബാക്കി</span> <i data-lucide="chevron-right" class="w-3 h-3 text-teal-600"></i>
+            </span>
+            <span id="dtlDueCustomer" class="text-xs font-black text-teal-800 block">0</span>
+          </div>
+
+          <!-- VENDOR PAYABLE -->
+          <div onclick="openRankingModal('vendor')" class="bg-rose-50 hover:bg-rose-100 p-2.5 rounded-2xl border border-rose-200 cursor-pointer transition touch-btn space-y-0.5">
+            <span class="text-[9.5px] font-black text-rose-900 uppercase flex items-center justify-between">
+              <span>🔻 വെണ്ടർ ബാക്കി</span> <i data-lucide="chevron-right" class="w-3 h-3 text-rose-600"></i>
+            </span>
+            <span id="dtlDueVendor" class="text-xs font-black text-rose-800 block">0</span>
+          </div>
+
+          <!-- STAFF SALARY DUE -->
+          <div onclick="openRankingModal('employee')" class="bg-purple-50 hover:bg-purple-100 p-2.5 rounded-2xl border border-purple-200 cursor-pointer transition touch-btn space-y-0.5">
+            <span class="text-[9.5px] font-black text-purple-900 uppercase flex items-center justify-between">
+              <span>👥 സാലറി ബാക്കി</span> <i data-lucide="chevron-right" class="w-3 h-3 text-purple-600"></i>
+            </span>
+            <span id="dtlDueSalary" class="text-xs font-black text-purple-800 block">0</span>
+          </div>
+
+          <!-- UTILITY BILLS DUE -->
+          <div onclick="openRankingModal('utility')" class="bg-amber-50 hover:bg-amber-100 p-2.5 rounded-2xl border border-amber-200 cursor-pointer transition touch-btn space-y-0.5">
+            <span class="text-[9.5px] font-black text-amber-900 uppercase flex items-center justify-between">
+              <span>⚡ ബില്ല് കുടിശ്ശിക</span> <i data-lucide="chevron-right" class="w-3 h-3 text-amber-600"></i>
+            </span>
+            <span id="dtlDueUtility" class="text-xs font-black text-amber-800 block">0</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeShopDetailModal()" class="w-full py-2.5 bg-slate-900 text-white font-bold rounded-xl text-xs cursor-pointer shadow">
+          തിരികെ പോകുക
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 2: RANKING BREAKDOWN POPUP (SORTED DESCENDING)     -->
+  <!-- ======================================================== -->
+  <div id="rankingDetailModal" class="fixed inset-0 bg-slate-950/85 flex items-center justify-center z-[99999] hidden p-3 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-sm w-full bg-white rounded-3xl shadow-2xl border p-4 space-y-3 my-auto max-h-[90vh] overflow-y-auto relative">
+      
+      <!-- POPUP HEADER -->
+      <div class="flex items-center justify-between border-b pb-2">
+        <div>
+          <h3 id="rankingModalTitle" class="text-xs font-black text-slate-900">കുടിശ്ശിക വിവരങ്ങൾ</h3>
+          <p id="rankingModalSubtitle" class="text-[9.5px] font-bold text-slate-500">കൂടുതലുള്ളവർ മുകളിൽ (Descending)</p>
+        </div>
+        <button onclick="closeRankingModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-xs flex items-center justify-center cursor-pointer">✕</button>
+      </div>
+
+      <!-- TOTAL BANNER -->
+      <div class="bg-slate-100 p-2 rounded-xl flex items-center justify-between text-xs font-black">
+        <span class="text-slate-600 uppercase text-[10px]">ആകെ തുക:</span>
+        <span id="rankingModalGrandTotal" class="text-slate-950 text-sm">0 SR</span>
+      </div>
+
+      <!-- SORTED LIST CONTAINER -->
+      <div id="rankingListContainer" class="space-y-1.5 max-h-[58vh] overflow-y-auto pr-1">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeRankingModal()" class="w-full py-2 bg-slate-900 text-white font-bold rounded-xl text-xs cursor-pointer">
+          ക്ലോസ് ചെയ്യുക
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- JAVASCRIPT ENGINE FOR MULTI-SHOP DASHBOARD               -->
+  <!-- ======================================================== -->
+  <script>
+    const SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : [];
+    let shopsDataStore = {}; // Holds processed metrics per shop
+    let activeModalShopId = null;
+    let currentViewMode = 'daily'; // 'daily' or 'monthly'
+
+    // SAUDI BUSINESS DATE (6:00 AM CUT-OFF SYNC)
+    function getSaudiBusinessDate() {
+      try {
+        const now = new Date();
+        const saudiTime = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
+        if (saudiTime.getHours() < 6) {
+          saudiTime.setDate(saudiTime.getDate() - 1);
+        }
+        const y = saudiTime.getFullYear();
+        const m = String(saudiTime.getMonth() + 1).padStart(2, '0');
+        const d = String(saudiTime.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      } catch(e) {
+        return new Date().toISOString().split('T')[0];
+      }
+    }
+
+    function getSelectedDate() {
+      const dt = document.getElementById("dashFilterDate");
+      return (dt && dt.value) ? dt.value : getSaudiBusinessDate();
+    }
+
+    function setTodayDate() {
+      const today = getSaudiBusinessDate();
+      const dt = document.getElementById("dashFilterDate");
+      if (dt) dt.value = today;
+      fetchAllShopsData();
+    }
+
+    function onDateChanged(val) {
+      if (!val) {
+        const dt = document.getElementById("dashFilterDate");
+        if (dt) dt.value = getSaudiBusinessDate();
+      }
+      fetchAllShopsData();
+    }
+
+    function changeDate(delta) {
+      const dtInput = document.getElementById("dashFilterDate");
+      let currentStr = (dtInput && dtInput.value) ? dtInput.value : getSaudiBusinessDate();
+      let d = parseToDateObj(currentStr);
+      d.setDate(d.getDate() + delta);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      if (dtInput) dtInput.value = `${y}-${m}-${day}`;
+      fetchAllShopsData();
+    }
+
+    function switchViewMode(mode) {
+      currentViewMode = mode;
+      const dBtn = document.getElementById("viewModeDailyBtn");
+      const mBtn = document.getElementById("viewModeMonthlyBtn");
+
+      if (mode === 'daily') {
+        dBtn.className = "flex-1 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer";
+        mBtn.className = "flex-1 py-1 rounded-lg text-slate-400 transition cursor-pointer";
+      } else {
+        mBtn.className = "flex-1 py-1 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer";
+        dBtn.className = "flex-1 py-1 rounded-lg text-slate-400 transition cursor-pointer";
+      }
+      fetchAllShopsData();
+    }
+
+    function cleanPartyName(str) {
+      if (!str) return '';
+      return String(str).split(' (')[0].replace(/^Staff:\s*/i, '').trim().toLowerCase();
+    }
+
+    function cleanDate(d) {
+      if (!d) return '';
+      return String(d).split('T')[0].split(' ')[0].replace(/\//g, '-').trim();
+    }
+
+    function parseToDateObj(dStr) {
+      if (!dStr) return new Date("2026-01-01");
+      if (dStr instanceof Date) return dStr;
+      let s = String(dStr).split('T')[0].trim();
+      if (s.includes('/')) {
+        let parts = s.split('/');
+        if (parts[0].length === 4) return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        else if (parts[2].length === 4) return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+      }
+      let parts = s.split('-').map(Number);
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    // SALARY ENGINE FOR AS-OF-DATE ACCRUAL
+    function getCycleStartDate(joinDate, cycleIndex) {
+      let d = new Date(joinDate.getFullYear(), joinDate.getMonth() + cycleIndex, joinDate.getDate());
+      let expectedMonth = (joinDate.getMonth() + cycleIndex) % 12;
+      if (expectedMonth < 0) expectedMonth += 12;
+      while (d.getMonth() !== expectedMonth) d.setDate(d.getDate() - 1);
+      return d;
+    }
+
+    function calculateEmployeeAccruedSalary(emp, asOfDateStr) {
+      if (!emp) return 0;
+      const monthlySalary = parseFloat(emp.monthly_salary) || 0;
+      const baseAdv = parseFloat(emp.opening_advance || emp.opening_balance) || 0;
+      if (!monthlySalary || !emp.joining_date) return baseAdv;
+
+      try {
+        const joinD = parseToDateObj(emp.joining_date);
+        if (isNaN(joinD.getTime())) return baseAdv;
+
+        let targetD = parseToDateObj(asOfDateStr);
+        if (isNaN(targetD.getTime())) targetD = new Date();
+
+        const isStopped = (emp.status === 'stopped' || emp.status === 'left');
+        if (isStopped && emp.stop_date) {
+          const stopD = parseToDateObj(emp.stop_date);
+          if (!isNaN(stopD.getTime()) && stopD < targetD) targetD = stopD;
+        }
+
+        if (targetD < joinD) return baseAdv;
+
+        let monthsDiff = (targetD.getFullYear() - joinD.getFullYear()) * 12 + (targetD.getMonth() - joinD.getMonth());
+        if (targetD.getDate() < joinD.getDate()) monthsDiff--;
+        let k = Math.max(0, monthsDiff);
+        let guard = 0;
+        while (k < 360 && guard < 400) {
+          guard++;
+          let nextCycle = getCycleStartDate(joinD, k + 1);
+          if (targetD >= nextCycle) k++;
+          else break;
+        }
+
+        let totalSalary = baseAdv + (k * monthlySalary);
+
+        if (isStopped) {
+          let curCycle = getCycleStartDate(joinD, k);
+          let nxtCycle = getCycleStartDate(joinD, k + 1);
+          let curCycleEnd = new Date(nxtCycle);
+          curCycleEnd.setDate(curCycleEnd.getDate() - 1);
+
+          if (targetD >= curCycle && targetD <= curCycleEnd) {
+            let diffMs = targetD.getTime() - curCycle.getTime();
+            let daysWorked = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+            let daysInMonth = new Date(targetD.getFullYear(), targetD.getMonth() + 1, 0).getDate();
+            let dailyRate = monthlySalary / daysInMonth;
+            totalSalary += Math.round(dailyRate * daysWorked * 100) / 100;
+          }
+        }
+        return totalSalary;
+      } catch (e) {
+        return baseAdv;
+      }
+    }
+
+    // ========================================================
+    // FETCH ALL SHOPS DATA SIMULTANEOUSLY
+    // ========================================================
+    async function fetchAllShopsData() {
+      const container = document.getElementById("shopsContainer");
+      if (!container) return;
+
+      const selDate = getSelectedDate();
+      const selMonth = selDate.substring(0, 7);
+
+      document.getElementById("masterDateLabel").innerText = (currentViewMode === 'daily') ? `തീയതി: ${selDate}` : `മാസം: ${selMonth}`;
+      document.getElementById("shopsCountBadge").innerText = `${SHOPS.length} കടകൾ`;
+
+      let masterSales = 0, masterPur = 0, masterExp = 0, masterCash = 0, masterBank = 0;
+
+      container.innerHTML = `
+        <div class="p-8 text-center text-slate-400 text-xs font-bold">
+          <i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-600"></i>
+          എല്ലാ കടകളിലെയും ഡാറ്റ തത്സമയം പരിശോധിക്കുന്നു...
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+
+      // Process each shop in parallel
+      const shopPromises = SHOPS.map(async (shop) => {
+        try {
+          const client = window.supabase.createClient(shop.url, shop.key);
+          const [cRes, vRes, eRes, expRes, tRes, sRes] = await Promise.all([
+            client.from('customers').select('*'),
+            client.from('vendors').select('*'),
+            client.from('employees').select('*'),
+            client.from('expenses_master').select('*'),
+            client.from('transactions').select('*').order('date', { ascending: true }),
+            client.from('app_settings').select('*')
+          ]);
+
+          const customers = cRes.data || [];
+          const vendors = vRes.data || [];
+          const employees = eRes.data || [];
+          const expensesMaster = expRes.data || [];
+          const txns = tRes.data || [];
+
+          let openCash = 0, openBank = 0;
+          if (sRes.data && sRes.data[0]) {
+            openCash = parseFloat(sRes.data[0].opening_cash) || 0;
+            openBank = parseFloat(sRes.data[0].opening_bank) || 0;
+          }
+
+          // Target Condition for Sales/Pur/Expense period filter
+          const dateMatch = (tDateStr) => {
+            const cleanD = cleanDate(tDateStr);
+            return (currentViewMode === 'daily') ? (cleanD === selDate) : cleanD.startsWith(selMonth);
+          };
+
+          // HISTORICAL AS-OF-DATE CUTOFF: <= selDate
+          const asOfCutoff = (tDateStr) => {
+            const cleanD = cleanDate(tDateStr);
+            return cleanD <= selDate;
+          };
+
+          let saleCash = 0, saleBank = 0, saleCredit = 0;
+          let purCash = 0, purBank = 0, purCredit = 0;
+          let expTotal = 0, salTotal = 0;
+
+          // Liquid Funds As Of Date
+          let curCashAsOf = openCash;
+          let curBankAsOf = openBank;
+
+          txns.forEach(t => {
+            if (!t) return;
+            const tDate = cleanDate(t.date);
+
+            // 1. Calculate As-Of Liquid Cash strictly up to selected date
+            if (asOfCutoff(t.date)) {
+              curCashAsOf += (parseFloat(t.cash_amount) || 0);
+              curBankAsOf += (parseFloat(t.bank_amount) || 0);
+            }
+
+            // 2. Calculate Period metrics (Daily / Monthly)
+            if (dateMatch(t.date)) {
+              const cAmt = Math.abs(parseFloat(t.cash_amount) || 0);
+              const bAmt = Math.abs(parseFloat(t.bank_amount) || 0);
+              const crAmt = parseFloat(t.credit_amount) || 0;
+
+              if (t.type === 'sale') {
+                const cClean = cleanPartyName(t.party_name);
+                const cust = customers.find(c => cleanPartyName(c.name) === cClean);
+                const isCr = cust && (cust.type || '').toLowerCase() === 'credit';
+                if (isCr) {
+                  saleCredit += crAmt;
+                } else {
+                  saleCash += cAmt;
+                  saleBank += bAmt;
+                  saleCredit += crAmt;
+                }
+              } else if (t.type === 'purchase') {
+                const vClean = cleanPartyName(t.party_name);
+                const vend = vendors.find(v => cleanPartyName(v.name) === vClean);
+                const isCr = vend && (vend.type || '').toLowerCase() === 'credit';
+                if (isCr) {
+                  purCredit += crAmt;
+                } else {
+                  purCash += cAmt;
+                  purBank += bAmt;
+                  purCredit += crAmt;
+                }
+              } else if (t.type === 'expense') {
+                expTotal += (cAmt + bAmt);
+              } else if (t.type === 'salary') {
+                let rawC = parseFloat(t.cash_amount) || 0;
+                let rawB = parseFloat(t.bank_amount) || 0;
+                if (rawC <= 0 && rawB <= 0) salTotal += (Math.abs(rawC) + Math.abs(rawB));
+              }
+            }
+          });
+
+          // 3. Outstandings As Of Selected Date (Itemized with ranking)
+          // CUSTOMER DUE LIST
+          let customerRankList = [];
+          customers.forEach(cust => {
+            if (cust && (cust.type || '').toLowerCase() === 'credit') {
+              let bal = parseFloat(cust.opening_balance) || 0;
+              const cClean = cleanPartyName(cust.name);
+              txns.forEach(t => {
+                if (t && t.type === 'sale' && asOfCutoff(t.date) && cleanPartyName(t.party_name) === cClean) {
+                  bal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
+                }
+              });
+              if (Math.abs(bal) > 0.01) {
+                customerRankList.push({ name: cust.name, amount: bal });
+              }
+            }
+          });
+          customerRankList.sort((a, b) => b.amount - a.amount);
+          const totalCustomerDue = customerRankList.reduce((sum, item) => sum + item.amount, 0);
+
+          // VENDOR PAYABLE LIST
+          let vendorRankList = [];
+          vendors.forEach(vend => {
+            if (vend && (vend.type || '').toLowerCase() === 'credit') {
+              let bal = parseFloat(vend.opening_balance) || 0;
+              const vClean = cleanPartyName(vend.name);
+              txns.forEach(t => {
+                if (t && t.type === 'purchase' && asOfCutoff(t.date) && cleanPartyName(t.party_name) === vClean) {
+                  bal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
+                }
+              });
+              if (Math.abs(bal) > 0.01) {
+                vendorRankList.push({ name: vend.name, amount: bal });
+              }
+            }
+          });
+          vendorRankList.sort((a, b) => b.amount - a.amount);
+          const totalVendorPayable = vendorRankList.reduce((sum, item) => sum + item.amount, 0);
+
+          // EMPLOYEE SALARY DUE LIST
+          let employeeRankList = [];
+          employees.forEach(emp => {
+            const accrued = calculateEmployeeAccruedSalary(emp, selDate);
+            const eClean = cleanPartyName(emp.name);
+            let paid = 0;
+            txns.forEach(t => {
+              if (t && t.type === 'salary' && asOfCutoff(t.date) && cleanPartyName(t.party_name).includes(eClean)) {
+                let cAmt = parseFloat(t.cash_amount) || 0;
+                let bAmt = parseFloat(t.bank_amount) || 0;
+                paid += (-cAmt - bAmt);
+              }
+            });
+            let bal = accrued - paid;
+            if (Math.abs(bal) > 0.01) {
+              employeeRankList.push({ name: emp.name, amount: bal });
+            }
+          });
+          employeeRankList.sort((a, b) => b.amount - a.amount);
+          const totalStaffDue = employeeRankList.reduce((sum, item) => sum + item.amount, 0);
+
+          // UTILITY BILLS DUE LIST
+          let utilityRankList = [];
+          expensesMaster.forEach(ex => {
+            let bal = parseFloat(ex.opening_balance) || 0;
+            const exClean = cleanPartyName(ex.name);
+            txns.forEach(t => {
+              if (t && asOfCutoff(t.date)) {
+                const tPartyClean = cleanPartyName(t.party_name);
+                if (tPartyClean.startsWith(exClean) || tPartyClean === exClean) {
+                  if (t.type === 'expense_bill') {
+                    bal += (parseFloat(t.credit_amount) || 0);
+                  } else if (t.type === 'expense') {
+                    bal -= (Math.abs(parseFloat(t.cash_amount) || 0) + Math.abs(parseFloat(t.bank_amount) || 0));
+                  }
+                }
+              }
+            });
+            if (Math.abs(bal) > 0.01) {
+              utilityRankList.push({ name: ex.name, amount: bal });
+            }
+          });
+          utilityRankList.sort((a, b) => b.amount - a.amount);
+          const totalUtilityDue = utilityRankList.reduce((sum, item) => sum + item.amount, 0);
+
+          const totSale = saleCash + saleBank + saleCredit;
+          const totPur = purCash + purBank + purCredit;
+          const totOutflow = expTotal + salTotal;
+          const totLiquid = curCashAsOf + curBankAsOf;
+
+          return {
+            id: shop.id,
+            name: shop.name,
+            logo: shop.logo,
+            totSale, saleCash, saleBank, saleCredit,
+            totPur, purCash, purBank, purCredit,
+            totOutflow, expTotal, salTotal,
+            curCashAsOf, curBankAsOf, totLiquid,
+            totalCustomerDue, customerRankList,
+            totalVendorPayable, vendorRankList,
+            totalStaffDue, employeeRankList,
+            totalUtilityDue, utilityRankList
+          };
+        } catch (err) {
+          console.error(`Error loading shop ${shop.name}:`, err);
+          return null;
+        }
+      });
+
+      const results = await Promise.all(shopPromises);
+      let cardsHtml = "";
+
+      results.forEach(res => {
+        if (!res) return;
+        shopsDataStore[res.id] = res;
+
+        masterSales += res.totSale;
+        masterPur += res.totPur;
+        masterExp += res.totOutflow;
+        masterCash += res.curCashAsOf;
+        masterBank += res.curBankAsOf;
+
+        // SHOP CARD HTML
+        cardsHtml += `
+          <div onclick="openShopDetailModal('${res.id}')" class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 hover:border-emerald-500 cursor-pointer transition touch-btn space-y-3">
+            <div class="flex items-center justify-between border-b pb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-800 border overflow-hidden">
+                  ${res.logo ? `<img src="${res.logo}" class="w-full h-full object-cover"/>` : '🏪'}
+                </div>
+                <div>
+                  <h3 class="text-xs font-black text-slate-900 uppercase">${res.name}</h3>
+                  <span class="text-[9px] text-emerald-700 font-extrabold">ടാപ്പ് ചെയ്ത് വിശദാംശങ്ങൾ കാണുക</span>
+                </div>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+            </div>
+
+            <!-- KEY 3 PILLARS: SALE | PUR | EXP -->
+            <div class="grid grid-cols-3 gap-1.5 text-center">
+              <div class="bg-emerald-50 p-2 rounded-xl border border-emerald-100">
+                <span class="text-[8.5px] text-emerald-800 block uppercase font-bold">സെയിൽസ്</span>
+                <span class="text-xs font-black text-emerald-700">${res.totSale.toLocaleString('en-IN')}</span>
+              </div>
+              <div class="bg-blue-50 p-2 rounded-xl border border-blue-100">
+                <span class="text-[8.5px] text-blue-800 block uppercase font-bold">പർച്ചേസ്</span>
+                <span class="text-xs font-black text-blue-700">${res.totPur.toLocaleString('en-IN')}</span>
+              </div>
+              <div class="bg-amber-50 p-2 rounded-xl border border-amber-100">
+                <span class="text-[8.5px] text-amber-800 block uppercase font-bold">ചിലവുകൾ</span>
+                <span class="text-xs font-black text-amber-700">${res.totOutflow.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            <!-- HISTORICAL LIQUID FUND AS OF SELECTED DATE -->
+            <div class="bg-slate-900 text-white p-2 rounded-xl flex items-center justify-between text-xs font-bold">
+              <span class="text-[9px] text-slate-300 uppercase">💵 അന്ന് കയ്യിലുള്ള ഫണ്ട്:</span>
+              <span class="font-mono text-emerald-400 font-black">${res.totLiquid.toLocaleString('en-IN')} SR</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Update Combined Master Box
+      document.getElementById("masterTotalSales").innerText = `${masterSales.toLocaleString('en-IN')} SR`;
+      document.getElementById("masterTotalPurchases").innerText = `${masterPur.toLocaleString('en-IN')} SR`;
+      document.getElementById("masterTotalExpenses").innerText = `${masterExp.toLocaleString('en-IN')} SR`;
+      const masterTotalLiquid = masterCash + masterBank;
+      document.getElementById("masterTotalLiquid").innerText = `${masterTotalLiquid.toLocaleString('en-IN')} SR`;
+      document.getElementById("masterTotalCash").innerText = `💵 ക്യാഷ്: ${masterCash.toLocaleString('en-IN')}`;
+      document.getElementById("masterTotalBank").innerText = `🏦 ബാങ്ക്: ${masterBank.toLocaleString('en-IN')}`;
+
+      container.innerHTML = cardsHtml;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // ========================================================
+    // OPEN SHOP DETAIL BREAKDOWN MODAL
+    // ========================================================
+    function openShopDetailModal(shopId) {
+      const data = shopsDataStore[shopId];
+      if (!data) return;
+      activeModalShopId = shopId;
+
+      const selDate = getSelectedDate();
+      const selMonth = selDate.substring(0, 7);
+
+      document.getElementById("modalShopTitle").innerText = data.name;
+      document.getElementById("modalShopPeriodLabel").innerText = (currentViewMode === 'daily') ? `തീയതി: ${selDate}` : `മാസം: ${selMonth}`;
+
+      const logoBox = document.getElementById("modalShopLogoBox");
+      logoBox.innerHTML = data.logo ? `<img src="${data.logo}" class="w-full h-full object-cover"/>` : '🏪';
+
+      // 1. Sales
+      document.getElementById("dtlSaleTotal").innerText = `${data.totSale.toLocaleString('en-IN')} SR`;
+      document.getElementById("dtlSaleCash").innerText = data.saleCash.toLocaleString('en-IN');
+      document.getElementById("dtlSaleBank").innerText = data.saleBank.toLocaleString('en-IN');
+      document.getElementById("dtlSaleCredit").innerText = data.saleCredit.toLocaleString('en-IN');
+
+      // 2. Purchases
+      document.getElementById("dtlPurTotal").innerText = `${data.totPur.toLocaleString('en-IN')} SR`;
+      document.getElementById("dtlPurCash").innerText = data.purCash.toLocaleString('en-IN');
+      document.getElementById("dtlPurBank").innerText = data.purBank.toLocaleString('en-IN');
+      document.getElementById("dtlPurCredit").innerText = data.purCredit.toLocaleString('en-IN');
+
+      // 3. Outflow
+      document.getElementById("dtlOutflowTotal").innerText = `${data.totOutflow.toLocaleString('en-IN')} SR`;
+      document.getElementById("dtlExpensesOnly").innerText = data.expTotal.toLocaleString('en-IN');
+      document.getElementById("dtlSalaryOnly").innerText = data.salTotal.toLocaleString('en-IN');
+
+      // 4. Historical Liquid Funds As Of Date
+      document.getElementById("dtlLiquidTotal").innerText = `${data.totLiquid.toLocaleString('en-IN')} SR`;
+      document.getElementById("dtlLiquidCash").innerText = `${data.curCashAsOf.toLocaleString('en-IN')} SR`;
+      document.getElementById("dtlLiquidBank").innerText = `${data.curBankAsOf.toLocaleString('en-IN')} SR`;
+
+      // 5. Outstandings Total Badges
+      document.getElementById("dtlDueCustomer").innerText = `${data.totalCustomerDue.toLocaleString('en-IN')} SR`;
+      document.getElementById("dtlDueVendor").innerText = `${data.totalVendorPayable.toLocaleString('en-IN')} SR`;
+      document.getElementById("dtlDueSalary").innerText = `${data.totalStaffDue.toLocaleString('en-IN')} SR`;
+      document.getElementById("dtlDueUtility").innerText = `${data.totalUtilityDue.toLocaleString('en-IN')} SR`;
+
+      document.getElementById("shopDetailModal").classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeShopDetailModal() {
+      document.getElementById("shopDetailModal").classList.add("hidden");
+    }
+
+    // ========================================================
+    // OPEN RANKING BREAKDOWN POPUP (SORTED DESCENDING)
+    // ========================================================
+    function openRankingModal(category) {
+      if (!activeModalShopId) return;
+      const data = shopsDataStore[activeModalShopId];
+      if (!data) return;
+
+      const titleEl = document.getElementById("rankingModalTitle");
+      const grandTotalEl = document.getElementById("rankingModalGrandTotal");
+      const container = document.getElementById("rankingListContainer");
+
+      let list = [];
+      let grandTotal = 0;
+      let title = "";
+
+      if (category === 'customer') {
+        title = "🔺 കസ്റ്റമർ കുടിശ്ശിക ലിസ്റ്റ്";
+        list = data.customerRankList;
+        grandTotal = data.totalCustomerDue;
+      } else if (category === 'vendor') {
+        title = "🔻 വെണ്ടർമാർക്ക് കൊടുക്കാനുള്ളത്";
+        list = data.vendorRankList;
+        grandTotal = data.totalVendorPayable;
+      } else if (category === 'employee') {
+        title = "👥 ജീവനക്കാരുടെ സാലറി ബാക്കി";
+        list = data.employeeRankList;
+        grandTotal = data.totalStaffDue;
+      } else if (category === 'utility') {
+        title = "⚡ യൂട്ടിലിറ്റി ബില്ല് കുടിശ്ശിക ലിസ്റ്റ്";
+        list = data.utilityRankList;
+        grandTotal = data.totalUtilityDue;
+      }
+
+      titleEl.innerText = title;
+      grandTotalEl.innerText = `${grandTotal.toLocaleString('en-IN')} SR`;
+
+      if (!list || list.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs font-bold">കുടിശ്ശികകൾ ആർക്കും ഇല്ല</div>`;
+      } else {
+        let html = "";
+        list.forEach((item, index) => {
+          html += `
+            <div class="bg-slate-50 hover:bg-slate-100 p-2 rounded-xl border border-slate-200 flex items-center justify-between text-xs font-bold">
+              <div class="flex items-center gap-2 truncate flex-1 min-w-0 pr-2">
+                <span class="w-5 h-5 rounded-full ${index === 0 ? 'bg-rose-600 text-white' : index < 3 ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'} text-[10px] flex items-center justify-center font-black shrink-0">
+                  #${index + 1}
+                </span>
+                <span class="text-slate-900 truncate" title="${item.name}">${item.name}</span>
+              </div>
+              <span class="text-xs font-black text-rose-700 shrink-0 font-mono">${item.amount.toLocaleString('en-IN')} SR</span>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+
+      document.getElementById("rankingDetailModal").classList.remove("hidden");
+    }
+
+    function closeRankingModal() {
+      document.getElementById("rankingDetailModal").classList.add("hidden");
+    }
+
+    // INITIAL LOAD
+    document.addEventListener("DOMContentLoaded", () => {
+      const dtInput = document.getElementById("dashFilterDate");
+      if (dtInput) dtInput.value = getSaudiBusinessDate();
+      fetchAllShopsData();
+    });
+  </script>
+</body>
+</html>
