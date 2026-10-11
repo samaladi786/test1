@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>ALNASSR സൂപ്പർ ഫാസ്റ്റ് POS</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <meta name="theme-color" content="#0f172a">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
+    body { font-family: 'Manrope', 'Noto Sans Malayalam', sans-serif; -webkit-tap-highlight-color: transparent; }
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+    .touch-btn:active { transform: scale(0.97); }
+    .uppercase-input { text-transform: uppercase; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col pb-6">
+
+  <!-- 1. LOGIN SCREEN -->
+  <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-[99999] p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-6 shadow-2xl border text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-slate-900 text-emerald-400 flex items-center justify-center mx-auto shadow-lg border border-slate-700">
+        <i data-lucide="zap" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <h2 class="text-base font-extrabold text-slate-900">ALNASSR ഫാസ്റ്റ് POS</h2>
+        <p class="text-xs text-slate-500 mt-1">ഷോപ്പ് പിൻ നൽകുക</p>
+      </div>
+
+      <form onsubmit="event.preventDefault(); verifyFastLogin();" class="space-y-4">
+        <input 
+          type="password" 
+          inputmode="numeric" 
+          maxlength="8" 
+          id="fastLoginPin" 
+          placeholder="••••" 
+          autofocus 
+          class="text-center text-2xl tracking-[0.4em] font-black w-40 py-3 border-2 rounded-2xl mx-auto block outline-none focus:border-emerald-600 bg-slate-50" 
+        />
+        <button 
+          type="button" 
+          onclick="verifyFastLogin()" 
+          class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-md touch-btn flex items-center justify-center gap-1.5 cursor-pointer">
+          <i data-lucide="log-in" class="w-4 h-4"></i> പ്രവേശിക്കുക
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. STICKY TOP HEADER -->
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-white/10 px-3 py-2.5">
+    <div class="flex items-center justify-between gap-2 max-w-md mx-auto">
+      <div class="flex items-center gap-2 overflow-hidden flex-1">
+        <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black border border-emerald-500/30 shrink-0">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+        </div>
+        <div class="truncate">
+          <h1 id="fastShopTitle" class="text-xs font-black text-white truncate">ALNASSR POS</h1>
+          <span id="fastStatusBadge" class="text-[9.5px] font-extrabold text-emerald-400">🟢 ഫാസ്റ്റ് മോഡ്</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button onclick="openClosingModal()" title="ഡെയ്‌ലി ക്ലോസിംഗ് & വാട്‌സ്ആപ്പ്" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow touch-btn flex items-center gap-1 cursor-pointer">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i> ക്ലോസിംഗ്
+        </button>
+        <a href="mobile.html" title="ഫുൾ POS മോഡ്" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold touch-btn flex items-center gap-1 cursor-pointer">
+          <i data-lucide="layout" class="w-3.5 h-3.5 text-emerald-400"></i> ഫുൾ
+        </a>
+        <button onclick="logoutFastApp()" class="p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs touch-btn cursor-pointer">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. DATE BAR & TAB SWITCHER -->
+  <div class="bg-slate-800 text-white px-3 py-1.5 border-b border-slate-700 shadow-inner sticky top-[51px] z-30">
+    <div class="max-w-md mx-auto flex items-center justify-between gap-1.5">
+      <input 
+        type="date" 
+        id="fastBusinessDate" 
+        onchange="onFastDateChanged(this.value)" 
+        class="bg-slate-900 text-emerald-400 font-black px-2.5 py-1 rounded-xl border border-slate-600 text-xs outline-none cursor-pointer flex-1 max-w-[140px]" 
+      />
+
+      <!-- 3 TABS -->
+      <div class="flex bg-slate-900 p-0.5 rounded-xl border border-slate-700 text-xs font-black flex-1 justify-end">
+        <button onclick="switchFastTab('sale')" id="fastTab-sale" class="py-1 px-3 rounded-lg bg-emerald-600 text-white shadow transition cursor-pointer">സെയിൽസ്</button>
+        <button onclick="switchFastTab('purchase')" id="fastTab-purchase" class="py-1 px-3 rounded-lg text-slate-400 transition cursor-pointer">പർച്ചേസ്</button>
+        <button onclick="switchFastTab('expense')" id="fastTab-expense" class="py-1 px-3 rounded-lg text-slate-400 transition cursor-pointer">ചിലവ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MAIN WORKSPACE CONTAINER -->
+  <main class="w-full max-w-md mx-auto px-3 pt-3 flex-1 flex flex-col justify-between space-y-3">
+
+    <!-- TAB 1: SALE ENTRY -->
+    <div id="fastView-sale" class="space-y-2.5">
+      <div class="bg-white p-4 rounded-3xl border border-emerald-200 shadow-sm space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">കസ്റ്റമർ പേര്:</label>
+          <div class="relative">
+            <input 
+              list="customerListOptions" 
+              id="fastSaleCustomerInput" 
+              onclick="this.select()" 
+              onfocus="this.select()" 
+              oninput="this.value = this.value.toUpperCase(); onFastCustomerSelected();" 
+              onchange="onFastCustomerSelected()" 
+              value="SHOPE" 
+              placeholder="കസ്റ്റമർ പേര്..." 
+              class="w-full text-base font-black p-3 pr-8 rounded-2xl border-2 border-emerald-400 bg-emerald-50/30 text-slate-900 outline-none uppercase-input" 
+            />
+            <button type="button" onclick="clearFastInput('fastSaleCustomerInput', onFastCustomerSelected)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">✕</button>
+          </div>
+          <datalist id="customerListOptions"></datalist>
+          <span id="fastCustInfo" class="text-xs font-black text-emerald-700 block mt-1 truncate">ക്യാഷ് കസ്റ്റമർ</span>
+        </div>
+
+        <div id="fastSaleAmountsBox" class="pt-0.5"></div>
+
+        <button onclick="saveFastSaleEntry()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="check-circle" class="w-5 h-5"></i> സെയിൽ സേവ് ചെയ്യുക
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 2: PURCHASE ENTRY -->
+    <div id="fastView-purchase" class="hidden space-y-2.5">
+      <div class="bg-white p-4 rounded-3xl border border-blue-200 shadow-sm space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">വെണ്ടർ പേര്:</label>
+          <div class="relative">
+            <input 
+              list="vendorListOptions" 
+              id="fastPurchaseVendorInput" 
+              onclick="this.select()" 
+              onfocus="this.select()" 
+              oninput="this.value = this.value.toUpperCase(); onFastVendorSelected();" 
+              onchange="onFastVendorSelected()" 
+              placeholder="വെണ്ടർ പേര്..." 
+              class="w-full text-base font-black p-3 pr-8 rounded-2xl border-2 border-blue-400 bg-blue-50/30 text-slate-900 outline-none uppercase-input" 
+            />
+            <button type="button" onclick="clearFastInput('fastPurchaseVendorInput', onFastVendorSelected)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">✕</button>
+          </div>
+          <datalist id="vendorListOptions"></datalist>
+          <span id="fastVendInfo" class="text-xs font-black text-blue-700 block mt-1 truncate"></span>
+        </div>
+
+        <div id="fastPurchaseAmountsBox" class="pt-0.5"></div>
+
+        <button onclick="saveFastPurchaseEntry()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-blue-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="check-circle" class="w-5 h-5"></i> പർച്ചേസ് സേവ് ചെയ്യുക
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 3: EXPENSE & SALARY ENTRY -->
+    <div id="fastView-expense" class="hidden space-y-2.5">
+      <div class="bg-white p-4 rounded-3xl border border-amber-200 shadow-sm space-y-3">
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-bold text-slate-700">ചിലവ് ഇനം / സ്റ്റാഫ്:</label>
+            <span id="fastExpTypeBadge" class="text-[9.5px] bg-amber-100 text-amber-800 px-2 py-0.2 rounded-full font-bold">ചിലവ്</span>
+          </div>
+          <div class="relative">
+            <input 
+              list="unifiedPartyOptions" 
+              id="fastUnifiedPartyInput" 
+              onclick="this.select()" 
+              onfocus="this.select()" 
+              oninput="this.value = this.value.toUpperCase(); onFastUnifiedSelected();" 
+              onchange="onFastUnifiedSelected()" 
+              placeholder="പേര് ടൈപ്പ് ചെയ്യുക..." 
+              class="w-full text-base font-black p-3 pr-8 rounded-2xl border-2 border-amber-400 bg-amber-50/30 text-slate-900 outline-none uppercase-input" 
+            />
+            <button type="button" onclick="clearFastInput('fastUnifiedPartyInput', onFastUnifiedSelected)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">✕</button>
+          </div>
+          <datalist id="unifiedPartyOptions"></datalist>
+          <span id="fastUnifiedInfo" class="text-xs font-black text-amber-700 block mt-1 truncate"></span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-amber-50 p-2 rounded-2xl border border-amber-200">
+            <label class="block text-[10px] font-black text-amber-900 mb-0.5 text-center">💵 ക്യാഷ് നൽകിയത്</label>
+            <input type="number" step="any" inputmode="decimal" id="fastExpCash" placeholder="0.00" class="w-full text-center text-base font-black p-2 rounded-xl border bg-white outline-none text-amber-800" />
+          </div>
+          <div class="bg-purple-50 p-2 rounded-2xl border border-purple-200">
+            <label class="block text-[10px] font-black text-purple-900 mb-0.5 text-center">🏦 ബാങ്ക് നൽകിയത്</label>
+            <input type="number" step="any" inputmode="decimal" id="fastExpBank" placeholder="0.00" class="w-full text-center text-base font-black p-2 rounded-xl border bg-white outline-none text-purple-800" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-600 mb-0.5">വിവരണം / കുറിപ്പ്:</label>
+          <input type="text" id="fastExpNote" placeholder="കുറിപ്പ്..." class="w-full text-xs p-2.5 rounded-xl border bg-slate-50 outline-none" />
+        </div>
+
+        <button id="btnFastSaveExp" onclick="saveFastUnifiedEntry()" class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="check-circle" class="w-5 h-5"></i> ചിലവ് സേവ് ചെയ്യുക
+        </button>
+      </div>
+    </div>
+
+    <!-- BOTTOM STRIP: TODAY'S TOTALS -->
+    <div class="space-y-2 pt-1">
+      <div class="grid grid-cols-3 gap-1.5 text-center text-xs font-bold">
+        <div class="bg-emerald-950 text-white p-2 rounded-2xl border border-emerald-800">
+          <span class="text-[9px] text-emerald-300 block uppercase font-extrabold">സെയിൽസ്</span>
+          <span id="fastTodaySaleTotal" class="text-xs font-black">0</span>
+        </div>
+        <div class="bg-blue-950 text-white p-2 rounded-2xl border border-blue-800">
+          <span class="text-[9px] text-blue-300 block uppercase font-extrabold">പർച്ചേസ്</span>
+          <span id="fastTodayPurTotal" class="text-xs font-black">0</span>
+        </div>
+        <div class="bg-amber-950 text-white p-2 rounded-2xl border border-amber-800">
+          <span class="text-[9px] text-amber-300 block uppercase font-extrabold">ചിലവുകൾ</span>
+          <span id="fastTodayExpTotal" class="text-xs font-black">0</span>
+        </div>
+      </div>
+
+      <!-- LAST 3 TRANSACTIONS STRIP -->
+      <div class="bg-white p-2.5 rounded-2xl border shadow-sm space-y-1.5">
+        <span class="text-[9.5px] font-black uppercase text-slate-400 block px-1">അവസാനം ചേർത്തവ:</span>
+        <div id="fastRecentTxnsList" class="space-y-1 text-xs">
+          <div class="text-center text-slate-400 text-[11px] py-1 font-bold">ഇടപാടുകൾ ഇല്ല</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: DAILY CASH CLOSING & WHATSAPP REPORT GENERATOR     -->
+  <!-- ======================================================== -->
+  <div id="closingModal" class="fixed inset-0 bg-slate-950/85 flex items-center justify-center z-[99999] hidden p-3 overflow-y-auto backdrop-blur-sm">
+    <div class="max-w-sm w-full bg-white rounded-3xl shadow-2xl border p-4 space-y-3.5 my-auto max-h-[92vh] overflow-y-auto relative">
+      
+      <div class="flex items-center justify-between border-b pb-2">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black">
+            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-xs font-black text-slate-900">ഡെയ്‌ലി ക്യാഷ് ക്ലോസിംഗ്</h3>
+            <p class="text-[9.5px] font-bold text-slate-500">കൗണ്ടർ ക്യാഷ് & വാട്‌സ്ആപ്പ് റിപ്പോർട്ട്</p>
+          </div>
+        </div>
+        <button onclick="closeClosingModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-black text-xs flex items-center justify-center cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        
+        <!-- 1. CLOSING PHYSICAL CASH IN COUNTER -->
+        <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 space-y-1">
+          <label class="block font-black text-emerald-950 text-[11px]">1. ക്ലോസിംഗ് സമയത്തെ കൗണ്ടർ ക്യാഷ്:</label>
+          <input 
+            type="number" 
+            step="any" 
+            inputmode="decimal" 
+            id="closePhysicalCashInput" 
+            oninput="recalculateClosingLiveMath()" 
+            placeholder="0.00" 
+            class="w-full text-center text-lg font-black p-2 rounded-xl border-2 border-emerald-400 bg-white text-emerald-800 outline-none" 
+          />
+          <div class="flex justify-between text-[10px] text-slate-500 pt-0.5">
+            <span>മാറ്റിവെക്കുന്ന സ്ഥിരം ഫ്ലോട്ട്:</span>
+            <span class="font-bold text-slate-700 font-mono">500.00</span>
+          </div>
+        </div>
+
+        <!-- 2. MULTIPLE MADA POS MACHINES -->
+        <div class="bg-blue-50 p-2.5 rounded-2xl border border-blue-200 space-y-2">
+          <div class="flex justify-between items-center">
+            <label class="font-black text-blue-950 text-[11px]">2. മാദ മെഷീനുകൾ (Bank POS):</label>
+            <button type="button" onclick="addMadaMachineRow()" class="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-lg touch-btn cursor-pointer">
+              + മെഷീൻ ചേർക്കുക
+            </button>
+          </div>
+          <div id="madaMachinesListContainer" class="space-y-1.5">
+            <!-- Injected via JavaScript -->
+          </div>
+          <div class="flex justify-between font-black text-blue-900 text-[11px] pt-1 border-t border-blue-200/60">
+            <span>ആകെ ബാങ്ക്/മാദ:</span>
+            <span id="closeTotalMadaDisplay" class="font-mono">0.00</span>
+          </div>
+        </div>
+
+        <!-- 3. MANUAL DRAWER CASH EXPENSES (PAYOUTS) -->
+        <div class="bg-amber-50 p-2.5 rounded-2xl border border-amber-200 space-y-2">
+          <div class="flex justify-between items-center">
+            <label class="font-black text-amber-950 text-[11px]">3. ഡ്രോയറിൽ നിന്ന് ചിലവാക്കിയത്:</label>
+            <button type="button" onclick="addDrawerExpenseRow()" class="text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded-lg touch-btn cursor-pointer">
+              + ചിലവ് ചേർക്കുക
+            </button>
+          </div>
+          <div id="drawerExpensesListContainer" class="space-y-1.5">
+            <!-- Injected via JavaScript -->
+          </div>
+          <div class="flex justify-between font-black text-amber-900 text-[11px] pt-1 border-t border-amber-200/60">
+            <span>ആകെ ചിലവുകൾ:</span>
+            <span id="closeTotalDrawerExpDisplay" class="font-mono">0.00</span>
+          </div>
+        </div>
+
+        <!-- SUMMARY CARD -->
+        <div class="bg-slate-900 text-white p-3 rounded-2xl space-y-1.5 font-bold text-[11px] border border-slate-700">
+          <div class="flex justify-between text-emerald-400 font-black text-xs border-b border-white/10 pb-1">
+            <span>🟢 മാനേജർക്ക് നൽകേണ്ട അറ്റ ക്യാഷ്:</span>
+            <span id="closeHandoverCashDisplay" class="font-mono">0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-300 pt-0.5">
+            <span>ഇന്നത്തെ ആകെ ക്യാഷ് ബിസിനസ്സ്:</span>
+            <span id="closeTotalCashBizDisplay" class="font-mono">0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-300">
+            <span>ഇന്നത്തെ ആകെ ബാങ്ക് (മാദ):</span>
+            <span id="closeTotalBankBizDisplay" class="font-mono">0.00</span>
+          </div>
+          <div class="flex justify-between text-white font-black text-xs border-t border-white/10 pt-1">
+            <span>ആകെ ടോട്ടൽ ബിസിനസ്സ്:</span>
+            <span id="closeGrandBizDisplay" class="font-mono text-emerald-400">0.00</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- WHATSAPP SEND BUTTON -->
+      <div class="pt-2 border-t space-y-2">
+        <button onclick="sendClosingWhatsAppReport()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs shadow-lg shadow-emerald-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5">
+          <i data-lucide="send" class="w-4 h-4"></i> വാട്‌സ്ആപ്പ് വഴി മാനേജർക്ക് അയക്കുക
+        </button>
+        <button onclick="closeClosingModal()" class="w-full py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs cursor-pointer">
+          റദ്ദാക്കുക
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : [];
+    const FIXED_FLOAT_AMOUNT = 500.00; // സ്ഥിരമായി ഡ്രോയറിൽ മാറ്റിവെക്കുന്ന ഫ്ലോട്ട് തുക
+
+    let currentShopId = null;
+    let currentShop = null;
+    let supabaseClient = null;
+
+    let customersList = [];
+    let vendorsList = [];
+    let employeesList = [];
+    let expensesMasterList = [];
+    let transactionsList = [];
+
+    // Closing state
+    let madaMachinesList = [ { name: "മെഷീൻ 1", amount: "" } ];
+    let drawerExpensesList = [ { desc: "ചിലവ്", amount: "" } ];
+
+    function getSaudiBusinessDate() {
+      try {
+        const now = new Date();
+        const saudiTime = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
+        if (saudiTime.getHours() < 6) saudiTime.setDate(saudiTime.getDate() - 1);
+        const y = saudiTime.getFullYear();
+        const m = String(saudiTime.getMonth() + 1).padStart(2, '0');
+        const d = String(saudiTime.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      } catch(e) {
+        return new Date().toISOString().split('T')[0];
+      }
+    }
+
+    function cleanPartyName(str) {
+      if (!str) return '';
+      return String(str).split(' (')[0].replace(/^Staff:\s*/i, '').trim().toLowerCase();
+    }
+
+    function cleanDate(d) {
+      if (!d) return '';
+      return String(d).split('T')[0].split(' ')[0].replace(/\//g, '-').trim();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedPin = localStorage.getItem("ALNASSR_FAST_PIN");
+      const dtInp = document.getElementById("fastBusinessDate");
+      if (dtInp) dtInp.value = getSaudiBusinessDate();
+
+      if (savedPin) {
+        attemptLoginWithPin(savedPin);
+      } else {
+        document.getElementById("loginScreen").classList.remove("hidden");
+      }
+
+      renderFastSaleInputs('cash');
+      renderFastPurchaseInputs('cash');
+      renderMadaMachinesList();
+      renderDrawerExpensesList();
+      if (window.lucide) lucide.createIcons();
+    });
+
+    function verifyFastLogin() {
+      const pin = document.getElementById("fastLoginPin").value.trim();
+      if (!pin) return alert("പിൻ നൽകുക!");
+      attemptLoginWithPin(pin);
+    }
+
+    function attemptLoginWithPin(pin) {
+      const matched = SHOPS.find(s => String(s.pin) === pin);
+      const masterPin = String(window.MASTER_PIN);
+
+      if (!matched && pin !== masterPin) {
+        alert("പിൻ തെറ്റാണ്!");
+        document.getElementById("fastLoginPin").value = "";
+        return;
+      }
+
+      currentShop = matched || SHOPS[0];
+      currentShopId = currentShop.id;
+      localStorage.setItem("ALNASSR_FAST_PIN", pin);
+
+      document.getElementById("fastShopTitle").innerText = currentShop.name;
+      document.getElementById("loginScreen").classList.add("hidden");
+
+      if (window.supabase && currentShop.url && currentShop.key) {
+        supabaseClient = window.supabase.createClient(currentShop.url, currentShop.key);
+      }
+
+      fetchFastData();
+    }
+
+    function logoutFastApp() {
+      localStorage.removeItem("ALNASSR_FAST_PIN");
+      window.location.reload();
+    }
+
+    function onFastDateChanged(val) {
+      renderFastTotalsAndRecent();
+    }
+
+    function switchFastTab(tab) {
+      document.getElementById("fastView-sale").classList.add("hidden");
+      document.getElementById("fastView-purchase").classList.add("hidden");
+      document.getElementById("fastView-expense").classList.add("hidden");
+
+      document.getElementById(`fastView-${tab}`).classList.remove("hidden");
+
+      ['sale', 'purchase', 'expense'].forEach(t => {
+        const btn = document.getElementById(`fastTab-${t}`);
+        if (t === tab) {
+          btn.className = `py-1 px-3 rounded-lg text-white shadow transition cursor-pointer font-black ${t === 'sale' ? 'bg-emerald-600' : t === 'purchase' ? 'bg-blue-600' : 'bg-amber-600'}`;
+        } else {
+          btn.className = "py-1 px-3 rounded-lg text-slate-400 transition cursor-pointer font-bold";
+        }
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function clearFastInput(id, callback) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = "";
+        el.focus();
+        if (callback) callback();
+      }
+    }
+
+    async function fetchFastData() {
+      if (!supabaseClient) return;
+      try {
+        const [cRes, vRes, eRes, expRes, tRes] = await Promise.all([
+          supabaseClient.from('customers').select('*').order('name'),
+          supabaseClient.from('vendors').select('*').order('name'),
+          supabaseClient.from('employees').select('*').order('name'),
+          supabaseClient.from('expenses_master').select('*').order('name'),
+          supabaseClient.from('transactions').select('*').order('date', { ascending: false }).limit(2000)
+        ]);
+
+        customersList = cRes.data || [];
+        vendorsList = vRes.data || [];
+        employeesList = eRes.data || [];
+        expensesMasterList = expRes.data || [];
+        transactionsList = tRes.data || [];
+
+        populateFastDropdowns();
+        renderFastTotalsAndRecent();
+      } catch (err) {
+        console.error("Fast data fetch error:", err);
+      }
+    }
+
+    function populateFastDropdowns() {
+      const cDL = document.getElementById("customerListOptions");
+      if (cDL) {
+        cDL.innerHTML = "";
+        customersList.forEach(c => cDL.innerHTML += `<option value="${c.name.toUpperCase()}">`);
+      }
+      const vDL = document.getElementById("vendorListOptions");
+      if (vDL) {
+        vDL.innerHTML = "";
+        vendorsList.forEach(v => vDL.innerHTML += `<option value="${v.name.toUpperCase()}">`);
+      }
+      const uDL = document.getElementById("unifiedPartyOptions");
+      if (uDL) {
+        uDL.innerHTML = "";
+        expensesMasterList.forEach(e => uDL.innerHTML += `<option value="${e.name.toUpperCase()}">`);
+        employeesList.forEach(em => uDL.innerHTML += `<option value="${em.name.toUpperCase()}">`);
+      }
+    }
+
+    // SALE INPUTS
+    function renderFastSaleInputs(type) {
+      const box = document.getElementById("fastSaleAmountsBox");
+      if (!box) return;
+
+      if (type === 'credit') {
+        box.innerHTML = `
+          <div class="grid grid-cols-3 gap-1.5">
+            <div class="bg-emerald-50 p-2 rounded-2xl border border-emerald-200">
+              <label class="block text-[9.5px] font-black text-emerald-900 mb-0.5 text-center truncate">💵 ക്യാഷ് റസീറ്റ്</label>
+              <input type="number" step="any" inputmode="decimal" id="fastSaleCash" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-emerald-800" />
+            </div>
+            <div class="bg-blue-50 p-2 rounded-2xl border border-blue-200">
+              <label class="block text-[9.5px] font-black text-blue-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് റസീറ്റ്</label>
+              <input type="number" step="any" inputmode="decimal" id="fastSaleBank" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-blue-800" />
+            </div>
+            <div class="bg-amber-50 p-2 rounded-2xl border border-amber-200">
+              <label class="block text-[9.5px] font-black text-amber-900 mb-0.5 text-center truncate">🛒 ക്രെഡിറ്റ് സെയിൽ</label>
+              <input type="number" step="any" inputmode="decimal" id="fastSaleCredit" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-amber-800" />
+            </div>
+          </div>
+        `;
+      } else {
+        box.innerHTML = `
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-emerald-50 p-2.5 rounded-2xl border border-emerald-200">
+              <label class="block text-xs font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് സെയിൽ</label>
+              <input type="number" step="any" inputmode="decimal" id="fastSaleCash" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none text-emerald-800" />
+            </div>
+            <div class="bg-blue-50 p-2.5 rounded-2xl border border-blue-200">
+              <label class="block text-xs font-black text-blue-900 mb-0.5 text-center">🏦 ബാങ്ക് സെയിൽ</label>
+              <input type="number" step="any" inputmode="decimal" id="fastSaleBank" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none text-blue-800" />
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function onFastCustomerSelected() {
+      const val = document.getElementById("fastSaleCustomerInput").value.trim();
+      const cleanName = cleanPartyName(val);
+      const cust = customersList.find(c => cleanPartyName(c.name) === cleanName);
+      const info = document.getElementById("fastCustInfo");
+
+      if (cust && (cust.type || '').toLowerCase() === 'credit') {
+        let liveBal = parseFloat(cust.opening_balance) || 0;
+        transactionsList.forEach(t => {
+          if (t && cleanPartyName(t.party_name) === cleanName && t.type === 'sale') {
+            liveBal += (parseFloat(t.credit_amount) || 0) - (parseFloat(t.cash_amount) || 0) - (parseFloat(t.bank_amount) || 0);
+          }
+        });
+        info.innerText = `ലൈവ് ബാലൻസ്: ${liveBal.toLocaleString('en-IN')}`;
+        renderFastSaleInputs('credit');
+      } else {
+        info.innerText = cust ? "ക്യാഷ് കസ്റ്റമർ" : "പുതിയ കസ്റ്റമർ (ക്യാഷ് ആയി സേവ് ആകും)";
+        renderFastSaleInputs('cash');
+      }
+    }
+
+    // PURCHASE INPUTS
+    function renderFastPurchaseInputs(type) {
+      const box = document.getElementById("fastPurchaseAmountsBox");
+      if (!box) return;
+
+      if (type === 'credit') {
+        box.innerHTML = `
+          <div class="grid grid-cols-3 gap-1.5">
+            <div class="bg-blue-50 p-2 rounded-2xl border border-blue-200">
+              <label class="block text-[9.5px] font-black text-blue-900 mb-0.5 text-center truncate">💵 ക്യാഷ് നൽകിയത്</label>
+              <input type="number" step="any" inputmode="decimal" id="fastPurCash" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-blue-800" />
+            </div>
+            <div class="bg-indigo-50 p-2 rounded-2xl border border-indigo-200">
+              <label class="block text-[9.5px] font-black text-indigo-900 mb-0.5 text-center truncate">🏦 ബാങ്ക് നൽകിയത്</label>
+              <input type="number" step="any" inputmode="decimal" id="fastPurBank" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-indigo-800" />
+            </div>
+            <div class="bg-amber-50 p-2 rounded-2xl border border-amber-200">
+              <label class="block text-[9.5px] font-black text-amber-900 mb-0.5 text-center truncate">🚚 ക്രെഡിറ്റ് പർച്ചേസ്</label>
+              <input type="number" step="any" inputmode="decimal" id="fastPurCredit" placeholder="0.00" class="w-full text-center text-sm font-black p-2 rounded-xl border bg-white outline-none text-amber-800" />
+            </div>
+          </div>
+        `;
+      } else {
+        box.innerHTML = `
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-blue-50 p-2.5 rounded-2xl border border-blue-200">
+              <label class="block text-xs font-black text-blue-900 mb-0.5 text-center">💵 ക്യാഷ് പർച്ചേസ്</label>
+              <input type="number" step="any" inputmode="decimal" id="fastPurCash" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none text-blue-800" />
+            </div>
+            <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-200">
+              <label class="block text-xs font-black text-indigo-900 mb-0.5 text-center">🏦 ബാങ്ക് പർച്ചേസ്</label>
+              <input type="number" step="any" inputmode="decimal" id="fastPurBank" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none text-indigo-800" />
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function onFastVendorSelected() {
+      const val = document.getElementById("fastPurchaseVendorInput").value.trim();
+      const cleanName = cleanPartyName(val);
+      const vend = vendorsList.find(v => cleanPartyName(v.name) === cleanName);
+      const info = document.getElementById("fastVendInfo");
+
+      if (vend && (vend.type || '').toLowerCase() === 'credit') {
+        let liveBal = parseFloat(vend.opening_balance) || 0;
+        transactionsList.forEach(t => {
+          if (t && cleanPartyName(t.party_name) === cleanName && t.type === 'purchase') {
+            liveBal += (parseFloat(t.credit_amount) || 0) - Math.abs(parseFloat(t.cash_amount) || 0) - Math.abs(parseFloat(t.bank_amount) || 0);
+          }
+        });
+        info.innerText = `ലൈവ് ബാലൻസ്: ${liveBal.toLocaleString('en-IN')}`;
+        renderFastPurchaseInputs('credit');
+      } else {
+        info.innerText = vend ? "ക്യാഷ് വെണ്ടർ" : "പുതിയ വെണ്ടർ (ക്യാഷ് ആയി സേവ് ആകും)";
+        renderFastPurchaseInputs('cash');
+      }
+    }
+
+    function onFastUnifiedSelected() {
+      const val = document.getElementById("fastUnifiedPartyInput").value.trim();
+      const cleanVal = cleanPartyName(val);
+      const emp = employeesList.find(e => cleanPartyName(e.name) === cleanVal);
+      const badge = document.getElementById("fastExpTypeBadge");
+      const info = document.getElementById("fastUnifiedInfo");
+      const btn = document.getElementById("btnFastSaveExp");
+
+      if (emp) {
+        badge.className = "text-[9.5px] bg-purple-100 text-purple-800 px-2 py-0.2 rounded-full font-bold";
+        badge.innerText = "സാലറി";
+        btn.className = "w-full py-3.5 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-purple-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition";
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> സാലറി സേവ് ചെയ്യുക`;
+
+        let totalSalary = parseFloat(emp.opening_advance || emp.opening_balance) || 0;
+        let paid = 0;
+        transactionsList.forEach(t => {
+          if (t && t.type === 'salary' && cleanPartyName(t.party_name).includes(cleanVal)) {
+            let c = parseFloat(t.cash_amount) || 0;
+            let b = parseFloat(t.bank_amount) || 0;
+            paid += (-c - b);
+          }
+        });
+        let bal = totalSalary - paid;
+        info.innerText = `സാലറി കുടിശ്ശിക: ${bal.toLocaleString('en-IN')}`;
+      } else {
+        badge.className = "text-[9.5px] bg-amber-100 text-amber-800 px-2 py-0.2 rounded-full font-bold";
+        badge.innerText = "ചിലവ്";
+        btn.className = "w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-amber-600/30 touch-btn cursor-pointer flex items-center justify-center gap-1.5 transition";
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> ചിലവ് സേവ് ചെയ്യുക`;
+        info.innerText = "";
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    async function saveFastSaleEntry() {
+      let rawName = document.getElementById("fastSaleCustomerInput").value.trim().toUpperCase();
+      if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
+
+      const cash = parseFloat(document.getElementById("fastSaleCash")?.value) || 0;
+      const bank = parseFloat(document.getElementById("fastSaleBank")?.value) || 0;
+      const credit = parseFloat(document.getElementById("fastSaleCredit")?.value) || 0;
+
+      if (cash <= 0 && bank <= 0 && credit <= 0) return alert("തുക നൽകുക!");
+
+      const date = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const payload = {
+        date: date,
+        type: 'sale',
+        party_name: rawName,
+        cash_amount: cash,
+        bank_amount: bank,
+        credit_amount: credit
+      };
+
+      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
+      transactionsList.unshift(payload);
+      renderFastTotalsAndRecent();
+
+      document.getElementById("fastSaleCustomerInput").value = "SHOPE";
+      onFastCustomerSelected();
+      alert("സെയിൽ സേവ് ചെയ്തു!");
+    }
+
+    async function saveFastPurchaseEntry() {
+      let rawName = document.getElementById("fastPurchaseVendorInput").value.trim().toUpperCase();
+      if (!rawName) return alert("വെണ്ടർ പേര് നൽകുക!");
+
+      const cash = parseFloat(document.getElementById("fastPurCash")?.value) || 0;
+      const bank = parseFloat(document.getElementById("fastPurBank")?.value) || 0;
+      const credit = parseFloat(document.getElementById("fastPurCredit")?.value) || 0;
+
+      if (cash <= 0 && bank <= 0 && credit <= 0) return alert("തുക നൽകുക!");
+
+      const date = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const payload = {
+        date: date,
+        type: 'purchase',
+        party_name: rawName,
+        cash_amount: -cash,
+        bank_amount: -bank,
+        credit_amount: credit
+      };
+
+      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
+      transactionsList.unshift(payload);
+      renderFastTotalsAndRecent();
+
+      document.getElementById("fastPurchaseVendorInput").value = "";
+      onFastVendorSelected();
+      alert("പർച്ചേസ് സേവ് ചെയ്തു!");
+    }
+
+    async function saveFastUnifiedEntry() {
+      let rawVal = document.getElementById("fastUnifiedPartyInput").value.trim().toUpperCase();
+      if (!rawVal) return alert("ഇനം അല്ലെങ്കിൽ പേര് നൽകുക!");
+
+      const cash = parseFloat(document.getElementById("fastExpCash").value) || 0;
+      const bank = parseFloat(document.getElementById("fastExpBank").value) || 0;
+      const note = document.getElementById("fastExpNote").value.trim();
+
+      if (cash <= 0 && bank <= 0) return alert("തുക നൽകുക!");
+
+      const date = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const emp = employeesList.find(e => cleanPartyName(e.name) === cleanPartyName(rawVal));
+
+      const payload = {
+        date: date,
+        type: emp ? 'salary' : 'expense',
+        party_name: emp ? `Staff: ${emp.name} - ${note || 'സാലറി'}` : `${rawVal} (${note || rawVal})`,
+        cash_amount: -cash,
+        bank_amount: -bank,
+        credit_amount: 0
+      };
+
+      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
+      transactionsList.unshift(payload);
+      renderFastTotalsAndRecent();
+
+      document.getElementById("fastExpCash").value = "";
+      document.getElementById("fastExpBank").value = "";
+      document.getElementById("fastExpNote").value = "";
+      document.getElementById("fastUnifiedPartyInput").value = "";
+      onFastUnifiedSelected();
+      alert("സേവ് ചെയ്തു!");
+    }
+
+    function renderFastTotalsAndRecent() {
+      const curDate = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      let sTot = 0, pTot = 0, eTot = 0;
+      let recent = [];
+
+      transactionsList.forEach(t => {
+        if (!t) return;
+        const tD = cleanDate(t.date);
+        if (tD === curDate) {
+          const c = Math.abs(parseFloat(t.cash_amount) || 0);
+          const b = Math.abs(parseFloat(t.bank_amount) || 0);
+          const cr = parseFloat(t.credit_amount) || 0;
+
+          if (t.type === 'sale') sTot += (c + b + cr);
+          else if (t.type === 'purchase') pTot += (c + b + cr);
+          else if (t.type === 'expense' || t.type === 'salary') eTot += (c + b);
+
+          if (recent.length < 3) recent.push(t);
+        }
+      });
+
+      document.getElementById("fastTodaySaleTotal").innerText = sTot.toLocaleString('en-IN');
+      document.getElementById("fastTodayPurTotal").innerText = pTot.toLocaleString('en-IN');
+      document.getElementById("fastTodayExpTotal").innerText = eTot.toLocaleString('en-IN');
+
+      const recentBox = document.getElementById("fastRecentTxnsList");
+      if (recent.length === 0) {
+        recentBox.innerHTML = `<div class="text-center text-slate-400 text-[11px] py-1 font-bold">ഇടപാടുകൾ ഇല്ല</div>`;
+      } else {
+        let html = "";
+        recent.forEach(r => {
+          const isSale = r.type === 'sale';
+          const isPur = r.type === 'purchase';
+          const amt = Math.abs(parseFloat(r.cash_amount) || 0) + Math.abs(parseFloat(r.bank_amount) || 0) + (parseFloat(r.credit_amount) || 0);
+          html += `
+            <div class="flex items-center justify-between py-1 border-b last:border-0 font-bold">
+              <span class="truncate pr-2">${r.party_name}</span>
+              <span class="font-black ${isSale ? 'text-emerald-700' : isPur ? 'text-blue-700' : 'text-amber-700'}">${amt.toLocaleString('en-IN')}</span>
+            </div>
+          `;
+        });
+        recentBox.innerHTML = html;
+      }
+    }
+
+    // ========================================================
+    // CLOSING & WHATSAPP REPORT MODAL LOGIC (FIXED FLOAT 500)
+    // ========================================================
+    function openClosingModal() {
+      document.getElementById("closingModal").classList.remove("hidden");
+      recalculateClosingLiveMath();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeClosingModal() {
+      document.getElementById("closingModal").classList.add("hidden");
+    }
+
+    function addMadaMachineRow() {
+      madaMachinesList.push({ name: `മെഷീൻ ${madaMachinesList.length + 1}`, amount: "" });
+      renderMadaMachinesList();
+      recalculateClosingLiveMath();
+    }
+
+    function removeMadaMachineRow(idx) {
+      if (madaMachinesList.length <= 1) return;
+      madaMachinesList.splice(idx, 1);
+      renderMadaMachinesList();
+      recalculateClosingLiveMath();
+    }
+
+    function renderMadaMachinesList() {
+      const container = document.getElementById("madaMachinesListContainer");
+      if (!container) return;
+      let html = "";
+      madaMachinesList.forEach((m, idx) => {
+        html += `
+          <div class="flex gap-1.5 items-center">
+            <input type="text" value="${m.name}" oninput="madaMachinesList[${idx}].name = this.value" placeholder="മെഷീൻ പേര്" class="flex-1 p-1.5 rounded-lg border bg-white font-bold text-xs" />
+            <input type="number" step="any" inputmode="decimal" value="${m.amount}" oninput="madaMachinesList[${idx}].amount = this.value; recalculateClosingLiveMath();" placeholder="0.00" class="w-24 p-1.5 text-center font-black rounded-lg border bg-white text-blue-800 text-xs" />
+            ${madaMachinesList.length > 1 ? `<button type="button" onclick="removeMadaMachineRow(${idx})" class="text-rose-600 font-black p-1">✕</button>` : ''}
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function addDrawerExpenseRow() {
+      drawerExpensesList.push({ desc: "", amount: "" });
+      renderDrawerExpensesList();
+      recalculateClosingLiveMath();
+    }
+
+    function removeDrawerExpenseRow(idx) {
+      if (drawerExpensesList.length <= 1) return;
+      drawerExpensesList.splice(idx, 1);
+      renderDrawerExpensesList();
+      recalculateClosingLiveMath();
+    }
+
+    function renderDrawerExpensesList() {
+      const container = document.getElementById("drawerExpensesListContainer");
+      if (!container) return;
+      let html = "";
+      drawerExpensesList.forEach((e, idx) => {
+        html += `
+          <div class="flex gap-1.5 items-center">
+            <input type="text" value="${e.desc}" oninput="drawerExpensesList[${idx}].desc = this.value" placeholder="ചിലവ് വിവരണം" class="flex-1 p-1.5 rounded-lg border bg-white font-bold text-xs" />
+            <input type="number" step="any" inputmode="decimal" value="${e.amount}" oninput="drawerExpensesList[${idx}].amount = this.value; recalculateClosingLiveMath();" placeholder="0.00" class="w-24 p-1.5 text-center font-black rounded-lg border bg-white text-amber-800 text-xs" />
+            ${drawerExpensesList.length > 1 ? `<button type="button" onclick="removeDrawerExpenseRow(${idx})" class="text-rose-600 font-black p-1">✕</button>` : ''}
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function recalculateClosingLiveMath() {
+      const physicalCash = parseFloat(document.getElementById("closePhysicalCashInput")?.value) || 0;
+      const floatCash = FIXED_FLOAT_AMOUNT;
+
+      let totalMada = 0;
+      madaMachinesList.forEach(m => { totalMada += (parseFloat(m.amount) || 0); });
+
+      let totalDrawerExp = 0;
+      drawerExpensesList.forEach(e => { totalDrawerExp += (parseFloat(e.amount) || 0); });
+
+      const handoverCash = physicalCash - floatCash;
+      const totalCashBiz = physicalCash + totalDrawerExp;
+      const grandTotalBiz = totalCashBiz + totalMada;
+
+      document.getElementById("closeTotalMadaDisplay").innerText = totalMada.toFixed(2);
+      document.getElementById("closeTotalDrawerExpDisplay").innerText = totalDrawerExp.toFixed(2);
+      document.getElementById("closeHandoverCashDisplay").innerText = handoverCash.toFixed(2);
+      document.getElementById("closeTotalCashBizDisplay").innerText = totalCashBiz.toFixed(2);
+      document.getElementById("closeTotalBankBizDisplay").innerText = totalMada.toFixed(2);
+      document.getElementById("closeGrandBizDisplay").innerText = grandTotalBiz.toFixed(2);
+    }
+
+    function sendClosingWhatsAppReport() {
+      const curDate = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const shopName = currentShop ? currentShop.name : "ALNASSR";
+
+      const physicalCash = parseFloat(document.getElementById("closePhysicalCashInput")?.value) || 0;
+      const floatCash = FIXED_FLOAT_AMOUNT;
+      const handoverCash = physicalCash - floatCash;
+
+      let totalDrawerExp = 0;
+      let expLines = [];
+      drawerExpensesList.forEach(e => {
+        const amt = parseFloat(e.amount) || 0;
+        if (amt > 0) {
+          totalDrawerExp += amt;
+          expLines.push(`  ▪️ ${e.desc || 'ചിലവ്'}: ${amt.toFixed(2)}`);
+        }
+      });
+
+      let totalMada = 0;
+      madaMachinesList.forEach(m => {
+        const amt = parseFloat(m.amount) || 0;
+        if (amt > 0) totalMada += amt;
+      });
+
+      const totalCashBiz = physicalCash + totalDrawerExp;
+      const grandTotalBiz = totalCashBiz + totalMada;
+
+      let waText = `*ALNASSR QUICK POS - DAILY CLOSING REPORT*\n` +
+                   `തീയതി: ${curDate} | ഷോപ്പ്: ${shopName}\n` +
+                   `--------------------------------\n` +
+                   `*കൗണ്ടർ ക്യാഷ് കൈമാറ്റം:*\n` +
+                   `  ▪️ ക്ലോസിംഗ് സമയത്തെ ക്യാഷ്: ${physicalCash.toFixed(2)}\n` +
+                   `  ▪️ മാറ്റിവെച്ച സ്ഥിരം ഫ്ലോട്ട്: ${floatCash.toFixed(2)}\n` +
+                   `--------------------------------\n` +
+                   `*മാനേജർക്ക് ഏൽപ്പിച്ച അറ്റ ക്യാഷ്: ${handoverCash.toFixed(2)}*\n` +
+                   `--------------------------------\n`;
+
+      if (expLines.length > 0) {
+        waText += `*ഡ്രോയറിൽ നിന്ന് ചിലവാക്കിയത്:*\n` +
+                  expLines.join('\n') + `\n` +
+                  `  ആകെ ചിലവുകൾ: ${totalDrawerExp.toFixed(2)}\n` +
+                  `--------------------------------\n`;
+      }
+
+      waText += `*ഇന്നത്തെ ആകെ ബിസിനസ്സ് സംഗ്രഹം:*\n` +
+                `  ▪️ ആകെ ക്യാഷ്: ${totalCashBiz.toFixed(2)}\n` +
+                `  ▪️ ആകെ ബാങ്ക് (മാദ): ${totalMada.toFixed(2)}\n` +
+                `*ആകെ ടോട്ടൽ: ${grandTotalBiz.toFixed(2)}*\n` +
+                `--------------------------------\n` +
+                `തയ്യാറാക്കിയത്: ക്യാഷ്യർ`;
+
+      window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(waText), '_blank');
+    }
+  </script>
+</body>
+</html>
