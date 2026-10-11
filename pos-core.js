@@ -736,6 +736,7 @@ function calculateUtilityExpenseLiveBalance(expItem) {
   return bal;
 }
 
+// UNIFIED PARTY SELECTED (REGULAR VS UTILITY EXPENSE SEPARATION)
 function onUnifiedPartySelected() {
   const val = document.getElementById("unifiedPartyInput").value.trim();
   const cleanVal = cleanPartyName(val);
@@ -759,17 +760,29 @@ function onUnifiedPartySelected() {
 
     const busDate = document.getElementById("mobileFilterDate")?.value || getSaudiBusinessDate();
     const liveBal = calculateEmployeePendingBalance(emp, busDate);
+    info.className = "text-xs font-black text-purple-700 block mt-1 truncate";
     info.innerText = `ലൈവ് സാലറി ബാക്കി: ${liveBal.toLocaleString('en-IN')} (ശമ്പളം: ${emp.monthly_salary || 0} | ജോയിനിങ്: ${emp.joining_date || '-'})`;
   } else {
     badge.className = "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold";
     badge.innerText = "ചിലവ്";
     if (staffDepBtn) staffDepBtn.classList.add("hidden");
 
-    if (expItem) {
+    // യൂട്ടിലിറ്റി / മാസ ബില്ല് ആണെങ്കിൽ മാത്രം കുടിശ്ശികയും +Bill ബട്ടണും കാണിക്കുന്നു
+    if (expItem && expItem.type === 'utility') {
       if (addBillBtn) addBillBtn.classList.remove("hidden");
       const liveBal = calculateUtilityExpenseLiveBalance(expItem);
-      info.innerText = `അടയ്ക്കാനുള്ള ലൈവ് കുടിശ്ശിക: ${liveBal.toLocaleString('en-IN')}`;
+      if (liveBal > 0) {
+        info.className = "text-xs font-black text-rose-700 block mt-1 truncate";
+        info.innerText = `⚠️ അടയ്ക്കാനുള്ള ലൈവ് കുടിശ്ശിക: ${liveBal.toLocaleString('en-IN')}`;
+      } else if (liveBal < 0) {
+        info.className = "text-xs font-black text-emerald-700 block mt-1 truncate";
+        info.innerText = `🟢 അഡ്വാൻസ് / കൂടുതൽ നൽകിയത്: ${liveBal.toLocaleString('en-IN')}`;
+      } else {
+        info.className = "text-xs font-black text-slate-600 block mt-1 truncate";
+        info.innerText = `കുടിശ്ശികയില്ല (0.00)`;
+      }
     } else {
+      // സാധാരണ ചിലവുകൾക്ക് (ചായ, ക്ലീനിംഗ് മുതലായവ) ബാലൻസോ +Bill ബട്ടണോ ആവശ്യമില്ല
       if (addBillBtn) addBillBtn.classList.add("hidden");
       info.innerText = "";
     }
@@ -778,6 +791,29 @@ function onUnifiedPartySelected() {
     btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> ചിലവ് സേവ് ചെയ്യുക`;
   }
   if (window.lucide) lucide.createIcons();
+}
+
+// DYNAMIC OPENING BALANCE TOGGLE
+function toggleNewExpenseOpeningField(type) {
+  const cont = document.getElementById("newExpOpeningContainer");
+  if (!cont) return;
+  if (type === 'regular') {
+    cont.classList.add("hidden");
+    document.getElementById("newExpOpening").value = "";
+  } else {
+    cont.classList.remove("hidden");
+  }
+}
+
+function toggleEditExpenseOpeningField(type) {
+  const openingBox = document.getElementById("editMasterOpeningBox");
+  if (!openingBox) return;
+  if (type === 'regular') {
+    openingBox.classList.add("hidden");
+    document.getElementById("editMasterOpening").value = "0";
+  } else {
+    openingBox.classList.remove("hidden");
+  }
 }
 
 // UTILITY BILL MODAL (+BILL) - INSTANT LOCAL UPDATE
@@ -815,7 +851,6 @@ async function saveUtilityBillAddition() {
     credit_amount: amt
   };
 
-  // തത്സമയം ഫോണിലെ മെമ്മറിയിലേക്ക് ആഡ് ചെയ്യുന്നു (Instant Local Update)
   const tempId = 'temp_bill_' + Date.now();
   const localRecord = { ...payload, id: tempId };
   transactionsList.unshift(localRecord);
@@ -1155,7 +1190,7 @@ async function syncOfflineQueue() {
   if (queue.length > remaining.length) fetchAllData();
 }
 
-// TRANSACTIONS SAVING (WITH PERSISTENT OFFLINE STORAGE & ERROR CATCHING)
+// TRANSACTIONS SAVING
 async function saveSaleEntry() {
   let rawName = document.getElementById("saleCustomerInput").value.trim().toUpperCase();
   if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
@@ -1925,20 +1960,23 @@ function renderActiveMasterList() {
       <table class="w-full text-xs text-left border-collapse">
         <thead>
           <tr class="bg-amber-100/70 text-slate-900 font-black border-b">
-            <th class="p-2">ചിലവ് ഇനം / ബില്ല്</th>
+            <th class="p-2">ചിലവ് ഇനം</th>
+            <th class="p-2 text-center">തരം (Type)</th>
             <th class="p-2 text-right">കുടിശ്ശിക</th>
             <th class="p-2 text-right">⚙️ നടപടി</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 font-bold">
     `;
-    if (list.length === 0) html += `<tr><td colspan="3" class="p-4 text-center text-slate-400">ചിലവ് ഇനങ്ങൾ ഇല്ല</td></tr>`;
+    if (list.length === 0) html += `<tr><td colspan="4" class="p-4 text-center text-slate-400">ചിലവ് ഇനങ്ങൾ ഇല്ല</td></tr>`;
     else {
       list.forEach(ex => {
+        const isUtil = (ex.type === 'utility');
         html += `
           <tr class="hover:bg-slate-100/60">
             <td class="p-2 font-black text-slate-900">${ex.name}</td>
-            <td class="p-2 text-right font-black text-amber-900">${(parseFloat(ex.opening_balance) || 0).toLocaleString('en-IN')}</td>
+            <td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${isUtil ? 'bg-indigo-100 text-indigo-800 font-black' : 'bg-slate-200 text-slate-800'}">${isUtil ? 'മാസ ബില്ല്' : 'സാധാരണ'}</span></td>
+            <td class="p-2 text-right font-black ${isUtil ? 'text-amber-900' : 'text-slate-400'}">${isUtil ? (parseFloat(ex.opening_balance) || 0).toLocaleString('en-IN') : '-'}</td>
             <td class="p-2 text-right whitespace-nowrap">
               <button onclick="openEditMasterItem('expense', '${ex.name}')" class="p-1 text-blue-600 cursor-pointer">✏️</button>
               <button onclick="deleteMasterItem('expense', '${ex.name}')" class="p-1 text-rose-600 cursor-pointer">🗑️</button>
@@ -1961,6 +1999,8 @@ function openEditMasterItem(type, originalName) {
   const nameInp = document.getElementById("editMasterName");
   const partyTypeBox = document.getElementById("editMasterPartyTypeBox");
   const partyTypeSel = document.getElementById("editMasterPartyType");
+  const expTypeBox = document.getElementById("editMasterExpenseTypeBox");
+  const expTypeSel = document.getElementById("editMasterExpenseType");
   const agentBox = document.getElementById("editMasterAgentBox");
   const agentInp = document.getElementById("editMasterAgent");
   const openingBox = document.getElementById("editMasterOpeningBox");
@@ -1974,6 +2014,7 @@ function openEditMasterItem(type, originalName) {
   const joinInp = document.getElementById("editMasterJoinDate");
 
   nameInp.value = originalName;
+  if (expTypeBox) expTypeBox.classList.add("hidden");
 
   if (type === 'customer') {
     const item = customersList.find(c => c.name === originalName);
@@ -2028,11 +2069,17 @@ function openEditMasterItem(type, originalName) {
     partyTypeBox.classList.add("hidden");
     agentBox.classList.add("hidden");
     creditLimitBox.classList.add("hidden");
-    openingBox.classList.remove("hidden");
-    openingLabel.innerText = "പഴയ കുടിശ്ശിക / തുടക്ക ബാക്കി:";
-    openingInp.value = item ? (item.opening_balance || 0) : 0;
     salaryBox.classList.add("hidden");
     joinBox.classList.add("hidden");
+
+    if (expTypeBox && expTypeSel) {
+      expTypeBox.classList.remove("hidden");
+      expTypeSel.value = item ? (item.type || 'utility') : 'utility';
+      toggleEditExpenseOpeningField(expTypeSel.value);
+    }
+
+    openingLabel.innerText = "പഴയ കുടിശ്ശിക / തുടക്ക ബാക്കി:";
+    openingInp.value = item ? (item.opening_balance || 0) : 0;
   }
 
   document.getElementById("editMasterModal").classList.remove("hidden");
@@ -2067,8 +2114,10 @@ async function saveEditedMasterItem() {
     };
 
     if (navigator.onLine && supabaseClient) {
-      if (item.id) await supabaseClient.from('customers').update(payload).eq('id', item.id);
-      else await supabaseClient.from('customers').update(payload).eq('name', originalName);
+      const { error } = item.id 
+        ? await supabaseClient.from('customers').update(payload).eq('id', item.id)
+        : await supabaseClient.from('customers').update(payload).eq('name', originalName);
+      if (error) return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
     }
     Object.assign(item, payload);
     localStorage.setItem(`ALNASSR_${currentShopId}_CUSTOMERS`, JSON.stringify(customersList));
@@ -2078,8 +2127,10 @@ async function saveEditedMasterItem() {
     const selectedPartyType = document.getElementById("editMasterPartyType").value;
     const payload = { name: newName, type: selectedPartyType, opening_balance: opening };
     if (navigator.onLine && supabaseClient) {
-      if (item.id) await supabaseClient.from('vendors').update(payload).eq('id', item.id);
-      else await supabaseClient.from('vendors').update(payload).eq('name', originalName);
+      const { error } = item.id 
+        ? await supabaseClient.from('vendors').update(payload).eq('id', item.id)
+        : await supabaseClient.from('vendors').update(payload).eq('name', originalName);
+      if (error) return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
     }
     Object.assign(item, payload);
     localStorage.setItem(`ALNASSR_${currentShopId}_VENDORS`, JSON.stringify(vendorsList));
@@ -2090,8 +2141,10 @@ async function saveEditedMasterItem() {
     const joinDate = document.getElementById("editMasterJoinDate").value || item.joining_date;
     const payload = { name: newName, monthly_salary: salary, opening_advance: opening, joining_date: joinDate };
     if (navigator.onLine && supabaseClient) {
-      if (item.id) await supabaseClient.from('employees').update(payload).eq('id', item.id);
-      else await supabaseClient.from('employees').update(payload).eq('name', originalName);
+      const { error } = item.id 
+        ? await supabaseClient.from('employees').update(payload).eq('id', item.id)
+        : await supabaseClient.from('employees').update(payload).eq('name', originalName);
+      if (error) return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
     }
     Object.assign(item, payload);
     localStorage.setItem(`ALNASSR_${currentShopId}_EMPLOYEES`, JSON.stringify(employeesList));
@@ -2100,18 +2153,24 @@ async function saveEditedMasterItem() {
     if (!item) return;
     const payload = { name: newName };
     if (navigator.onLine && supabaseClient) {
-      if (item.id) await supabaseClient.from('agents').update(payload).eq('id', item.id);
-      else await supabaseClient.from('agents').update(payload).eq('name', originalName);
+      const { error } = item.id 
+        ? await supabaseClient.from('agents').update(payload).eq('id', item.id)
+        : await supabaseClient.from('agents').update(payload).eq('name', originalName);
+      if (error) return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
     }
     item.name = newName;
     localStorage.setItem(`ALNASSR_${currentShopId}_AGENTS`, JSON.stringify(agentsList));
   } else if (type === 'expense') {
     const item = expensesMasterList.find(ex => ex.name === originalName);
     if (!item) return;
-    const payload = { name: newName, opening_balance: opening };
+    const expType = document.getElementById("editMasterExpenseType")?.value || 'utility';
+    const finalOpening = (expType === 'regular') ? 0 : opening;
+    const payload = { name: newName, type: expType, opening_balance: finalOpening };
     if (navigator.onLine && supabaseClient) {
-      if (item.id) await supabaseClient.from('expenses_master').update(payload).eq('id', item.id);
-      else await supabaseClient.from('expenses_master').update(payload).eq('name', originalName);
+      const { error } = item.id 
+        ? await supabaseClient.from('expenses_master').update(payload).eq('id', item.id)
+        : await supabaseClient.from('expenses_master').update(payload).eq('name', originalName);
+      if (error) return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
     }
     Object.assign(item, payload);
     localStorage.setItem(`ALNASSR_${currentShopId}_EXPENSES`, JSON.stringify(expensesMasterList));
@@ -2287,6 +2346,7 @@ function openNewExpenseModal() {
   document.getElementById("newExpName").value = "";
   document.getElementById("newExpOpening").value = "";
   document.getElementById("newExpType").value = "utility";
+  toggleNewExpenseOpeningField("utility");
   document.getElementById("newExpenseModal").classList.remove("hidden");
   document.getElementById("newExpName").focus();
 }
@@ -2298,7 +2358,7 @@ function closeNewExpenseModal() {
 async function saveNewExpenseMaster() {
   const name = document.getElementById("newExpName").value.trim().toUpperCase();
   const type = document.getElementById("newExpType").value;
-  const opening = parseFloat(document.getElementById("newExpOpening").value) || 0;
+  const opening = (type === 'regular') ? 0 : (parseFloat(document.getElementById("newExpOpening").value) || 0);
   if (!name) return alert("ചിലവ് ഇനത്തിന്റെ പേര് നൽകുക!");
 
   const newExp = { name: name, type: type, opening_balance: opening };
