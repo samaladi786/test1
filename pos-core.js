@@ -316,7 +316,7 @@ function logoutApp() {
 function goToDesktopPortal() {
   const userRole = sessionStorage.getItem("ALNASSR_MOBILE_ROLE") || sessionStorage.getItem("ALNASSR_USER_ROLE");
   if (userRole === 'admin') {
-    window.open("dashboard.html", "_blank");
+    window.open("index.html", "_blank");
     return;
   }
   pendingAction = 'open_desktop_portal';
@@ -1837,7 +1837,7 @@ async function verifyPinAndExecute() {
     if (pinVal === masterPin) {
       sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
       closePinModal();
-      window.open("dashboard.html", "_blank");
+      window.open("index.html", "_blank");
     } else {
       alert("അഡ്മിൻ മാസ്റ്റർ പിൻ തെറ്റാണ്!");
       document.getElementById("pinInput").value = "";
