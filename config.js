@@ -6,7 +6,7 @@ window.MASTER_PIN = "0000"; //[cite: 1]
 window.STAFF_DELETE_LIMIT_DAYS = 2; //[cite: 1]
 
 // എക്സ്റ്റേണൽ റിപ്പോർട്ട് പോർട്ടൽ ലിങ്ക്
-window.GLOBAL_REPORT_PORTAL_URL = "https://samaladi786.github.io/dashboard";
+window.GLOBAL_REPORT_PORTAL_URL = "https://samaladi786.github.io/test1/dashboard";
 
 window.SHOPS_CONFIG = [
   {
