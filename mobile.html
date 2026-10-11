@@ -283,7 +283,7 @@
   <!-- 3. MAIN WORKSPACE CONTAINER -->
   <main class="w-full max-w-md lg:max-w-7xl mx-auto px-3 pt-2.5 flex-1 flex flex-col justify-between space-y-3">
 
-    <!-- DESKTOP GRID CONTAINER: PURCHASE (COL 1) | EXPENSE (COL 2) | SALES (COL 3) -->
+    <!-- DESKTOP GRID CONTAINER: PURCHASE | EXPENSE | SALES -->
     <div class="desktop-layout-grid space-y-3 lg:space-y-0">
       
       <!-- TAB 2: PURCHASE ENTRY -->
@@ -788,6 +788,15 @@
           </select>
         </div>
 
+        <!-- EXPENSE TYPE SELECTOR IN MASTER EDIT -->
+        <div id="editMasterExpenseTypeBox" class="hidden">
+          <label class="block font-bold text-slate-700 mb-0.5">ചിലവ് തരം (Type):</label>
+          <select id="editMasterExpenseType" onchange="toggleEditExpenseOpeningField(this.value)" class="w-full p-2.5 rounded-xl border bg-slate-50 font-black outline-none">
+            <option value="utility">മാസ ബില്ല് / കുടിശ്ശികയുള്ളത് (Utility)</option>
+            <option value="regular">സാധാരണ ചിലവ് (Regular)</option>
+          </select>
+        </div>
+
         <div id="editMasterAgentBox" class="hidden">
           <label class="block font-bold text-slate-700 mb-0.5">റൂട്ട് ഏജന്റ്:</label>
           <input list="agentListOptions" id="editMasterAgent" placeholder="ഏജന്റ് പേര്..." class="w-full p-2 rounded-xl border bg-slate-50 font-bold uppercase-input outline-none" />
@@ -926,7 +935,7 @@
     </div>
   </div>
 
-  <!-- 7. NEW EXPENSE / UTILITY BILL MODAL -->
+  <!-- 7. NEW EXPENSE / UTILITY BILL MODAL (DYNAMIC FIELD SHOW/HIDE) -->
   <div id="newExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -936,16 +945,16 @@
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">ചിലവ് ഇനം / പേര്:</label>
-          <input type="text" id="newExpName" oninput="this.value = this.value.toUpperCase();" placeholder="ഉദാ: റൂം വാടക, കറണ്ട് ബില്ല്..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none uppercase-input" />
+          <input type="text" id="newExpName" oninput="this.value = this.value.toUpperCase();" placeholder="ഉദാ: റൂം വാടക, ചായ, കറണ്ട്..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none uppercase-input" />
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-0.5">ഇനം തരം (Type):</label>
-          <select id="newExpType" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none">
-            <option value="utility">മാസ ബില്ല് / കുടിശ്ശികയുള്ളത് (Recurring/Utility)</option>
+          <select id="newExpType" onchange="toggleNewExpenseOpeningField(this.value)" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none">
+            <option value="utility">മാസ ബില്ല് / കുടിശ്ശികയുള്ളത് (Utility)</option>
             <option value="regular">സാധാരണ ചിലവ് (Regular)</option>
           </select>
         </div>
-        <div>
+        <div id="newExpOpeningContainer">
           <label class="block font-bold text-slate-700 mb-0.5">പഴയ കുടിശ്ശിക / ബാക്കി തുക:</label>
           <input type="number" step="any" id="newExpOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none" />
         </div>
