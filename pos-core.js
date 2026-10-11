@@ -1834,12 +1834,26 @@ async function verifyPinAndExecute() {
   const currentShopPin = currentShop ? String(currentShop.pin).trim() : null;
 
   if (pendingAction === 'open_desktop_portal') {
-    if (pinVal === masterPin) {
+    const shopsArr = getShopsList();
+    const isMaster = (masterPin && pinVal === masterPin);
+    const matchedShop = (shopsArr || []).find(s => String(s.pin).trim() === pinVal);
+
+    if (isMaster) {
+      // മാസ്റ്റർ പിൻ ആണെങ്കിൽ ഫുൾ അഡ്മിൻ ആക്സസോടെ തുറക്കുന്നു
+      sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
       sessionStorage.setItem("ALNASSR_USER_ROLE", "admin");
       closePinModal();
       window.open("index.html", "_blank");
+    } else if (matchedShop) {
+      // ഷോപ്പ് പിൻ ആണെങ്കിൽ ആ ഷോപ്പ് മാത്രം സെലക്ട് ചെയ്ത് തുറക്കുന്നു
+      sessionStorage.setItem("ALNASSR_LOGGED_IN", "true");
+      sessionStorage.setItem("ALNASSR_USER_ROLE", "shop");
+      sessionStorage.setItem("ALNASSR_ACTIVE_SHOP_ID", matchedShop.id);
+      localStorage.setItem("ALNASSR_SELECTED_SHOP_ID", matchedShop.id);
+      closePinModal();
+      window.open("index.html", "_blank");
     } else {
-      alert("അഡ്മിൻ മാസ്റ്റർ പിൻ തെറ്റാണ്!");
+      alert("പിൻ തെറ്റാണ്!");
       document.getElementById("pinInput").value = "";
     }
     return;
