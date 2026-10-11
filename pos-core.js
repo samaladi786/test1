@@ -6,6 +6,7 @@ function getShopsList() {
   if (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG) && window.SHOPS_CONFIG.length > 0) return window.SHOPS_CONFIG;
   if (window.SHOPS && Array.isArray(window.SHOPS) && window.SHOPS.length > 0) return window.SHOPS;
   try {
+    if (typeof SHOPS_CONFIG !== 'undefined' && Array.isArray(SHOPS_CONFIG) && SHOPS_CONFIG.length > 0) return SHOPS_CONFIG;
     if (typeof SHOPS !== 'undefined' && Array.isArray(SHOPS) && SHOPS.length > 0) return SHOPS;
   } catch(e) {}
   return [];
@@ -156,14 +157,13 @@ function updateNetworkStatus() {
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
-// 4-DIGIT AUTO-SUBMIT & NUMERIC KEYPAD BINDING
+// 4-DIGIT BINDING ENFORCER
 function setup4DigitPinInputs() {
   const loginInp = document.getElementById("loginPasswordInput");
   if (loginInp) {
     loginInp.setAttribute("maxlength", "4");
     loginInp.setAttribute("inputmode", "numeric");
     loginInp.setAttribute("pattern", "[0-9]*");
-    loginInp.setAttribute("autocomplete", "current-password");
     loginInp.oninput = function() {
       this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
       if (this.value.length === 4) {
@@ -202,7 +202,10 @@ function initAppEngine() {
 
   if (isLogged) {
     const loginEl = document.getElementById("loginScreen");
-    if (loginEl) loginEl.classList.add("hidden");
+    if (loginEl) {
+      loginEl.style.setProperty("display", "none", "important");
+      loginEl.classList.add("hidden");
+    }
     applyRolePermissions(userRole);
     initMultiShopSystem();
   } else {
@@ -232,12 +235,12 @@ if (document.readyState === "loading") {
   initAppEngine();
 }
 
-// LOGIN LOGIC (ROBUST PIN MATCHING)
+// LOGIN LOGIC
 function verifyLogin() {
   try {
     const input = document.getElementById("loginPasswordInput");
     if (!input) return;
-    const enteredPin = input.value.trim();
+    const enteredPin = String(input.value).trim();
 
     if (!enteredPin) return alert("പിൻ നൽകുക!");
 
@@ -269,7 +272,7 @@ function verifyLogin() {
 
     const loginEl = document.getElementById("loginScreen");
     if (loginEl) {
-      loginEl.style.display = "none";
+      loginEl.style.setProperty("display", "none", "important");
       loginEl.classList.add("hidden");
       loginEl.classList.remove("flex");
     }
@@ -806,7 +809,7 @@ function calculateUtilityExpenseLiveBalance(expItem) {
   return bal;
 }
 
-// UNIFIED PARTY SELECTED (REGULAR VS UTILITY EXPENSE SEPARATION)
+// UNIFIED PARTY SELECTED
 function onUnifiedPartySelected() {
   const val = document.getElementById("unifiedPartyInput").value.trim();
   const cleanVal = cleanPartyName(val);
@@ -837,7 +840,6 @@ function onUnifiedPartySelected() {
     badge.innerText = "ചിലവ്";
     if (staffDepBtn) staffDepBtn.classList.add("hidden");
 
-    // യൂട്ടിലിറ്റി / മാസ ബില്ല് ആണെങ്കിൽ മാത്രം കുടിശ്ശികയും +Bill ബട്ടണും കാണിക്കുന്നു
     if (expItem && expItem.type === 'utility') {
       if (addBillBtn) addBillBtn.classList.remove("hidden");
       const liveBal = calculateUtilityExpenseLiveBalance(expItem);
@@ -852,7 +854,6 @@ function onUnifiedPartySelected() {
         info.innerText = `കുടിശ്ശികയില്ല (0.00)`;
       }
     } else {
-      // സാധാരണ ചിലവുകൾക്ക് (ചായ, ക്ലീനിംഗ് മുതലായവ) ബാലൻസോ +Bill ബട്ടണോ ആവശ്യമില്ല
       if (addBillBtn) addBillBtn.classList.add("hidden");
       info.innerText = "";
     }
@@ -886,7 +887,7 @@ function toggleEditExpenseOpeningField(type) {
   }
 }
 
-// UTILITY BILL MODAL (+BILL) - INSTANT LOCAL UPDATE
+// UTILITY BILL MODAL (+BILL)
 function openAddUtilityBillModal() {
   const currentVal = document.getElementById("unifiedPartyInput").value.trim().toUpperCase();
   const cleanVal = cleanPartyName(currentVal);
@@ -1216,7 +1217,7 @@ async function saveStaffDepositEntry() {
   onUnifiedPartySelected();
 }
 
-// OFFLINE QUEUE LOGIC (STRICT 6-FIELD SANITIZATION)
+// OFFLINE QUEUE LOGIC
 function getOfflineQueue() {
   try { return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`)) || []; }
   catch (e) { return []; }
@@ -2529,4 +2530,18 @@ function closeNewVendorModal() { document.getElementById("newVendorModal").class
 function openNewEmployeeModal() {
   document.getElementById("newEmpName").value = "";
   document.getElementById("newEmpSalary").value = "";
-  document.getElementById("newEmp
+  document.getElementById("newEmpAdvance").value = "";
+  document.getElementById("newEmpJoinDate").value = getSaudiBusinessDate();
+  document.getElementById("newEmployeeModal").classList.remove("hidden");
+  document.getElementById("newEmpName").focus();
+}
+function closeNewEmployeeModal() { document.getElementById("newEmployeeModal").classList.add("hidden"); }
+
+function openTodaySalesModal() { document.getElementById("todaySalesModal").classList.remove("hidden"); if (window.lucide) lucide.createIcons(); }
+function closeTodaySalesModal() { document.getElementById("todaySalesModal").classList.add("hidden"); }
+
+function openTodayPurchaseModal() { document.getElementById("todayPurchaseModal").classList.remove("hidden"); if (window.lucide) lucide.createIcons(); }
+function closeTodayPurchaseModal() { document.getElementById("todayPurchaseModal").classList.add("hidden"); }
+
+function openTodayExpenseModal() { document.getElementById("todayExpenseModal").classList.remove("hidden"); if (window.lucide) lucide.createIcons(); }
+function closeTodayExpenseModal() { document.getElementById("todayExpenseModal").classList.add("hidden"); }
