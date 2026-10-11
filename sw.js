@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alnassr-pos-cache-v2.26';
+const CACHE_NAME = 'alnassr-pos-cache-v2.27';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
