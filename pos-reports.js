@@ -124,7 +124,11 @@ function renderReportData(mode) {
 
   let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
   const offlineQueue = getOfflineQueue();
-  offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+  // FIXED OFFLINE PARSING
+  offlineQueue.forEach(item => { 
+    const record = item.payload ? item.payload : item;
+    allTx.unshift(record); 
+  });
 
   let totSale = 0, totPur = 0, totExp = 0, totSal = 0;
   let cashSalesMap = {};
@@ -476,7 +480,11 @@ function generateStatement() {
 
   let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
   const offlineQueue = getOfflineQueue();
-  offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+  // FIXED OFFLINE PARSING
+  offlineQueue.forEach(item => { 
+    const record = item.payload ? item.payload : item;
+    allTx.unshift(record); 
+  });
   allTx.sort((a, b) => (cleanDate(a.date) || '').localeCompare(cleanDate(b.date) || ''));
 
   let partyName = partyVal;
@@ -485,12 +493,10 @@ function generateStatement() {
   let totalSalesOrBills = 0;
   let totalPaidOrCollected = 0;
   let statementRows = [];
-  let isAgentMode = (type === 'agent');
   let isAllVendorsMode = (type === 'vendor' && (partyVal === 'ALL VENDORS' || partyVal === 'ALL'));
   let isAllCustomersMode = (type === 'customer' && (partyVal === 'ALL CUSTOMERS' || partyVal === 'ALL'));
   let isAllUtilityBillsMode = (type === 'expense' && (partyVal === 'ALL UTILITY BILLS' || partyVal === 'ALL'));
 
-  let agentCustomersSummary = [];
   let vendorsConsolidatedSummary = [];
   let customersConsolidatedSummary = [];
   let utilitiesConsolidatedSummary = [];
@@ -866,7 +872,6 @@ function downloadMasterExcel() {
 
     const wb = XLSX.utils.book_new();
 
-    // 1. Customers
     const custData = customersList.map(c => ({
       "Name": c.name,
       "Type": c.type || 'credit',
@@ -877,7 +882,6 @@ function downloadMasterExcel() {
     const wsCust = XLSX.utils.json_to_sheet(custData);
     XLSX.utils.book_append_sheet(wb, wsCust, "Customers");
 
-    // 2. Vendors
     const vendData = vendorsList.map(v => ({
       "Name": v.name,
       "Type": v.type || 'credit',
@@ -886,7 +890,6 @@ function downloadMasterExcel() {
     const wsVend = XLSX.utils.json_to_sheet(vendData);
     XLSX.utils.book_append_sheet(wb, wsVend, "Vendors");
 
-    // 3. Employees
     const empData = employeesList.map(e => ({
       "Name": e.name,
       "Monthly_Salary": e.monthly_salary || 0,
@@ -897,9 +900,9 @@ function downloadMasterExcel() {
     const wsEmp = XLSX.utils.json_to_sheet(empData);
     XLSX.utils.book_append_sheet(wb, wsEmp, "Employees");
 
-    // 4. Expenses
     const expData = expensesMasterList.map(ex => ({
       "Name": ex.name,
+      "Type": ex.type || 'regular',
       "Opening_Balance": ex.opening_balance || 0
     }));
     const wsExp = XLSX.utils.json_to_sheet(expData);
@@ -917,7 +920,7 @@ async function uploadMasterExcel(event) {
   if (!file) return;
 
   const enteredPin = prompt("എക്സൽ വഴി ഡാറ്റ കയറ്റാൻ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക:");
-  const masterPin = String(window.MASTER_PIN);
+  const masterPin = getMasterPin();
   if (enteredPin !== masterPin) {
     event.target.value = "";
     return alert("അഡ്മിൻ മാസ്റ്റർ പിൻ തെറ്റാണ്!");
@@ -929,7 +932,6 @@ async function uploadMasterExcel(event) {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: 'array' });
 
-      // Import Customers
       if (workbook.Sheets["Customers"]) {
         const rows = XLSX.utils.sheet_to_json(workbook.Sheets["Customers"]);
         for (const r of rows) {
@@ -953,7 +955,6 @@ async function uploadMasterExcel(event) {
         }
       }
 
-      // Import Vendors
       if (workbook.Sheets["Vendors"]) {
         const rows = XLSX.utils.sheet_to_json(workbook.Sheets["Vendors"]);
         for (const r of rows) {
@@ -975,7 +976,6 @@ async function uploadMasterExcel(event) {
         }
       }
 
-      // Import Employees
       if (workbook.Sheets["Employees"]) {
         const rows = XLSX.utils.sheet_to_json(workbook.Sheets["Employees"]);
         for (const r of rows) {
@@ -999,7 +999,6 @@ async function uploadMasterExcel(event) {
         }
       }
 
-      // Import Expenses
       if (workbook.Sheets["Expenses"]) {
         const rows = XLSX.utils.sheet_to_json(workbook.Sheets["Expenses"]);
         for (const r of rows) {
@@ -1007,6 +1006,7 @@ async function uploadMasterExcel(event) {
           const name = String(r.Name).trim().toUpperCase();
           const payload = {
             name: name,
+            type: String(r.Type || 'regular').toLowerCase(),
             opening_balance: parseFloat(r.Opening_Balance) || 0
           };
           let existing = expensesMasterList.find(ex => ex.name.toUpperCase() === name);
@@ -1074,7 +1074,7 @@ async function requestRestoreBackup(event) {
   if (!file) return;
 
   const enteredPin = prompt("ബാക്കപ്പ് റീസ്റ്റോർ ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക:");
-  const masterPin = String(window.MASTER_PIN);
+  const masterPin = getMasterPin();
   if (enteredPin !== masterPin) {
     event.target.value = "";
     return alert("അഡ്മിൻ മാസ്റ്റർ പിൻ തെറ്റാണ്!");
@@ -1110,7 +1110,6 @@ async function requestRestoreBackup(event) {
 
       if (navigator.onLine && supabaseClient) {
         alert("ക്ലൗഡിലേക്ക് ഡാറ്റ ബാക്കപ്പ് അപ്‌ലോഡ് ചെയ്യുന്നു. അല്പം കാത്തിരിക്കുക...");
-        // Re-push transactions in chunks
         if (transactionsList.length > 0) {
           const chunkSize = 200;
           for (let i = 0; i < transactionsList.length; i += chunkSize) {
