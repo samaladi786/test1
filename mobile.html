@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
- <title id="mobilePageTitle">ALNASSR മൊബൈൽ POS</title>
+  <title id="mobilePageTitle">ALNASSR മൊബൈൽ POS</title>
 
-<!-- PWA MANIFEST & ICONS -->
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#0f172a">
+  <!-- PWA MANIFEST & ICONS -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#0f172a">
   
   <!-- TAILWIND, ICONS, SUPABASE & SHEETJS (EXCEL) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -79,7 +79,7 @@
         size: A4 portrait;
         margin: 4mm 6mm;
       }
-      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #employeeStopModal, #expenseBillModal, #openingFundModal, #backupModal, #masterModal, #editMasterModal, #staffDepositModal, #transferModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
+      header, #mobileDateNavBar, main, nav, #offlineSyncBar, #pinModal, #newVendorModal, #newCustomerModal, #newEmployeeModal, #newExpenseModal, #employeeStopModal, #expenseBillModal, #openingFundModal, #backupModal, #masterModal, #editMasterModal, #staffDepositModal, #transferModal, #editTransactionModal, #todayPurchaseModal, #todayExpenseModal, #todaySalesModal, .no-print {
         display: none !important;
       }
       body {
@@ -217,10 +217,10 @@
           <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-400"></i>
           <span>മാസ്റ്റർ</span>
         </button>
-        <a href="dashboard.html" target="_blank" title="റിപ്പോർട്ട് പോർട്ടൽ" class="hidden lg:flex items-center gap-1.5 ...">
-  <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
-  <span>പോർട്ടൽ</span>
-</a>
+        <a href="dashboard.html" target="_blank" title="റിപ്പോർട്ട് പോർട്ടൽ" class="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold shadow touch-btn">
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
+          <span>പോർട്ടൽ</span>
+        </a>
         <button onclick="openReportModal()" title="റിപ്പോർട്ടുകൾ" class="hidden lg:flex items-center gap-1 px-2.5 py-1.5 bg-violet-700 hover:bg-violet-600 text-white rounded-xl text-xs font-bold shadow touch-btn cursor-pointer">
           <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
           <span>റിപ്പോർട്ട്</span>
@@ -358,7 +358,7 @@
                   <button type="button" onclick="openNewEmployeeModal()" class="text-[10px] bg-purple-700 hover:bg-purple-800 text-white font-bold px-2 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
                     👥 ന്യൂ സ്റ്റാഫ്
                   </button>
-                  <button type="button" onclick="quickAddExpensePrompt()" class="text-[10px] bg-amber-600 hover:bg-amber-700 text-white font-bold px-2 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
+                  <button type="button" onclick="openNewExpenseModal()" class="text-[10px] bg-amber-600 hover:bg-amber-700 text-white font-bold px-2 py-1 rounded-full touch-btn cursor-pointer shadow-sm">
                     + ന്യൂ ചിലവ്
                   </button>
                 </div>
@@ -504,7 +504,7 @@
           <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
           <span>റിപ്പോർട്ട്</span>
         </button>
-        <a href="https://samaladi786.github.io/report" target="_blank" class="py-2.5 px-1 bg-indigo-700 hover:bg-indigo-600 text-white rounded-2xl text-[11px] font-black shadow touch-btn flex items-center justify-center gap-1 cursor-pointer">
+        <a href="dashboard.html" target="_blank" class="py-2.5 px-1 bg-indigo-700 hover:bg-indigo-600 text-white rounded-2xl text-[11px] font-black shadow touch-btn flex items-center justify-center gap-1 cursor-pointer">
           <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
           <span>പോർട്ടൽ</span>
         </a>
@@ -554,10 +554,10 @@
   </nav>
 
   <!-- ======================================================== -->
-  <!-- MODALS & POPUPS (RECURRING BILLS, EXCEL, BACKUP, ETC.)   -->
+  <!-- MODALS & POPUPS                                          -->
   <!-- ======================================================== -->
 
-  <!-- 1. REPORTS & STATEMENTS MODAL (WITH 15% VAT SUMMARY) -->
+  <!-- 1. REPORTS & STATEMENTS MODAL -->
   <div id="reportModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-4xl w-full bg-white p-3 sm:p-5 shadow-2xl rounded-3xl border space-y-2.5 my-auto max-h-[96vh] overflow-y-auto relative">
       <div class="sticky top-0 bg-white/95 backdrop-blur-sm border-b pb-2 pt-1 z-30 flex items-center justify-between no-print">
@@ -699,7 +699,7 @@
     </div>
   </div>
 
-  <!-- 2. MASTER RECORDS MODAL (WITH EXCEL IMPORT/EXPORT & BACKUP BUTTONS) -->
+  <!-- 2. MASTER RECORDS MODAL -->
   <div id="masterModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-3xl w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3.5 my-auto max-h-[94vh] overflow-y-auto relative">
       <div class="sticky top-0 bg-white border-b pb-2 pt-1 z-30 flex items-center justify-between">
@@ -822,7 +822,7 @@
     </div>
   </div>
 
-  <!-- 4. NEW CUSTOMER MODAL (WITH CREDIT LIMIT) -->
+  <!-- 4. NEW CUSTOMER MODAL -->
   <div id="newCustomerModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -926,7 +926,38 @@
     </div>
   </div>
 
-  <!-- 7. EMPLOYEE STOP & FINAL SETTLEMENT MODAL -->
+  <!-- 7. NEW EXPENSE / UTILITY BILL MODAL -->
+  <div id="newExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-xs font-black text-amber-900 flex items-center gap-1.5">⚡ പുതിയ ചിലവ് / ബില്ല് ഇനം</h3>
+        <button onclick="closeNewExpenseModal()" class="text-slate-400 hover:text-slate-700 font-black cursor-pointer">✕</button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ചിലവ് ഇനം / പേര്:</label>
+          <input type="text" id="newExpName" oninput="this.value = this.value.toUpperCase();" placeholder="ഉദാ: റൂം വാടക, കറണ്ട് ബില്ല്..." class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none uppercase-input" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">ഇനം തരം (Type):</label>
+          <select id="newExpType" class="w-full p-2 rounded-xl border bg-slate-50 font-bold outline-none">
+            <option value="utility">മാസ ബില്ല് / കുടിശ്ശികയുള്ളത് (Recurring/Utility)</option>
+            <option value="regular">സാധാരണ ചിലവ് (Regular)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-0.5">പഴയ കുടിശ്ശിക / ബാക്കി തുക:</label>
+          <input type="number" step="any" id="newExpOpening" placeholder="0.00" class="w-full p-2.5 rounded-xl border bg-slate-50 font-bold outline-none" />
+        </div>
+      </div>
+      <div class="pt-2 border-t flex gap-2">
+        <button type="button" onclick="closeNewExpenseModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer">റദ്ദാക്കുക</button>
+        <button type="button" onclick="saveNewExpenseMaster()" class="flex-1 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow cursor-pointer">സേവ്</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. EMPLOYEE STOP & FINAL SETTLEMENT MODAL -->
   <div id="employeeStopModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border space-y-3.5 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -969,7 +1000,7 @@
     </div>
   </div>
 
-  <!-- 8. RECURRING UTILITY BILL MODAL (+ BILL ENTRY) -->
+  <!-- 9. RECURRING UTILITY BILL MODAL (+ BILL ENTRY) -->
   <div id="expenseBillModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -998,7 +1029,7 @@
     </div>
   </div>
 
-  <!-- 9. OPENING FUND SETTINGS MODAL -->
+  <!-- 10. OPENING FUND SETTINGS MODAL -->
   <div id="openingFundModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1023,7 +1054,7 @@
     </div>
   </div>
 
-  <!-- 10. BACKUP & DISASTER RECOVERY MODAL -->
+  <!-- 11. BACKUP & DISASTER RECOVERY MODAL -->
   <div id="backupModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1054,7 +1085,7 @@
     </div>
   </div>
 
-  <!-- 11. CASH / BANK TRANSFER MODAL -->
+  <!-- 12. CASH / BANK TRANSFER MODAL -->
   <div id="transferModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1082,7 +1113,7 @@
     </div>
   </div>
 
-  <!-- 12. STAFF DEPOSIT MODAL -->
+  <!-- 13. STAFF DEPOSIT MODAL -->
   <div id="staffDepositModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1117,7 +1148,7 @@
     </div>
   </div>
 
-  <!-- 13. EDIT TRANSACTION MODAL -->
+  <!-- 14. EDIT TRANSACTION MODAL -->
   <div id="editTransactionModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border space-y-3.5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1156,7 +1187,7 @@
     </div>
   </div>
 
-  <!-- 14. PIN VERIFY MODAL -->
+  <!-- 15. PIN VERIFY MODAL -->
   <div id="pinModal" class="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-[99999] hidden p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl border text-center space-y-3">
       <h3 class="text-base font-bold text-slate-800">സെക്യൂരിറ്റി പിൻ</h3>
@@ -1169,7 +1200,7 @@
     </div>
   </div>
 
-  <!-- 15. TODAY'S SALES BREAKDOWN MODAL -->
+  <!-- 16. TODAY'S SALES BREAKDOWN MODAL -->
   <div id="todaySalesModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1190,7 +1221,7 @@
     </div>
   </div>
 
-  <!-- 16. TODAY'S PURCHASES BREAKDOWN MODAL -->
+  <!-- 17. TODAY'S PURCHASES BREAKDOWN MODAL -->
   <div id="todayPurchaseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1211,7 +1242,7 @@
     </div>
   </div>
 
-  <!-- 17. TODAY'S EXPENSES BREAKDOWN MODAL -->
+  <!-- 18. TODAY'S EXPENSES BREAKDOWN MODAL -->
   <div id="todayExpenseModal" class="fixed inset-0 bg-slate-950/75 flex items-center justify-center z-[9999] hidden p-2 sm:p-4 overflow-y-auto backdrop-blur-sm">
     <div class="max-w-lg w-full bg-white p-4 shadow-2xl rounded-3xl border space-y-3 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-2">
