@@ -22,7 +22,7 @@
     .touch-btn:active { transform: scale(0.97); }
     .uppercase-input { text-transform: uppercase; }
 
-    /* COMPACT 58mm / 80mm THERMAL RECEIPT PRINT STYLES */
+    /* 58mm / 80mm COMPACT THERMAL RECEIPT PRINT STYLES */
     @media print {
       body * { visibility: hidden !important; }
       #thermalReceiptContainer, #thermalReceiptContainer * { visibility: visible !important; }
@@ -95,7 +95,9 @@
             </select>
           </div>
           <h1 id="fastShopTitle" class="text-xs font-black text-white truncate">ALNASSR POS</h1>
-          <span id="fastStatusBadge" class="text-[9.5px] font-extrabold text-emerald-400">🟢 ഫാസ്റ്റ് മോഡ്</span>
+          <div class="flex items-center gap-1 text-[9.5px]">
+            <span id="fastNetworkBadge" class="font-extrabold text-emerald-400">🟢 ഓൺലൈൻ</span>
+          </div>
         </div>
       </div>
 
@@ -112,6 +114,11 @@
       </div>
     </div>
   </header>
+
+  <!-- OFFLINE PENDING SYNC NOTICE -->
+  <div id="fastOfflineSyncBar" class="bg-amber-500 text-slate-900 text-xs font-bold py-1.5 px-4 text-center hidden cursor-pointer" onclick="syncFastOfflineQueue()">
+    ⚠️ <span id="fastOfflineSyncMsg">ഓഫ്‍ലൈൻ എൻട്രികൾ ഉണ്ട്. സിങ്ക് ചെയ്യാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക.</span>
+  </div>
 
   <!-- 3. DATE BAR & TAB SWITCHER (ORDER: 1. പർച്ചേസ് | 2. ചിലവ് | 3. സെയിൽസ്) -->
   <div class="bg-slate-800 text-white px-3 py-1.5 border-b border-slate-700 shadow-inner sticky top-[51px] z-30">
@@ -301,7 +308,7 @@
             step="any" 
             inputmode="decimal" 
             id="closePhysicalCashInput" 
-            oninput="recalculateClosingLiveMath()" 
+            oninput="onPhysicalCashChanged(this.value)" 
             placeholder="0.00" 
             class="w-full text-center text-lg font-black p-2 rounded-xl border-2 border-emerald-400 bg-white text-emerald-800 outline-none" 
           />
@@ -325,12 +332,12 @@
           <div id="closeAutoExpListContainer" class="space-y-1 max-h-24 overflow-y-auto text-[10.5px]"></div>
         </div>
 
-        <!-- 4. EXTRA MANUAL CLOSING EXPENSES (NOT SENT TO CLOUD DATABASE) -->
+        <!-- 4. EXTRA MANUAL CLOSING EXPENSES (STORED IN LOCALSTORAGE, NEVER TO SUPABASE) -->
         <div class="bg-purple-50/80 p-2.5 rounded-2xl border border-purple-200 space-y-2">
           <div class="flex justify-between items-center">
             <div>
               <label class="font-black text-purple-950 text-[11px] block">4. അധിക ചിലവ് / മാനേജർ വാങ്ങിയത്:</label>
-              <span class="text-[9px] text-purple-700 font-bold block">(ക്ലൗഡിൽ കയറില്ല, റിപ്പോർട്ടിൽ മാത്രം വരും)</span>
+              <span class="text-[9px] text-purple-700 font-bold block">(ഫോണിൽ സേവ് ആകും, ക്ലൗഡിൽ കയറില്ല)</span>
             </div>
             <button type="button" onclick="addManualExtraExpenseRow()" class="text-[10px] bg-purple-700 text-white font-bold px-2 py-0.5 rounded-lg touch-btn cursor-pointer">
               + ചേർക്കുക
@@ -401,9 +408,10 @@
     // Sales Mada Machine inputs state
     let salesMadaMachines = [ { name: "മാദ 1", amount: "" } ];
 
-    // Manual closing extra items (purely local, NOT sent to Supabase)
+    // Manual closing extra items (STORED IN LOCALSTORAGE)
     let manualClosingExtras = [ { desc: "മാനേജർ വാങ്ങിയത്", amount: "" } ];
 
+    // SAUDI BUSINESS DATE (6:00 AM CUT-OFF SYNC)
     function getSaudiBusinessDate() {
       try {
         const now = new Date();
@@ -428,6 +436,71 @@
       return String(d).split('T')[0].split(' ')[0].replace(/\//g, '-').trim();
     }
 
+    // OFFLINE QUEUE MANAGEMENT
+    function getFastOfflineQueue() {
+      try {
+        return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_FAST_OFFLINE_TXNS`)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function pushFastOfflineQueue(payload) {
+      const q = getFastOfflineQueue();
+      q.push({ ...payload, _timestamp: Date.now() });
+      localStorage.setItem(`ALNASSR_${currentShopId}_FAST_OFFLINE_TXNS`, JSON.stringify(q));
+      checkFastOfflineQueueUI();
+    }
+
+    function checkFastOfflineQueueUI() {
+      const q = getFastOfflineQueue();
+      const bar = document.getElementById("fastOfflineSyncBar");
+      const msg = document.getElementById("fastOfflineSyncMsg");
+      if (q.length > 0) {
+        bar.classList.remove("hidden");
+        msg.innerText = `⚠️ ${q.length} ഓഫ്‍ലൈൻ എൻട്രികൾ ഉണ്ട്. സിങ്ക് ചെയ്യാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക.`;
+      } else {
+        bar.classList.add("hidden");
+      }
+    }
+
+    async function syncFastOfflineQueue() {
+      if (!navigator.onLine || !supabaseClient) return;
+      const q = getFastOfflineQueue();
+      if (q.length === 0) return;
+
+      const remaining = [];
+      for (const item of q) {
+        const { _timestamp, ...cleanPayload } = item;
+        try {
+          const { error } = await supabaseClient.from('transactions').insert([cleanPayload]);
+          if (error) remaining.push(item);
+        } catch (e) {
+          remaining.push(item);
+        }
+      }
+
+      localStorage.setItem(`ALNASSR_${currentShopId}_FAST_OFFLINE_TXNS`, JSON.stringify(remaining));
+      checkFastOfflineQueueUI();
+      if (q.length > remaining.length) fetchFastData();
+    }
+
+    function updateFastNetworkStatus() {
+      const badge = document.getElementById("fastNetworkBadge");
+      if (!badge) return;
+      if (navigator.onLine) {
+        badge.className = "font-extrabold text-emerald-400";
+        badge.innerText = "🟢 ഓൺലൈൻ";
+        syncFastOfflineQueue();
+      } else {
+        badge.className = "font-extrabold text-amber-400";
+        badge.innerText = "⚠️ ഓഫ്‍ലൈൻ";
+      }
+    }
+
+    window.addEventListener('online', updateFastNetworkStatus);
+    window.addEventListener('offline', updateFastNetworkStatus);
+
     document.addEventListener("DOMContentLoaded", () => {
       const savedPin = localStorage.getItem("ALNASSR_FAST_PIN");
       const dtInp = document.getElementById("fastBusinessDate");
@@ -441,7 +514,7 @@
 
       renderFastPurchaseInputs('cash');
       renderFastSaleInputs('cash');
-      renderManualExtraExpenseRows();
+      updateFastNetworkStatus();
       if (window.lucide) lucide.createIcons();
     });
 
@@ -510,6 +583,7 @@
         supabaseClient = window.supabase.createClient(currentShop.url, currentShop.key);
       }
 
+      checkFastOfflineQueueUI();
       fetchFastData();
     }
 
@@ -673,13 +747,20 @@
         credit_amount: credit
       };
 
-      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
-      transactionsList.unshift(payload);
-      renderFastTotalsAndRecent();
+      if (!navigator.onLine || !supabaseClient) {
+        pushFastOfflineQueue(payload);
+        transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
+        renderFastTotalsAndRecent();
+        alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: പർച്ചേസ് ഫോണിൽ സേവ് ചെയ്തു!");
+      } else {
+        await supabaseClient.from('transactions').insert([payload]);
+        transactionsList.unshift(payload);
+        renderFastTotalsAndRecent();
+        alert("പർച്ചേസ് സേവ് ചെയ്തു!");
+      }
 
       document.getElementById("fastPurchaseVendorInput").value = "";
       onFastVendorSelected();
-      alert("പർച്ചേസ് സേവ് ചെയ്തു!");
     }
 
     // ========================================================
@@ -742,16 +823,23 @@
         credit_amount: 0
       };
 
-      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
-      transactionsList.unshift(payload);
-      renderFastTotalsAndRecent();
+      if (!navigator.onLine || !supabaseClient) {
+        pushFastOfflineQueue(payload);
+        transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
+        renderFastTotalsAndRecent();
+        alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: ചിലവ് ഫോണിൽ സേവ് ചെയ്തു!");
+      } else {
+        await supabaseClient.from('transactions').insert([payload]);
+        transactionsList.unshift(payload);
+        renderFastTotalsAndRecent();
+        alert("സേവ് ചെയ്തു!");
+      }
 
       document.getElementById("fastExpCash").value = "";
       document.getElementById("fastExpBank").value = "";
       document.getElementById("fastExpNote").value = "";
       document.getElementById("fastUnifiedPartyInput").value = "";
       onFastUnifiedSelected();
-      alert("സേവ് ചെയ്തു!");
     }
 
     // ========================================================
@@ -799,7 +887,7 @@
         box.innerHTML = `
           <div class="bg-emerald-50 p-2.5 rounded-2xl border border-emerald-200">
             <label class="block text-xs font-black text-emerald-900 mb-0.5 text-center">💵 ക്യാഷ് സെയിൽ</label>
-            <input type="number" step="any" inputmode="decimal" id="fastSaleCash" placeholder="0.00" class="w-full text-center text-base font-black p-2 rounded-xl border bg-white outline-none text-emerald-800" />
+            <input type="number" step="any" inputmode="decimal" id="fastSaleCash" placeholder="0.00" class="w-full text-center text-base font-black p-2.5 rounded-xl border bg-white outline-none text-emerald-800" />
           </div>
 
           <div class="bg-blue-50 p-2.5 rounded-2xl border border-blue-200 space-y-1.5">
@@ -869,15 +957,21 @@
         credit_amount: credit
       };
 
-      if (supabaseClient) await supabaseClient.from('transactions').insert([payload]);
-      transactionsList.unshift(payload);
-      renderFastTotalsAndRecent();
+      if (!navigator.onLine || !supabaseClient) {
+        pushFastOfflineQueue(payload);
+        transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
+        renderFastTotalsAndRecent();
+        alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: സെയിൽ ഫോണിൽ സേവ് ചെയ്തു!");
+      } else {
+        await supabaseClient.from('transactions').insert([payload]);
+        transactionsList.unshift(payload);
+        renderFastTotalsAndRecent();
+        alert("സെയിൽ സേവ് ചെയ്തു!");
+      }
 
-      // Reset mada inputs for next sale
       salesMadaMachines = [ { name: "മാദ 1", amount: "" } ];
       document.getElementById("fastSaleCustomerInput").value = "SHOPE";
       onFastCustomerSelected();
-      alert("സെയിൽ സേവ് ചെയ്തു!");
     }
 
     // ========================================================
@@ -929,10 +1023,47 @@
     }
 
     // ========================================================
-    // CLOSING LOGIC (AUTO-PULL + LOCAL EXTRAS + THERMAL PRINT)
+    // CLOSING LOGIC (WITH LOCALSTORAGE BACKED MANUAL EXTRAS)
     // ========================================================
+    function loadManualClosingExtras() {
+      const curDate = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const storageKey = `ALNASSR_${currentShopId}_FAST_CLOSING_EXTRAS_${curDate}`;
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        if (Array.isArray(saved) && saved.length > 0) {
+          manualClosingExtras = saved;
+        } else {
+          manualClosingExtras = [ { desc: "മാനേജർ വാങ്ങിയത്", amount: "" } ];
+        }
+      } catch (e) {
+        manualClosingExtras = [ { desc: "മാനേജർ വാങ്ങിയത്", amount: "" } ];
+      }
+
+      // Also restore physical cash input if saved for today
+      const cashKey = `ALNASSR_${currentShopId}_FAST_PHYSICAL_CASH_${curDate}`;
+      const savedCash = localStorage.getItem(cashKey);
+      const cashInput = document.getElementById("closePhysicalCashInput");
+      if (cashInput && savedCash !== null) cashInput.value = savedCash;
+
+      renderManualExtraExpenseRows();
+    }
+
+    function saveManualClosingExtrasToStorage() {
+      const curDate = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const storageKey = `ALNASSR_${currentShopId}_FAST_CLOSING_EXTRAS_${curDate}`;
+      localStorage.setItem(storageKey, JSON.stringify(manualClosingExtras));
+    }
+
+    function onPhysicalCashChanged(val) {
+      const curDate = document.getElementById("fastBusinessDate")?.value || getSaudiBusinessDate();
+      const cashKey = `ALNASSR_${currentShopId}_FAST_PHYSICAL_CASH_${curDate}`;
+      localStorage.setItem(cashKey, val || "");
+      recalculateClosingLiveMath();
+    }
+
     function openClosingModal() {
       document.getElementById("closingModal").classList.remove("hidden");
+      loadManualClosingExtras();
       populateClosingAutoItems();
       recalculateClosingLiveMath();
       if (window.lucide) lucide.createIcons();
@@ -944,13 +1075,18 @@
 
     function addManualExtraExpenseRow() {
       manualClosingExtras.push({ desc: "", amount: "" });
+      saveManualClosingExtrasToStorage();
       renderManualExtraExpenseRows();
       recalculateClosingLiveMath();
     }
 
     function removeManualExtraExpenseRow(idx) {
-      if (manualClosingExtras.length <= 1) return;
-      manualClosingExtras.splice(idx, 1);
+      if (manualClosingExtras.length <= 1) {
+        manualClosingExtras[0] = { desc: "", amount: "" };
+      } else {
+        manualClosingExtras.splice(idx, 1);
+      }
+      saveManualClosingExtrasToStorage();
       renderManualExtraExpenseRows();
       recalculateClosingLiveMath();
     }
@@ -962,8 +1098,8 @@
       manualClosingExtras.forEach((e, idx) => {
         html += `
           <div class="flex gap-1.5 items-center">
-            <input type="text" value="${e.desc}" oninput="manualClosingExtras[${idx}].desc = this.value" placeholder="വിവരണം (ഉദാ: മാനേജർ)" class="flex-1 p-1.5 rounded-lg border bg-white font-bold text-xs" />
-            <input type="number" step="any" inputmode="decimal" value="${e.amount}" oninput="manualClosingExtras[${idx}].amount = this.value; recalculateClosingLiveMath();" placeholder="0.00" class="w-24 p-1.5 text-center font-black rounded-lg border bg-white text-purple-800 text-xs" />
+            <input type="text" value="${e.desc}" oninput="manualClosingExtras[${idx}].desc = this.value; saveManualClosingExtrasToStorage();" placeholder="വിവരണം (ഉദാ: മാനേജർ)" class="flex-1 p-1.5 rounded-lg border bg-white font-bold text-xs" />
+            <input type="number" step="any" inputmode="decimal" value="${e.amount}" oninput="manualClosingExtras[${idx}].amount = this.value; saveManualClosingExtrasToStorage(); recalculateClosingLiveMath();" placeholder="0.00" class="w-24 p-1.5 text-center font-black rounded-lg border bg-white text-purple-800 text-xs" />
             ${manualClosingExtras.length > 1 ? `<button type="button" onclick="removeManualExtraExpenseRow(${idx})" class="text-rose-600 font-black p-1">✕</button>` : ''}
           </div>
         `;
