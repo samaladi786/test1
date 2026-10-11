@@ -693,7 +693,10 @@ function calculateEmployeePendingBalance(emp, asOfDateStr) {
 
   let allTx = Array.isArray(transactionsList) ? [...transactionsList] : [];
   const offlineQueue = getOfflineQueue();
-  offlineQueue.forEach(item => { if (item.payload) allTx.unshift(item.payload); });
+  offlineQueue.forEach(item => { 
+    const record = item.payload ? item.payload : item;
+    allTx.unshift(record); 
+  });
 
   const empClean = cleanPartyName(emp.name);
   let totalPaid = 0;
@@ -812,7 +815,7 @@ async function saveUtilityBillAddition() {
     credit_amount: amt
   };
 
-  // 1. തത്സമയം ഫോണിലെ മെമ്മറിയിലേക്ക് ആഡ് ചെയ്യുന്നു (Instant Local Update)
+  // തത്സമയം ഫോണിലെ മെമ്മറിയിലേക്ക് ആഡ് ചെയ്യുന്നു (Instant Local Update)
   const tempId = 'temp_bill_' + Date.now();
   const localRecord = { ...payload, id: tempId };
   transactionsList.unshift(localRecord);
@@ -823,17 +826,20 @@ async function saveUtilityBillAddition() {
     renderQuickTotalsAndRecent();
     alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: പുതിയ ബില്ല് ഫോണിൽ സേവ് ചെയ്തു!");
   } else {
-    const { data } = await supabaseClient.from('transactions').insert([payload]).select();
-    if (data && data[0]) {
+    const { data, error } = await supabaseClient.from('transactions').insert([payload]).select();
+    if (error) {
+      console.error("Supabase Bill Error:", error);
+      alert("⚠️ ക്ലൗഡ് കണക്ഷൻ പിശക്! ബില്ല് ഫോണിൽ താൽക്കാലികമായി സൂക്ഷിച്ചിട്ടുണ്ട്.");
+      pushToOfflineQueue(payload);
+    } else if (data && data[0]) {
       localRecord.id = data[0].id;
       localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+      alert("പുതിയ ബില്ല് തുക വിജയകരമായി ചേർത്തു!");
     }
     renderQuickTotalsAndRecent();
-    alert("പുതിയ ബില്ല് തുക വിജയകരമായി ചേർത്തു!");
   }
 
   closeAddUtilityBillModal();
-  // സ്ക്രീനിലെ ലൈവ് കുടിശ്ശിക തുക തത്സമയം അപ്‌ഡേറ്റ് ആകാൻ
   onUnifiedPartySelected();
 }
 
@@ -1003,13 +1009,17 @@ async function saveDeposit() {
     credit_amount: 0
   };
 
+  const tempRecord = { ...payload, id: 'temp_' + Date.now() };
+  transactionsList.unshift(tempRecord);
+  localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+
   if (!navigator.onLine || !supabaseClient) {
     pushToOfflineQueue(payload);
-    transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
     renderQuickTotalsAndRecent();
     alert("ബാങ്കിലേക്ക് നിക്ഷേപിച്ച തുക സേവ് ചെയ്തു!");
   } else {
-    await supabaseClient.from('transactions').insert([payload]);
+    const { data, error } = await supabaseClient.from('transactions').insert([payload]).select();
+    if (!error && data && data[0]) tempRecord.id = data[0].id;
     alert("ബാങ്കിലേക്ക് നിക്ഷേപിച്ചു!");
     fetchAllData();
   }
@@ -1030,13 +1040,17 @@ async function saveWithdrawal() {
     credit_amount: 0
   };
 
+  const tempRecord = { ...payload, id: 'temp_' + Date.now() };
+  transactionsList.unshift(tempRecord);
+  localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+
   if (!navigator.onLine || !supabaseClient) {
     pushToOfflineQueue(payload);
-    transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
     renderQuickTotalsAndRecent();
     alert("കയ്യിലേക്ക് എടുത്ത തുക സേവ് ചെയ്തു!");
   } else {
-    await supabaseClient.from('transactions').insert([payload]);
+    const { data, error } = await supabaseClient.from('transactions').insert([payload]).select();
+    if (!error && data && data[0]) tempRecord.id = data[0].id;
     alert("കയ്യിലേക്ക് പിൻവലിച്ചു!");
     fetchAllData();
   }
@@ -1079,13 +1093,17 @@ async function saveStaffDepositEntry() {
     credit_amount: 0
   };
 
+  const tempRecord = { ...payload, id: 'temp_' + Date.now() };
+  transactionsList.unshift(tempRecord);
+  localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+
   if (!navigator.onLine || !supabaseClient) {
     pushToOfflineQueue(payload);
-    transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
     renderQuickTotalsAndRecent();
     alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: സ്റ്റാഫ് തന്ന വരവ് സേവ് ചെയ്തു!");
   } else {
-    await supabaseClient.from('transactions').insert([payload]);
+    const { data, error } = await supabaseClient.from('transactions').insert([payload]).select();
+    if (!error && data && data[0]) tempRecord.id = data[0].id;
     alert("സ്റ്റാഫ് തന്ന വരവ് വിജയകരമായി സേവ് ചെയ്തു!");
     fetchAllData();
   }
@@ -1093,7 +1111,7 @@ async function saveStaffDepositEntry() {
   onUnifiedPartySelected();
 }
 
-// OFFLINE QUEUE
+// OFFLINE QUEUE LOGIC
 function getOfflineQueue() {
   try { return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`)) || []; }
   catch (e) { return []; }
@@ -1110,9 +1128,10 @@ function checkOfflineQueueUI() {
   const queue = getOfflineQueue();
   const bar = document.getElementById("offlineSyncBar");
   const msg = document.getElementById("offlineSyncMsg");
+  if (!bar) return;
   if (queue.length > 0) {
     bar.classList.remove("hidden");
-    msg.innerText = `${queue.length} ഓഫ്‍ലൈൻ എൻട്രികൾ സേവ് ചെയ്തിട്ടുണ്ട്. സിങ്ക് ചെയ്യാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക.`;
+    if (msg) msg.innerText = `${queue.length} ഓഫ്‍ലൈൻ എൻട്രികൾ സേവ് ചെയ്തിട്ടുണ്ട്. സിങ്ക് ചെയ്യാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക.`;
   } else {
     bar.classList.add("hidden");
   }
@@ -1136,7 +1155,7 @@ async function syncOfflineQueue() {
   if (queue.length > remaining.length) fetchAllData();
 }
 
-// TRANSACTIONS SAVING
+// TRANSACTIONS SAVING (WITH PERSISTENT OFFLINE STORAGE & ERROR CATCHING)
 async function saveSaleEntry() {
   let rawName = document.getElementById("saleCustomerInput").value.trim().toUpperCase();
   if (!rawName) return alert("കസ്റ്റമർ പേര് നൽകുക!");
@@ -1146,7 +1165,10 @@ async function saveSaleEntry() {
   if (!cust) {
     const newCust = { name: name, type: 'cash', opening_balance: 0 };
     if (navigator.onLine && supabaseClient) {
-      try { await supabaseClient.from('customers').insert([newCust]); } catch (e) {}
+      try { 
+        const { data } = await supabaseClient.from('customers').insert([newCust]).select(); 
+        if (data && data[0]) newCust.id = data[0].id;
+      } catch (e) {}
     }
     customersList.push(newCust);
     localStorage.setItem(`ALNASSR_${currentShopId}_CUSTOMERS`, JSON.stringify(customersList));
@@ -1183,15 +1205,26 @@ async function saveSaleEntry() {
     credit_amount: credit
   };
 
+  const tempRecord = { ...payload, id: 'temp_' + Date.now() };
+  transactionsList.unshift(tempRecord);
+  localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+
   if (!navigator.onLine || !supabaseClient) {
     pushToOfflineQueue(payload);
-    transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
     renderQuickTotalsAndRecent();
     alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: സെയിൽ ഫോണിൽ സേവ് ചെയ്തു!");
   } else {
-    await supabaseClient.from('transactions').insert([payload]);
-    alert("സെയിൽ സേവ് ചെയ്തു!");
-    fetchAllData();
+    const { data, error } = await supabaseClient.from('transactions').insert([payload]).select();
+    if (error) {
+      console.error("Supabase Error:", error);
+      pushToOfflineQueue(payload);
+      alert("⚠️ ക്ലൗഡ് കണക്ഷൻ പിശക്! സെയിൽ ഫോണിൽ സൂക്ഷിച്ചിട്ടുണ്ട്.");
+    } else if (data && data[0]) {
+      tempRecord.id = data[0].id;
+      localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+      alert("സെയിൽ സേവ് ചെയ്തു!");
+    }
+    renderQuickTotalsAndRecent();
   }
 
   document.getElementById("saleCustomerInput").value = "SHOPE";
@@ -1207,7 +1240,10 @@ async function savePurchaseEntry() {
   if (!vend) {
     const newVend = { name: name, type: 'cash', opening_balance: 0 };
     if (navigator.onLine && supabaseClient) {
-      try { await supabaseClient.from('vendors').insert([newVend]); } catch (e) {}
+      try { 
+        const { data } = await supabaseClient.from('vendors').insert([newVend]).select(); 
+        if (data && data[0]) newVend.id = data[0].id;
+      } catch (e) {}
     }
     vendorsList.push(newVend);
     localStorage.setItem(`ALNASSR_${currentShopId}_VENDORS`, JSON.stringify(vendorsList));
@@ -1229,15 +1265,26 @@ async function savePurchaseEntry() {
     credit_amount: credit
   };
 
+  const tempRecord = { ...payload, id: 'temp_' + Date.now() };
+  transactionsList.unshift(tempRecord);
+  localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+
   if (!navigator.onLine || !supabaseClient) {
     pushToOfflineQueue(payload);
-    transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
     renderQuickTotalsAndRecent();
     alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: പർച്ചേസ് ഫോണിൽ സേവ് ചെയ്തു!");
   } else {
-    await supabaseClient.from('transactions').insert([payload]);
-    alert("പർച്ചേസ് സേവ് ചെയ്തു!");
-    fetchAllData();
+    const { data, error } = await supabaseClient.from('transactions').insert([payload]).select();
+    if (error) {
+      console.error("Supabase Error:", error);
+      pushToOfflineQueue(payload);
+      alert("⚠️ ക്ലൗഡ് കണക്ഷൻ പിശക്! പർച്ചേസ് ഫോണിൽ സൂക്ഷിച്ചിട്ടുണ്ട്.");
+    } else if (data && data[0]) {
+      tempRecord.id = data[0].id;
+      localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+      alert("പർച്ചേസ് സേവ് ചെയ്തു!");
+    }
+    renderQuickTotalsAndRecent();
   }
 
   document.getElementById("purchaseVendorInput").value = "";
@@ -1273,7 +1320,10 @@ async function saveUnifiedExpSalEntry() {
     if (!exp) {
       const newExp = { name: expName, type: 'regular', opening_balance: 0 };
       if (navigator.onLine && supabaseClient) {
-        try { await supabaseClient.from('expenses_master').insert([newExp]); } catch (e) {}
+        try { 
+          const { data } = await supabaseClient.from('expenses_master').insert([newExp]).select(); 
+          if (data && data[0]) newExp.id = data[0].id;
+        } catch (e) {}
       }
       expensesMasterList.push(newExp);
       localStorage.setItem(`ALNASSR_${currentShopId}_EXPENSES`, JSON.stringify(expensesMasterList));
@@ -1290,15 +1340,26 @@ async function saveUnifiedExpSalEntry() {
     };
   }
 
+  const tempRecord = { ...payload, id: 'temp_' + Date.now() };
+  transactionsList.unshift(tempRecord);
+  localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+
   if (!navigator.onLine || !supabaseClient) {
     pushToOfflineQueue(payload);
-    transactionsList.unshift({ ...payload, id: 'temp_' + Date.now() });
     renderQuickTotalsAndRecent();
     alert("⚠️ ഓഫ്‍ലൈൻ മോഡ്: ചിലവ് ഫോണിൽ സേവ് ചെയ്തു!");
   } else {
-    await supabaseClient.from('transactions').insert([payload]);
-    alert("ചിലവ് സേവ് ചെയ്തു!");
-    fetchAllData();
+    const { data, error } = await supabaseClient.from('transactions').insert([payload]).select();
+    if (error) {
+      console.error("Supabase Error:", error);
+      pushToOfflineQueue(payload);
+      alert("⚠️ ക്ലൗഡ് കണക്ഷൻ പിശക്! ചിലവ് ഫോണിൽ സൂക്ഷിച്ചിട്ടുണ്ട്.");
+    } else if (data && data[0]) {
+      tempRecord.id = data[0].id;
+      localStorage.setItem(`ALNASSR_${currentShopId}_TRANSACTIONS`, JSON.stringify(transactionsList));
+      alert("ചിലവ് സേവ് ചെയ്തു!");
+    }
+    renderQuickTotalsAndRecent();
   }
 
   document.getElementById("expSalCashAmt").value = "";
@@ -2130,9 +2191,17 @@ async function saveNewCustomerMaster() {
     agent_id: matchedAg ? matchedAg.id : null
   };
 
-  if (navigator.onLine && supabaseClient) {
-    await supabaseClient.from('customers').insert([newCust]);
+  if (!navigator.onLine || !supabaseClient) {
+    alert("⚠️ ശ്രദ്ധിക്കുക: നിങ്ങൾ ഇപ്പോൾ ഓഫ്‍ലൈനിലാണ്! നെറ്റ് വരുമ്പോൾ മാത്രമേ ഈ കസ്റ്റമറെ ക്ലൗഡിലേക്ക് സ്ഥിരമായി അപ്‌ലോഡ് ചെയ്യാൻ കഴിയൂ.");
+  } else {
+    const { data, error } = await supabaseClient.from('customers').insert([newCust]).select();
+    if (error) {
+      console.error("Customer Save Error:", error);
+      return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
+    }
+    if (data && data[0]) newCust.id = data[0].id;
   }
+
   customersList.push(newCust);
   localStorage.setItem(`ALNASSR_${currentShopId}_CUSTOMERS`, JSON.stringify(customersList));
   populateDropdowns();
@@ -2141,7 +2210,7 @@ async function saveNewCustomerMaster() {
   onCustomerSelected();
   closeNewCustomerModal();
   renderActiveMasterList();
-  alert("പുതിയ കസ്റ്റമറെ ചേർത്തു!");
+  alert("പുതിയ കസ്റ്റമറെ വിജയകരമായി ചേർത്തു!");
 }
 
 async function saveNewVendorMaster() {
@@ -2151,9 +2220,18 @@ async function saveNewVendorMaster() {
   if (!name) return alert("വെണ്ടർ പേര് നൽകുക!");
 
   const newVend = { name: name, type: type, opening_balance: opening };
-  if (navigator.onLine && supabaseClient) {
-    await supabaseClient.from('vendors').insert([newVend]);
+
+  if (!navigator.onLine || !supabaseClient) {
+    alert("⚠️ ശ്രദ്ധിക്കുക: നിങ്ങൾ ഇപ്പോൾ ഓഫ്‍ലൈനിലാണ്! നെറ്റ് വരുമ്പോൾ മാത്രമേ വെണ്ടറെ ക്ലൗഡിലേക്ക് അപ്‌ലോഡ് ചെയ്യാൻ കഴിയൂ.");
+  } else {
+    const { data, error } = await supabaseClient.from('vendors').insert([newVend]).select();
+    if (error) {
+      console.error("Vendor Save Error:", error);
+      return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
+    }
+    if (data && data[0]) newVend.id = data[0].id;
   }
+
   vendorsList.push(newVend);
   localStorage.setItem(`ALNASSR_${currentShopId}_VENDORS`, JSON.stringify(vendorsList));
   populateDropdowns();
@@ -2162,7 +2240,7 @@ async function saveNewVendorMaster() {
   onVendorSelected();
   closeNewVendorModal();
   renderActiveMasterList();
-  alert("പുതിയ വെണ്ടറെ ചേർത്തു!");
+  alert("പുതിയ വെണ്ടറെ വിജയകരമായി ചേർത്തു!");
 }
 
 async function saveNewEmployeeMaster() {
@@ -2181,11 +2259,16 @@ async function saveNewEmployeeMaster() {
     created_at: new Date().toISOString()
   };
 
-  if (navigator.onLine && supabaseClient) {
-    const { data } = await supabaseClient.from('employees').insert([newEmp]).select();
-    if (data && data[0]) newEmp.id = data[0].id;
-  } else {
+  if (!navigator.onLine || !supabaseClient) {
     newEmp.id = 'emp_' + Date.now();
+    alert("⚠️ ശ്രദ്ധിക്കുക: നിങ്ങൾ ഓഫ്‍ലൈനിലാണ്! നെറ്റ് ഉള്ളപ്പോൾ മാത്രമേ സ്റ്റാഫിനെ ക്ലൗഡിലേക്ക് അപ്‌ലോഡ് ചെയ്യാൻ കഴിയൂ.");
+  } else {
+    const { data, error } = await supabaseClient.from('employees').insert([newEmp]).select();
+    if (error) {
+      console.error("Staff Save Error:", error);
+      return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
+    }
+    if (data && data[0]) newEmp.id = data[0].id;
   }
 
   employeesList.push(newEmp);
@@ -2196,7 +2279,7 @@ async function saveNewEmployeeMaster() {
   onUnifiedPartySelected();
   closeNewEmployeeModal();
   renderActiveMasterList();
-  alert("പുതിയ ജീവനക്കാരനെ ചേർത്തു!");
+  alert("പുതിയ ജീവനക്കാരനെ വിജയകരമായി ചേർത്തു!");
 }
 
 // NEW EXPENSE / UTILITY MASTER
@@ -2219,11 +2302,17 @@ async function saveNewExpenseMaster() {
   if (!name) return alert("ചിലവ് ഇനത്തിന്റെ പേര് നൽകുക!");
 
   const newExp = { name: name, type: type, opening_balance: opening };
-  if (navigator.onLine && supabaseClient) {
-    const { data } = await supabaseClient.from('expenses_master').insert([newExp]).select();
-    if (data && data[0]) newExp.id = data[0].id;
-  } else {
+
+  if (!navigator.onLine || !supabaseClient) {
     newExp.id = 'exp_' + Date.now();
+    alert("⚠️ ശ്രദ്ധിക്കുക: നിങ്ങൾ ഓഫ്‍ലൈനിലാണ്! നെറ്റ് വരുമ്പോൾ മാത്രമേ ചിലവ് ഇനം ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിയൂ.");
+  } else {
+    const { data, error } = await supabaseClient.from('expenses_master').insert([newExp]).select();
+    if (error) {
+      console.error("Expense Save Error:", error);
+      return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
+    }
+    if (data && data[0]) newExp.id = data[0].id;
   }
 
   expensesMasterList.push(newExp);
