@@ -2,7 +2,24 @@
 // ALNASSR QUICK POS - CORE LOGIC ENGINE (pos-core.js)
 // ========================================================
 
-var SHOPS = (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : [];
+function getShopsList() {
+  if (window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG) && window.SHOPS_CONFIG.length > 0) return window.SHOPS_CONFIG;
+  if (window.SHOPS && Array.isArray(window.SHOPS) && window.SHOPS.length > 0) return window.SHOPS;
+  try {
+    if (typeof SHOPS !== 'undefined' && Array.isArray(SHOPS) && SHOPS.length > 0) return SHOPS;
+  } catch(e) {}
+  return [];
+}
+
+function getMasterPin() {
+  if (window.MASTER_PIN !== undefined && window.MASTER_PIN !== null) return String(window.MASTER_PIN).trim();
+  try {
+    if (typeof MASTER_PIN !== 'undefined' && MASTER_PIN !== null) return String(MASTER_PIN).trim();
+  } catch(e) {}
+  return null;
+}
+
+var SHOPS = getShopsList();
 var currentShopId = null;
 var currentShop = null;
 var supabaseClient = null;
@@ -139,7 +156,44 @@ function updateNetworkStatus() {
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
-document.addEventListener("DOMContentLoaded", () => {
+// 4-DIGIT AUTO-SUBMIT & NUMERIC KEYPAD BINDING
+function setup4DigitPinInputs() {
+  const loginInp = document.getElementById("loginPasswordInput");
+  if (loginInp) {
+    loginInp.setAttribute("maxlength", "4");
+    loginInp.setAttribute("inputmode", "numeric");
+    loginInp.setAttribute("pattern", "[0-9]*");
+    loginInp.setAttribute("autocomplete", "current-password");
+    loginInp.oninput = function() {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+      if (this.value.length === 4) {
+        verifyLogin();
+      }
+    };
+    loginInp.onfocus = function() { this.select(); };
+    loginInp.onclick = function() { this.select(); };
+  }
+
+  const secPinInp = document.getElementById("pinInput");
+  if (secPinInp) {
+    secPinInp.setAttribute("maxlength", "4");
+    secPinInp.setAttribute("inputmode", "numeric");
+    secPinInp.setAttribute("pattern", "[0-9]*");
+    secPinInp.oninput = function() {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+      if (this.value.length === 4) {
+        verifyPinAndExecute();
+      }
+    };
+    secPinInp.onfocus = function() { this.select(); };
+    secPinInp.onclick = function() { this.select(); };
+  }
+}
+
+function initAppEngine() {
+  SHOPS = getShopsList();
+  setup4DigitPinInputs();
+
   const isLogged = sessionStorage.getItem("ALNASSR_LOGGED_IN") === "true";
   const userRole = sessionStorage.getItem("ALNASSR_MOBILE_ROLE") || sessionStorage.getItem("ALNASSR_USER_ROLE");
 
@@ -147,14 +201,19 @@ document.addEventListener("DOMContentLoaded", () => {
   if (dtInput) dtInput.value = getSaudiBusinessDate();
 
   if (isLogged) {
-    document.getElementById("loginScreen").classList.add("hidden");
+    const loginEl = document.getElementById("loginScreen");
+    if (loginEl) loginEl.classList.add("hidden");
     applyRolePermissions(userRole);
     initMultiShopSystem();
   } else {
-    document.getElementById("loginScreen").classList.remove("hidden");
+    const loginEl = document.getElementById("loginScreen");
+    if (loginEl) loginEl.classList.remove("hidden");
     setTimeout(() => {
       const inp = document.getElementById("loginPasswordInput");
-      if (inp) inp.focus();
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
     }, 300);
   }
 
@@ -165,9 +224,15 @@ document.addEventListener("DOMContentLoaded", () => {
   checkOfflineQueueUI();
 
   if (window.lucide) lucide.createIcons();
-});
+}
 
-// LOGIN LOGIC
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initAppEngine);
+} else {
+  initAppEngine();
+}
+
+// LOGIN LOGIC (ROBUST PIN MATCHING)
 function verifyLogin() {
   try {
     const input = document.getElementById("loginPasswordInput");
@@ -176,13 +241,12 @@ function verifyLogin() {
 
     if (!enteredPin) return alert("പിൻ നൽകുക!");
 
-    const masterPin = (typeof MASTER_PIN !== 'undefined') ? String(MASTER_PIN) : (window.MASTER_PIN ? String(window.MASTER_PIN) : null);
-    const shopsArr = (typeof SHOPS !== 'undefined' && Array.isArray(SHOPS) && SHOPS.length > 0) 
-      ? SHOPS 
-      : ((window.SHOPS_CONFIG && Array.isArray(window.SHOPS_CONFIG)) ? window.SHOPS_CONFIG : []);
+    const masterPin = getMasterPin();
+    const shopsArr = getShopsList();
+    SHOPS = shopsArr;
 
     const isMaster = (masterPin && enteredPin === masterPin);
-    const matchedShop = (shopsArr || []).find(s => String(s.pin) === enteredPin);
+    const matchedShop = (shopsArr || []).find(s => String(s.pin).trim() === enteredPin);
 
     if (!isMaster && !matchedShop) {
       alert("പാസ്‌വേഡ് തെറ്റാണ്!");
@@ -254,13 +318,18 @@ function goToDesktopPortal() {
   }
   pendingAction = 'open_desktop_portal';
   document.getElementById("pinSubText").innerText = "ഡെസ്ക്ടോപ്പ് പോർട്ടലിലേക്ക് പോകാൻ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക";
-  document.getElementById("pinInput").value = "";
-  document.getElementById("pinModal").classList.remove("hidden");
-  document.getElementById("pinInput").focus();
+  const pInp = document.getElementById("pinInput");
+  if (pInp) {
+    pInp.value = "";
+    document.getElementById("pinModal").classList.remove("hidden");
+    pInp.focus();
+    pInp.select();
+  }
 }
 
 // MULTI-SHOP SYSTEM
 function initMultiShopSystem(forceShopId = null) {
+  SHOPS = getShopsList();
   const sel = document.getElementById("shopSelector");
   if (sel) sel.innerHTML = "";
 
@@ -287,6 +356,7 @@ function initMultiShopSystem(forceShopId = null) {
 }
 
 function connectActiveShop() {
+  SHOPS = getShopsList();
   currentShop = SHOPS.find(s => s.id === currentShopId) || SHOPS[0];
   if (!currentShop) return;
 
@@ -894,7 +964,7 @@ async function requestSaveOpeningFunds() {
   const bank = parseFloat(document.getElementById("setOpeningBankInput").value) || 0;
 
   const enteredPin = prompt("തുടക്ക ഫണ്ട് മാറ്റാൻ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക:");
-  const masterPin = String(window.MASTER_PIN);
+  const masterPin = getMasterPin();
   if (enteredPin !== masterPin) return alert("അഡ്മിൻ മാസ്റ്റർ പിൻ തെറ്റാണ്!");
 
   openingSettings.openingCash = cash;
@@ -1146,7 +1216,7 @@ async function saveStaffDepositEntry() {
   onUnifiedPartySelected();
 }
 
-// OFFLINE QUEUE LOGIC (ENHANCED WITH STRICT 6-FIELD SANITIZATION)
+// OFFLINE QUEUE LOGIC (STRICT 6-FIELD SANITIZATION)
 function getOfflineQueue() {
   try { return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`)) || []; }
   catch (e) { return []; }
@@ -1187,7 +1257,6 @@ async function syncOfflineQueue() {
   for (const item of queue) {
     const raw = item.payload ? item.payload : item;
     
-    // Supabase transactions ടേബിളിന് ആവശ്യമായ കൃത്യമായ 6 ഫീൽഡുകൾ മാത്രം എടുക്കുന്നു
     const cleanPayload = {
       date: raw.date || getSaudiBusinessDate(),
       type: raw.type || 'sale',
@@ -1220,7 +1289,6 @@ async function syncOfflineQueue() {
     fetchAllData();
   }
 
-  // അഥവാ എന്തെങ്കിലും കാരണത്താൽ അപ്‌ലോഡ് പരാജയപ്പെട്ടാൽ അത് നീക്കം ചെയ്യാൻ അവസരം നൽകുന്നു
   if (remaining.length > 0) {
     const force = confirm(`⚠️ ${remaining.length} ഓഫ്‍ലൈൻ എൻട്രികൾ ക്ലൗഡിലേക്ക് കയറാതെ തടസ്സപ്പെട്ടിരിക്കുന്നു!\nകാരണം: ${lastErrorMsg || 'ഡാറ്റാബേസ് കണക്ഷൻ എറർ'}\n\nഈ എൻട്രികൾ ഒഴിവാക്കി മഞ്ഞ ബാർ മാറ്റണമോ?`);
     if (force) {
@@ -1643,9 +1711,13 @@ function requestEdit(id) {
     pendingAction = 'edit';
     pendingTxnId = id;
     document.getElementById("pinSubText").innerText = "⚠️ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണ്! എഡിറ്റ് ചെയ്യാൻ സൂപ്പർ അഡ്മിൻ മാസ്റ്റർ പിൻ നൽകുക.";
-    document.getElementById("pinInput").value = "";
-    document.getElementById("pinModal").classList.remove("hidden");
-    document.getElementById("pinInput").focus();
+    const pInp = document.getElementById("pinInput");
+    if (pInp) {
+      pInp.value = "";
+      document.getElementById("pinModal").classList.remove("hidden");
+      pInp.focus();
+      pInp.select();
+    }
   } else {
     openEditModal(txn);
   }
@@ -1739,9 +1811,13 @@ function requestDelete(id) {
       : "ഡിലീറ്റ് ചെയ്യാൻ ലോഗിൻ പിൻ നൽകുക";
   }
 
-  document.getElementById("pinInput").value = "";
-  document.getElementById("pinModal").classList.remove("hidden");
-  document.getElementById("pinInput").focus();
+  const pInp = document.getElementById("pinInput");
+  if (pInp) {
+    pInp.value = "";
+    document.getElementById("pinModal").classList.remove("hidden");
+    pInp.focus();
+    pInp.select();
+  }
 }
 
 function closePinModal() {
@@ -1753,8 +1829,8 @@ function closePinModal() {
 async function verifyPinAndExecute() {
   const pinVal = document.getElementById("pinInput").value.trim();
   const sessionPin = sessionStorage.getItem("ALNASSR_ACTIVE_PIN");
-  const masterPin = String(window.MASTER_PIN);
-  const currentShopPin = currentShop ? String(currentShop.pin) : null;
+  const masterPin = getMasterPin();
+  const currentShopPin = currentShop ? String(currentShop.pin).trim() : null;
 
   if (pendingAction === 'open_desktop_portal') {
     if (pinVal === masterPin) {
@@ -2195,7 +2271,8 @@ async function saveEditedMasterItem() {
     const payload = { name: newName };
     if (navigator.onLine && supabaseClient) {
       const { error } = item.id 
-        ? await supabaseClient.from('agents').update(payload).eq('id', item.id);
+        ? await supabaseClient.from('agents').update(payload).eq('id', item.id)
+        : await supabaseClient.from('agents').update(payload).eq('name', originalName);
       if (error) return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
     }
     item.name = newName;
@@ -2452,18 +2529,4 @@ function closeNewVendorModal() { document.getElementById("newVendorModal").class
 function openNewEmployeeModal() {
   document.getElementById("newEmpName").value = "";
   document.getElementById("newEmpSalary").value = "";
-  document.getElementById("newEmpAdvance").value = "";
-  document.getElementById("newEmpJoinDate").value = getSaudiBusinessDate();
-  document.getElementById("newEmployeeModal").classList.remove("hidden");
-  document.getElementById("newEmpName").focus();
-}
-function closeNewEmployeeModal() { document.getElementById("newEmployeeModal").classList.add("hidden"); }
-
-function openTodaySalesModal() { document.getElementById("todaySalesModal").classList.remove("hidden"); if (window.lucide) lucide.createIcons(); }
-function closeTodaySalesModal() { document.getElementById("todaySalesModal").classList.add("hidden"); }
-
-function openTodayPurchaseModal() { document.getElementById("todayPurchaseModal").classList.remove("hidden"); if (window.lucide) lucide.createIcons(); }
-function closeTodayPurchaseModal() { document.getElementById("todayPurchaseModal").classList.add("hidden"); }
-
-function openTodayExpenseModal() { document.getElementById("todayExpenseModal").classList.remove("hidden"); if (window.lucide) lucide.createIcons(); }
-function closeTodayExpenseModal() { document.getElementById("todayExpenseModal").classList.add("hidden"); }
+  document.getElementById("newEmp
