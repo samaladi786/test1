@@ -1146,7 +1146,7 @@ async function saveStaffDepositEntry() {
   onUnifiedPartySelected();
 }
 
-// OFFLINE QUEUE LOGIC
+// OFFLINE QUEUE LOGIC (ENHANCED WITH STRICT 6-FIELD SANITIZATION)
 function getOfflineQueue() {
   try { return JSON.parse(localStorage.getItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`)) || []; }
   catch (e) { return []; }
@@ -1175,19 +1175,60 @@ function checkOfflineQueueUI() {
 async function syncOfflineQueue() {
   if (!navigator.onLine || !supabaseClient) return;
   const queue = getOfflineQueue();
-  if (queue.length === 0) return;
+  if (queue.length === 0) {
+    checkOfflineQueueUI();
+    return;
+  }
 
+  let successCount = 0;
   const remaining = [];
+  let lastErrorMsg = "";
+
   for (const item of queue) {
-    const { _timestamp, ...cleanPayload } = item;
+    const raw = item.payload ? item.payload : item;
+    
+    // Supabase transactions ടേബിളിന് ആവശ്യമായ കൃത്യമായ 6 ഫീൽഡുകൾ മാത്രം എടുക്കുന്നു
+    const cleanPayload = {
+      date: raw.date || getSaudiBusinessDate(),
+      type: raw.type || 'sale',
+      party_name: raw.party_name || 'UNKNOWN',
+      cash_amount: parseFloat(raw.cash_amount) || 0,
+      bank_amount: parseFloat(raw.bank_amount) || 0,
+      credit_amount: parseFloat(raw.credit_amount) || 0
+    };
+
     try {
       const { error } = await supabaseClient.from('transactions').insert([cleanPayload]);
-      if (error) remaining.push(item);
-    } catch (e) { remaining.push(item); }
+      if (error) {
+        console.error("Sync item error:", error);
+        lastErrorMsg = error.message;
+        remaining.push(item);
+      } else {
+        successCount++;
+      }
+    } catch (e) {
+      console.error("Sync item exception:", e);
+      lastErrorMsg = e.message;
+      remaining.push(item);
+    }
   }
+
   localStorage.setItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`, JSON.stringify(remaining));
   checkOfflineQueueUI();
-  if (queue.length > remaining.length) fetchAllData();
+
+  if (successCount > 0) {
+    fetchAllData();
+  }
+
+  // അഥവാ എന്തെങ്കിലും കാരണത്താൽ അപ്‌ലോഡ് പരാജയപ്പെട്ടാൽ അത് നീക്കം ചെയ്യാൻ അവസരം നൽകുന്നു
+  if (remaining.length > 0) {
+    const force = confirm(`⚠️ ${remaining.length} ഓഫ്‍ലൈൻ എൻട്രികൾ ക്ലൗഡിലേക്ക് കയറാതെ തടസ്സപ്പെട്ടിരിക്കുന്നു!\nകാരണം: ${lastErrorMsg || 'ഡാറ്റാബേസ് കണക്ഷൻ എറർ'}\n\nഈ എൻട്രികൾ ഒഴിവാക്കി മഞ്ഞ ബാർ മാറ്റണമോ?`);
+    if (force) {
+      localStorage.removeItem(`ALNASSR_${currentShopId}_OFFLINE_TXNS`);
+      checkOfflineQueueUI();
+      alert("തടസ്സപ്പെട്ട എൻട്രികൾ ഒഴിവാക്കി മഞ്ഞ ബാർ മാറ്റി!");
+    }
+  }
 }
 
 // TRANSACTIONS SAVING
@@ -2154,8 +2195,7 @@ async function saveEditedMasterItem() {
     const payload = { name: newName };
     if (navigator.onLine && supabaseClient) {
       const { error } = item.id 
-        ? await supabaseClient.from('agents').update(payload).eq('id', item.id)
-        : await supabaseClient.from('agents').update(payload).eq('name', originalName);
+        ? await supabaseClient.from('agents').update(payload).eq('id', item.id);
       if (error) return alert("ക്ലൗഡിലേക്ക് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + error.message);
     }
     item.name = newName;
